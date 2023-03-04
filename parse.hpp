@@ -6,8 +6,7 @@
 
 class parse
 {
-	private:
-		// std::vector<std::string>	container;
+	public:
 		std::vector<std::string>	listen;
 		std::vector<std::string>	root;
 		std::vector<std::string>	index;
@@ -20,7 +19,7 @@ class parse
 		//
 	public:
 		parse();
-		parse(const parse &obj);
-		parse	&operator=(const parse &obj);
+		// parse(const parse &obj);
+		// parse	&operator=(const parse &obj);
 		~parse();
 };
