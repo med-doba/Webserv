@@ -1,10 +1,23 @@
-#include "parse.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/03/05 11:29:45 by med-doba          #+#    #+#             */
+/*   Updated: 2023/03/05 13:43:48 by med-doba         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
+#include "location.hpp"
+#include "server.hpp"
 
 void	ft_ft(std::string str)
 {
 	std::cout << str << std::endl;
 }
+
 
 bool	ft_check_extention(std::string str)
 {
@@ -22,6 +35,17 @@ bool	ft_check_extention(std::string str)
 	return false;
 }
 
+bool	ft_check_allowed(std::vector<std::string> &allowed)
+{
+	std::vector<std::string>::iterator	it;
+	for (it = allowed.begin() + 1 ; it != allowed.end(); it++)
+	{
+		if (*it != "POST" && *it != "GET" && *it != "DELETE" && *it != "ALL")
+			return false;
+	}
+	return true;
+}
+
 void	ft_trim(std::string &str)
 {
 	int	i,j;
@@ -35,6 +59,12 @@ void	ft_trim(std::string &str)
 	while (str[i] == ' ' || str[i--] == '\t')
 		j++;
 	str.erase(i, j);
+}
+
+void	ft_error(std::string msg)
+{
+	std::cerr << msg << std::endl;
+	exit(1);
 }
 
 void	ft_check_double(std::vector<std::string> &container)
@@ -51,11 +81,7 @@ void	ft_check_double(std::vector<std::string> &container)
 				count++;
 		}
 		if(count > 1)
-		{
-			std::cout << "error double\n";
-			exit(1);
-		}
-			// throw ;//"double element"
+			ft_error("error double");
 	}
 }
 
@@ -76,12 +102,11 @@ int	ft_occurrences_of_char(std::string &line, char c)
 std::vector<std::string>	ft_split(const std::string str, std::string split)
 {
 	std::vector<std::string> rtn;
-	int	i = 0,j = 0;
+	size_t	i = 0,j = 0;
 
 	for (i = 0; str.find_first_of(split, i) != std::string::npos; i++)
 	{
 		j = str.find_first_of(split, i);
-		//i need to prevent add empty line here
 		rtn.push_back(str.substr(i, (j - i)));
 		i = j;
 	}
@@ -94,15 +119,27 @@ bool	ft_isDigit(std::string &str)
 {
 	int	i = -1;
 
-	while (++i < str.size())
+	while ((size_t)++i < str.size())
 		if (!std::isdigit(str[i]))
 			return false;
 	return true;
 }
 
-void	ft_error(std::string msg)
+bool	ft_check_autoindex(std::string &str)
 {
-	std::cerr << msg << std::endl;
+	ft_ft(str);
+	if (str == "on" || str == "off")
+		return true;
+	return false;
+};
+
+
+void	ft_count(void)
+{
+	static int autoindex = 0;
+	autoindex++;
+	if (autoindex == 2)
+		ft_error("times count");
 }
 
 bool	ft_check_cmbsize(std::string &str)
@@ -125,7 +162,6 @@ bool	ft_check_cmbsize(std::string &str)
 
 bool	ft_checkRang_nbr(std::string str)
 {
-	int	index = 0;
 	std::vector<std::string>	array;
 	std::vector<std::string>::iterator	it;
 
@@ -134,14 +170,59 @@ bool	ft_checkRang_nbr(std::string str)
 	{
 		if (!ft_isDigit(*it) || !(std::stoll(*it) >= 0 && std::stoll(*it) <= 255) || array.size() != 4)
 			return false;
-		// std::cout <<"it=" <<  *it << "$"<<std::endl;
 	}
 	return true;
+}
+std::vector<std::string>	ft_parse_root(std::string &lines)
+{
+	std::vector<std::string>	tmp;
+
+	tmp = ft_split(lines, " \t");
+	if (tmp.size() != 2)
+		ft_error("root: error root");
+	return tmp;
+}
+
+std::vector<std::string>	ft_parse_index(std::string &lines)
+{
+	std::vector<std::string>	tmp;
+	std::vector<std::string>::iterator it;
+
+	tmp = ft_split(lines, " \t");
+	for (it = tmp.begin() + 1 ; it != tmp.end(); it++)
+	{
+		if (ft_check_extention(*it) == false)
+			ft_error("index: error extention");
+	}
+	return tmp;
+}
+
+std::vector<std::string>	ft_parse_errorpage(std::string &lines)
+{
+	std::vector<std::string>	tmp;
+
+	tmp = ft_split(lines, " \t");
+	if (tmp.size() != 3)
+		ft_error("error_page: error in error page");
+	return tmp;
+}
+
+std::vector<std::string>	ft_parse_cmbsize(std::string &lines)
+{
+	std::vector<std::string>	tmp;
+
+	tmp = ft_split(lines, " \t");
+	if (tmp.size() > 2)
+		ft_error("ClMaxBodySize: error is didgit");
+	if (!ft_check_cmbsize(tmp[1]))
+		ft_error("ClMaxBodySize: error cmbs");
+	return tmp;
 }
 
 int	main(void)
 {
-	parse	classconfig;
+	server	classconfig;
+	location	location;
 	std::string		lines;
 	std::ifstream	file_conf("filetest.conf");
 
@@ -167,7 +248,7 @@ int	main(void)
 				continue;
 			}
 
-			if(InTheServerBlock)
+			if(InTheServerBlock && !InTheLocationBlock)
 			{
 				if (ft_occurrences_of_char(lines, ';') == -1)
 					return (ft_error("error: occurrences_of_char"), 1);
@@ -185,14 +266,6 @@ int	main(void)
 					}
 					ft_check_double(classconfig.listen);
 				}
-				else if (lines.find("client_max_body_size") != std::string::npos)
-				{
-					classconfig.client_max_body_size = ft_split(lines, " \t");
-					if (classconfig.client_max_body_size.size() > 2)
-						return (ft_error("ClMaxBodySize: error is didgit"), 1);
-					if (!ft_check_cmbsize(classconfig.client_max_body_size[1]))
-						return (ft_error("ClMaxBodySize: error cmbs"), 1);
-				}
 				else if (lines.substr(0, 4) == "host")
 				{
 					classconfig.host = ft_split(lines, " \t");
@@ -204,35 +277,46 @@ int	main(void)
 					}
 				}
 				else if (lines.substr(0, 11) == "server_name")
-				{
 					classconfig.server_name = ft_split(lines, " \t");
-					// std::vector<std::string>::iterator it;
-					// for (it = classconfig.server_name.begin(); it != classconfig.server_name.end(); it++)
-					// {
-					// 	std::cout << "serve " << *it << "\n";
-					// }
-				}
+				else if(lines.substr(0, 4) == "root")
+					classconfig.root = ft_parse_root(lines);
 				else if (lines.substr(0, 5) == "index")
-				{
-					classconfig.index = ft_split(lines, " \t");
-					 std::vector<std::string>::iterator it;
-					for (it = classconfig.index.begin() + 1 ; it != classconfig.index.end(); it++)
-					{
-						if (ft_check_extention(*it) == false)
-							return (ft_error("index: error extention"), 1);
-					}
-				}
+					classconfig.index = ft_parse_index(lines);
+				else if (lines.find("client_max_body_size") != std::string::npos)
+					classconfig.client_max_body_size = ft_parse_cmbsize(lines);
 				else if (lines.find("error_page") != std::string::npos)
-				{
-					classconfig.error_page = ft_split(lines, " \t");
-				}
-				else if (lines.find("index") != std::string::npos)
-				{
-					classconfig.index = ft_split(lines, " \t");
-				}
+					classconfig.error_page =  ft_parse_errorpage(lines);
 			}
 			if (InTheLocationBlock)
 			{
+				if (lines.back() != '}')
+					lines.pop_back();
+				if(lines.substr(0, 4) == "root")
+					location.root = ft_parse_root(lines);
+				else if (lines.substr(0, 5) == "index")
+					location.index = ft_parse_index(lines);
+				else if (lines.find("error_page") != std::string::npos)
+					location.error_page = ft_parse_errorpage(lines);
+				else if (lines.find("client_max_body_size") != std::string::npos)
+					location.client_max_body_size = ft_parse_cmbsize(lines);
+				else if (lines.substr(0, 6) == "return")
+					location.rtn = ft_split(lines, " \t");
+				else if (lines.substr(0, 8) == "cgi_pass")
+					location.cgi = ft_split(lines, " \t");
+				else if (lines.substr(0, 5) == "allow")
+				{
+					location.allow = ft_split(lines, " \t");
+					if (!ft_check_allowed(location.allow))
+						return (ft_error("location allow: error allow"), 1);
+				}
+				else if (lines.substr(0, 9) == "autoindex")
+				{
+					location.autoindex = ft_split(lines, " \t");
+					if (location.autoindex.size() != 2)
+						return (ft_error("location autoindex: error autoindex1"), 1);
+					if (!ft_check_autoindex(*(location.autoindex.begin() + 1)))
+						return (ft_error("location autoindex: error autoindex2"), 1);
+				}
 			}
 
 			if (lines == "}")
@@ -240,25 +324,67 @@ int	main(void)
 				if (InTheServerBlock)
 					InTheServerBlock = false;
 				if (InTheLocationBlock)
+				{
 					InTheLocationBlock = false;
+
+				}
 				//check errors
 			}
-			// std::cout << "----------------------------\n";
 		}
 		file_conf.close();
-		// std::cout << "----------------------------\n";
-		// std::vector<std::string>::iterator it1;
-		// for (it1 = classconfig.listen.begin(); it1 != classconfig.listen.end(); it1++)
-		// {
-		// 	std::cout << *it1 << std::endl;
-		// }
-		// std::cout << "----------------------------\n";
-		// std::vector<std::string>::iterator it2;
-		// for (it2 = classconfig.client_max_body_size.begin(); it2 != classconfig.client_max_body_size.end(); it2++)
-		// {
-		// 	std::cout << *it2 << std::endl;
-		// }
-		// std::cout << "----------------------------\n";
 	}
 	return 0;
 }
+
+// void	ft_show(server &classconfig)
+// {
+// 	std::cout << "----------------------------\n";
+// 	std::vector<std::string>::iterator it1;
+// 	for (it1 = classconfig.error_page.begin(); it1 != classconfig.error_page.end(); it1++)
+// 		std::cout << *it1 << std::endl;
+// 	std::cout << "----------------------------\n";
+// 	std::vector<std::string>::iterator it2;
+// 	for (it2 = classconfig.index.begin(); it2 != classconfig.index.end(); it2++)
+// 		std::cout << *it2 << std::endl;
+// 	std::cout << "----------------------------\n";
+// 	std::vector<std::string>::iterator it3;
+// 	for (it3 = classconfig.root.begin(); it3 != classconfig.root.end(); it3++)
+// 		std::cout << *it3 << std::endl;
+// 	std::cout << "----------------------------\n";
+// 	std::vector<std::string>::iterator it4;
+// 	for (it4 = classconfig.server_name.begin(); it4 != classconfig.server_name.end(); it4++)
+// 		std::cout << *it4 << std::endl;
+// 	std::cout << "----------------------------\n";
+// 	std::vector<std::string>::iterator it2;
+// 	for (it2 = classconfig.client_max_body_size.begin(); it2 != classconfig.client_max_body_size.end(); it2++)
+// 		std::cout << *it2 << std::endl;
+// 	std::cout << "----------------------------\n";
+// 	std::vector<std::string>::iterator it2;
+// 	for (it2 = classconfig.listen.begin(); it2 != classconfig.listen.end(); it2++)
+// 		std::cout << *it2 << std::endl;
+// 	std::cout << "----------------------------\n";
+// 	std::vector<std::string>::iterator it2;
+// 	for (it2 = classconfig.error_page.begin(); it2 != classconfig.error_page.end(); it2++)
+// 		std::cout << *it2 << std::endl;
+// 	std::cout << "----------------------------\n";
+// 	std::vector<std::string>::iterator it2;
+// 	for (it2 = classconfig.host.begin(); it2 != classconfig.host.end(); it2++)
+// 		std::cout << *it2 << std::endl;
+// 	std::cout << "----------------------------\n";
+// 	std::vector<std::string>::iterator it2;
+// 	for (it2 = classconfig.location->allow.begin(); it2 != classconfig.location->allow.end(); it2++)
+// 		std::cout << *it2 << std::endl;
+// 	std::cout << "----------------------------\n";
+// 	std::vector<std::string>::iterator it2;
+// 	for (it2 = classconfig.location->autoindex.begin(); it2 != classconfig.location->autoindex.end(); it2++)
+// 		std::cout << *it2 << std::endl;
+// 	std::cout << "----------------------------\n";
+// 	std::vector<std::string>::iterator it2;
+// 	for (it2 = classconfig.location->cgi.begin(); it2 != classconfig.location->cgi.end(); it2++)
+// 		std::cout << *it2 << std::endl;
+// 	std::cout << "----------------------------\n";
+// 	std::vector<std::string>::iterator it2;
+// 	for (it2 = classconfig.location->rtn.begin(); it2 != classconfig.location->rtn.end(); it2++)
+// 		std::cout << *it2 << std::endl;
+// 	std::cout << "----------------------------\n";
+// }
