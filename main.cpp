@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:29:45 by med-doba          #+#    #+#             */
-/*   Updated: 2023/03/05 13:43:48 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/03/06 13:27:15 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@ void	ft_ft(std::string str)
 {
 	std::cout << str << std::endl;
 }
-
 
 bool	ft_check_extention(std::string str)
 {
@@ -127,7 +126,7 @@ bool	ft_isDigit(std::string &str)
 
 bool	ft_check_autoindex(std::string &str)
 {
-	ft_ft(str);
+	// ft_ft(str);
 	if (str == "on" || str == "off")
 		return true;
 	return false;
@@ -219,10 +218,114 @@ std::vector<std::string>	ft_parse_cmbsize(std::string &lines)
 	return tmp;
 }
 
+void	ft_clearvectorserv(server &classconfig)
+{
+	classconfig.client_max_body_size.clear();
+	classconfig.error_page.clear();
+	classconfig.host.clear();
+	classconfig.index.clear();
+	classconfig.listen.clear();
+	classconfig.root.clear();
+	classconfig.server_name.clear();
+}
+
+void	ft_clearvectorlocation(location &location_)
+{
+	location_.client_max_body_size.clear();
+	location_.error_page.clear();
+	location_.root.clear();
+	location_.index.clear();
+	location_.cgi.clear();
+	location_.autoindex.clear();
+	location_.rtn.clear();
+	location_.allow.clear();
+}
+
+void	ft_show(std::vector<server> &block)
+{
+	puts("\n\nin\n\n");
+	for (size_t i = 0; i <  block.size(); i++)
+	{
+		std::cout << "-----------server block-----------------\n";
+		std::cout << "----------------------------\n";
+		std::vector<std::string>::iterator it6;
+		for (it6 = block[i].listen.begin(); it6 != block[i].listen.end(); it6++)
+			std::cout << *it6 << std::endl;
+		std::cout << "----------------------------\n";
+		std::cout << "----------------------------\n";
+		std::vector<std::string>::iterator it8;
+		for (it8 = block[i].host.begin(); it8 != block[i].host.end(); it8++)
+			std::cout << *it8 << std::endl;
+		std::cout << "----------------------------\n";
+		std::cout << "----------------------------\n";
+		std::vector<std::string>::iterator it4;
+		for (it4 = block[i].server_name.begin(); it4 != block[i].server_name.end(); it4++)
+			std::cout << *it4 << std::endl;
+		std::cout << "----------------------------\n";
+		std::cout << "----------------------------\n";
+		std::vector<std::string>::iterator it3;
+		for (it3 = block[i].root.begin(); it3 != block[i].root.end(); it3++)
+			std::cout << *it3 << std::endl;
+		std::cout << "----------------------------\n";
+		std::cout << "----------------------------\n";
+		std::vector<std::string>::iterator it1;
+		for (it1 = block[i].error_page.begin(); it1 != block[i].error_page.end(); it1++)
+			std::cout << *it1 << std::endl;
+		std::cout << "----------------------------\n";
+		std::cout << "----------------------------\n";
+		std::vector<std::string>::iterator it2;
+		for (it2 = block[i].index.begin(); it2 != block[i].index.end(); it2++)
+			std::cout << *it2 << std::endl;
+		std::cout << "----------------------------\n";
+		std::cout << "----------------------------\n";
+		std::vector<std::string>::iterator it5;
+		for (it5 = block[i].client_max_body_size.begin(); it5 != block[i].client_max_body_size.end(); it5++)
+			std::cout << *it5 << std::endl;
+		std::cout << "----------------------------\n";
+		std::cout << "----------------------------\n";
+		std::cout << "-----------server block-----------------\n";
+		std::cout << "----------------------------\n";
+		std::cout << "-----------location block-----------------\n";
+		std::cout << "----------------------------\n";
+		std::vector<std::string>::iterator it7;
+		for (it7 = block[i].obj_location.error_page.begin(); it7 != block[i].obj_location.error_page.end(); it7++)
+			std::cout << *it7 << std::endl;
+		std::cout << "----------------------------\n";
+		std::vector<std::string>::iterator it9;
+		for (it9 = block[i].obj_location.allow.begin(); it9 != block[i].obj_location.allow.end(); it9++)
+			std::cout << *it9 << std::endl;
+		std::cout << "----------------------------\n";
+		std::vector<std::string>::iterator it10;
+		for (it10 = block[i].obj_location.autoindex.begin(); it10 != block[i].obj_location.autoindex.end(); it10++)
+			std::cout << *it10 << std::endl;
+		std::cout << "----------------------------\n";
+		std::vector<std::string>::iterator it11;
+		for (it11 = block[i].obj_location.cgi.begin(); it11 != block[i].obj_location.cgi.end(); it11++)
+			std::cout << *it11 << std::endl;
+		std::cout << "----------------------------\n";
+		std::vector<std::string>::iterator it12;
+		for (it12 = block[i].obj_location.rtn.begin(); it12 != block[i].obj_location.rtn.end(); it12++)
+			std::cout << *it12 << std::endl;
+		std::cout << "----------------------------\n";
+		std::cout << "-----------location block-----------------\n";
+	}
+
+}
+
+void printVector(const std::vector<std::string>& vec)
+{
+	for (std::vector<std::string>::const_iterator iter = vec.begin(); iter != vec.end(); ++iter) {
+		std::cout << *iter << " ";
+	}
+	std::cout << std::endl;
+}
+
 int	main(void)
 {
 	server	classconfig;
-	location	location;
+	location	location_;
+	std::vector<server>	block;
+	std::vector<location>	in_block;
 	std::string		lines;
 	std::ifstream	file_conf("filetest.conf");
 
@@ -248,12 +351,13 @@ int	main(void)
 				continue;
 			}
 
-			if(InTheServerBlock && !InTheLocationBlock)
+			if(InTheServerBlock && InTheLocationBlock == false)
 			{
 				if (ft_occurrences_of_char(lines, ';') == -1)
 					return (ft_error("error: occurrences_of_char"), 1);
-				// ft_ft(lines);
-				lines.pop_back();
+				ft_ft(lines);
+				if (lines.back() != '}')
+					lines.pop_back();
 				if (lines.find("listen") != std::string::npos)
 				{
 					classconfig.listen = ft_split(lines, " \t");
@@ -289,102 +393,68 @@ int	main(void)
 			}
 			if (InTheLocationBlock)
 			{
+				ft_ft(lines);
 				if (lines.back() != '}')
 					lines.pop_back();
 				if(lines.substr(0, 4) == "root")
-					location.root = ft_parse_root(lines);
+				{
+					classconfig.obj_location.root = ft_parse_root(lines);
+
+				}
 				else if (lines.substr(0, 5) == "index")
-					location.index = ft_parse_index(lines);
+					classconfig.obj_location.index = ft_parse_index(lines);
 				else if (lines.find("error_page") != std::string::npos)
-					location.error_page = ft_parse_errorpage(lines);
+					classconfig.obj_location.error_page = ft_parse_errorpage(lines);
 				else if (lines.find("client_max_body_size") != std::string::npos)
-					location.client_max_body_size = ft_parse_cmbsize(lines);
+					classconfig.obj_location.client_max_body_size = ft_parse_cmbsize(lines);
 				else if (lines.substr(0, 6) == "return")
-					location.rtn = ft_split(lines, " \t");
+					classconfig.obj_location.rtn = ft_split(lines, " \t");
 				else if (lines.substr(0, 8) == "cgi_pass")
-					location.cgi = ft_split(lines, " \t");
+					classconfig.obj_location.cgi = ft_split(lines, " \t");
 				else if (lines.substr(0, 5) == "allow")
 				{
-					location.allow = ft_split(lines, " \t");
-					if (!ft_check_allowed(location.allow))
-						return (ft_error("location allow: error allow"), 1);
+					classconfig.obj_location.allow = ft_split(lines, " \t");
+					if (!ft_check_allowed(classconfig.obj_location.allow))
+						return (ft_error("classconfig.obj_location allow: error allow"), 1);
 				}
 				else if (lines.substr(0, 9) == "autoindex")
 				{
-					location.autoindex = ft_split(lines, " \t");
-					if (location.autoindex.size() != 2)
-						return (ft_error("location autoindex: error autoindex1"), 1);
-					if (!ft_check_autoindex(*(location.autoindex.begin() + 1)))
-						return (ft_error("location autoindex: error autoindex2"), 1);
+					classconfig.obj_location.autoindex = ft_split(lines, " \t");
+					if (classconfig.obj_location.autoindex.size() != 2)
+						return (ft_error("location_ autoindex: error autoindex1"), 1);
+					std::vector<std::string>::iterator	it;
+					it = (classconfig.obj_location.autoindex.begin() + 1);
+					if (!ft_check_autoindex(*it))
+						return (ft_error("location_ autoindex: error autoindex2"), 1);
 				}
 			}
 
 			if (lines == "}")
 			{
-				if (InTheServerBlock)
-					InTheServerBlock = false;
-				if (InTheLocationBlock)
+				// puts("\n\ntimes\n\n");
+				if (InTheServerBlock && InTheLocationBlock == false)
 				{
-					InTheLocationBlock = false;
-
+					InTheServerBlock = false;
+					block.push_back(classconfig);
+					ft_clearvectorserv(classconfig);
 				}
-				//check errors
+				if (InTheServerBlock && InTheLocationBlock)
+				{
+					puts("\n\n#@@#2#2#2#232\n\n");
+					classconfig.obj_location = location_;
+					std::vector<std::string>::iterator it10;
+					for (it10 = location_.autoindex.begin(); it10 != location_.autoindex.end(); it10++)
+						std::cout << "it10 = " << *it10 << std::endl;
+					in_block.push_back(classconfig.obj_location);
+					InTheLocationBlock = false;
+					ft_clearvectorlocation(location_);
+				}
 			}
 		}
 		file_conf.close();
+		puts("\n^^^^^^^^^^^^^^^^^^^^^^^\n");
+		ft_show(block);
+		puts("\n^^^^^^^^^^^^^^^^^^^^^^^\n");
 	}
 	return 0;
 }
-
-// void	ft_show(server &classconfig)
-// {
-// 	std::cout << "----------------------------\n";
-// 	std::vector<std::string>::iterator it1;
-// 	for (it1 = classconfig.error_page.begin(); it1 != classconfig.error_page.end(); it1++)
-// 		std::cout << *it1 << std::endl;
-// 	std::cout << "----------------------------\n";
-// 	std::vector<std::string>::iterator it2;
-// 	for (it2 = classconfig.index.begin(); it2 != classconfig.index.end(); it2++)
-// 		std::cout << *it2 << std::endl;
-// 	std::cout << "----------------------------\n";
-// 	std::vector<std::string>::iterator it3;
-// 	for (it3 = classconfig.root.begin(); it3 != classconfig.root.end(); it3++)
-// 		std::cout << *it3 << std::endl;
-// 	std::cout << "----------------------------\n";
-// 	std::vector<std::string>::iterator it4;
-// 	for (it4 = classconfig.server_name.begin(); it4 != classconfig.server_name.end(); it4++)
-// 		std::cout << *it4 << std::endl;
-// 	std::cout << "----------------------------\n";
-// 	std::vector<std::string>::iterator it2;
-// 	for (it2 = classconfig.client_max_body_size.begin(); it2 != classconfig.client_max_body_size.end(); it2++)
-// 		std::cout << *it2 << std::endl;
-// 	std::cout << "----------------------------\n";
-// 	std::vector<std::string>::iterator it2;
-// 	for (it2 = classconfig.listen.begin(); it2 != classconfig.listen.end(); it2++)
-// 		std::cout << *it2 << std::endl;
-// 	std::cout << "----------------------------\n";
-// 	std::vector<std::string>::iterator it2;
-// 	for (it2 = classconfig.error_page.begin(); it2 != classconfig.error_page.end(); it2++)
-// 		std::cout << *it2 << std::endl;
-// 	std::cout << "----------------------------\n";
-// 	std::vector<std::string>::iterator it2;
-// 	for (it2 = classconfig.host.begin(); it2 != classconfig.host.end(); it2++)
-// 		std::cout << *it2 << std::endl;
-// 	std::cout << "----------------------------\n";
-// 	std::vector<std::string>::iterator it2;
-// 	for (it2 = classconfig.location->allow.begin(); it2 != classconfig.location->allow.end(); it2++)
-// 		std::cout << *it2 << std::endl;
-// 	std::cout << "----------------------------\n";
-// 	std::vector<std::string>::iterator it2;
-// 	for (it2 = classconfig.location->autoindex.begin(); it2 != classconfig.location->autoindex.end(); it2++)
-// 		std::cout << *it2 << std::endl;
-// 	std::cout << "----------------------------\n";
-// 	std::vector<std::string>::iterator it2;
-// 	for (it2 = classconfig.location->cgi.begin(); it2 != classconfig.location->cgi.end(); it2++)
-// 		std::cout << *it2 << std::endl;
-// 	std::cout << "----------------------------\n";
-// 	std::vector<std::string>::iterator it2;
-// 	for (it2 = classconfig.location->rtn.begin(); it2 != classconfig.location->rtn.end(); it2++)
-// 		std::cout << *it2 << std::endl;
-// 	std::cout << "----------------------------\n";
-// }

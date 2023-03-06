@@ -1,15 +1,12 @@
 #ifndef LOCATION_HPP
 #define LOCATION_HPP
 
-#include "server.hpp"
 #include <fstream>
 #include <string>
 #include <iostream>
 #include <vector>
 
-// class server;
-
-class location : public server
+class location
 {
 	public:
 		location();
@@ -19,6 +16,11 @@ class location : public server
 		std::vector<std::string>	autoindex;
 		std::vector<std::string>	rtn;
 		std::vector<std::string>	cgi;
+		std::vector<std::string>	root;
+		std::vector<std::string>	server_name;
+		std::vector<std::string>	index;
+		std::vector<std::string>	error_page;
+		std::vector<std::string>	client_max_body_size;
 		~location();
 };
 
