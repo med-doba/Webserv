@@ -6,12 +6,13 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:29:45 by med-doba          #+#    #+#             */
-/*   Updated: 2023/03/06 13:27:15 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/03/06 23:41:28 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "location.hpp"
 #include "server.hpp"
+#include <stdlib.h>
 
 void	ft_ft(std::string str)
 {
@@ -98,19 +99,33 @@ int	ft_occurrences_of_char(std::string &line, char c)
 	return count;
 }
 
+int	ft_occurrences_of_char_v2(std::string &line, char c)
+{
+	int	count = 0;
+
+	for(int i = 0; line.find(c, i) != std::string::npos; i++)
+	{
+		count++;
+		i = line.find(c, i);
+	}
+	return count;
+}
+
 std::vector<std::string>	ft_split(const std::string str, std::string split)
 {
 	std::vector<std::string> rtn;
 	size_t	i = 0,j = 0;
-
+	//listen	64564 45454 1;
 	for (i = 0; str.find_first_of(split, i) != std::string::npos; i++)
 	{
 		j = str.find_first_of(split, i);
+		if (j == std::string::npos)
+			break;
 		rtn.push_back(str.substr(i, (j - i)));
 		i = j;
 	}
 	if (i < str.length())
-		rtn.push_back(str.substr(i, (j - i)));
+		rtn.push_back(str.substr(i));
 	return rtn;
 }
 
@@ -126,7 +141,9 @@ bool	ft_isDigit(std::string &str)
 
 bool	ft_check_autoindex(std::string &str)
 {
-	// ft_ft(str);
+	ft_ft("````");
+	ft_ft(str);
+	ft_ft("`````");
 	if (str == "on" || str == "off")
 		return true;
 	return false;
@@ -163,11 +180,12 @@ bool	ft_checkRang_nbr(std::string str)
 {
 	std::vector<std::string>	array;
 	std::vector<std::string>::iterator	it;
-
+	if (ft_occurrences_of_char_v2(str, '.') != 3)
+		return false;
 	array = ft_split(str, ".");
 	for (it = array.begin(); it != array.end(); it++)
 	{
-		if (!ft_isDigit(*it) || !(std::stoll(*it) >= 0 && std::stoll(*it) <= 255) || array.size() != 4)
+		if (!ft_isDigit(*it) || !(std::stoll(*it) >= 0 && std::stoll(*it) <= 255))
 			return false;
 	}
 	return true;
@@ -241,9 +259,22 @@ void	ft_clearvectorlocation(location &location_)
 	location_.allow.clear();
 }
 
+bool	ft_check_rangeofports(std::string &str)
+{
+	int	i, nbr;
+
+	i = 0;
+	ft_ft("&&&&");
+	ft_ft(str);
+	ft_ft("&&&&");
+	nbr = std::stoi(str);
+	if (nbr >= 1 && nbr <= 65535)
+		return true;
+	return false;
+}
+
 void	ft_show(std::vector<server> &block)
 {
-	puts("\n\nin\n\n");
 	for (size_t i = 0; i <  block.size(); i++)
 	{
 		std::cout << "-----------server block-----------------\n";
@@ -286,27 +317,35 @@ void	ft_show(std::vector<server> &block)
 		std::cout << "-----------server block-----------------\n";
 		std::cout << "----------------------------\n";
 		std::cout << "-----------location block-----------------\n";
-		std::cout << "----------------------------\n";
-		std::vector<std::string>::iterator it7;
-		for (it7 = block[i].obj_location.error_page.begin(); it7 != block[i].obj_location.error_page.end(); it7++)
-			std::cout << *it7 << std::endl;
-		std::cout << "----------------------------\n";
-		std::vector<std::string>::iterator it9;
-		for (it9 = block[i].obj_location.allow.begin(); it9 != block[i].obj_location.allow.end(); it9++)
-			std::cout << *it9 << std::endl;
-		std::cout << "----------------------------\n";
-		std::vector<std::string>::iterator it10;
-		for (it10 = block[i].obj_location.autoindex.begin(); it10 != block[i].obj_location.autoindex.end(); it10++)
-			std::cout << *it10 << std::endl;
-		std::cout << "----------------------------\n";
-		std::vector<std::string>::iterator it11;
-		for (it11 = block[i].obj_location.cgi.begin(); it11 != block[i].obj_location.cgi.end(); it11++)
-			std::cout << *it11 << std::endl;
-		std::cout << "----------------------------\n";
-		std::vector<std::string>::iterator it12;
-		for (it12 = block[i].obj_location.rtn.begin(); it12 != block[i].obj_location.rtn.end(); it12++)
-			std::cout << *it12 << std::endl;
-		std::cout << "----------------------------\n";
+		for (size_t j = 0; j < block[i].obj_location.size(); j++)
+		{
+			std::cout << "-------------+!@#$%^&*()---------------\n";
+			std::vector<std::string>::iterator it7;
+			for (it7 = block[i].obj_location[j].error_page.begin(); it7 != block[i].obj_location[j].error_page.end(); it7++)
+				std::cout << *it7 << std::endl;
+			std::vector<std::string>::iterator it00;
+			for (it00 = block[i].obj_location[j].root.begin(); it00 != block[i].obj_location[j].root.end(); it00++)
+				std::cout << *it00 << std::endl;
+			std::vector<std::string>::iterator it11;
+			for (it11 = block[i].obj_location[j].index.begin(); it11 != block[i].obj_location[j].index.end(); it11++)
+				std::cout << *it11 << std::endl;
+			std::vector<std::string>::iterator it17;
+			for (it17 = block[i].obj_location[j].client_max_body_size.begin(); it17 != block[i].obj_location[j].client_max_body_size.end(); it17++)
+				std::cout << *it17 << std::endl;
+			std::vector<std::string>::iterator it9;
+			for (it9 = block[i].obj_location[j].allow.begin(); it9 != block[i].obj_location[j].allow.end(); it9++)
+				std::cout << *it9 << std::endl;
+			std::vector<std::string>::iterator it10;
+			for (it10 = block[i].obj_location[j].autoindex.begin(); it10 != block[i].obj_location[j].autoindex.end(); it10++)
+				std::cout << *it10 << std::endl;
+			std::vector<std::string>::iterator it111;
+			for (it111 = block[i].obj_location[j].cgi.begin(); it111 != block[i].obj_location[j].cgi.end(); it111++)
+				std::cout << *it111 << std::endl;
+			std::vector<std::string>::iterator it12;
+			for (it12 = block[i].obj_location[j].rtn.begin(); it12 != block[i].obj_location[j].rtn.end(); it12++)
+				std::cout << *it12 << std::endl;
+			std::cout << "----------------------------\n";
+		}
 		std::cout << "-----------location block-----------------\n";
 	}
 
@@ -355,9 +394,8 @@ int	main(void)
 			{
 				if (ft_occurrences_of_char(lines, ';') == -1)
 					return (ft_error("error: occurrences_of_char"), 1);
-				ft_ft(lines);
-				if (lines.back() != '}')
-					lines.pop_back();
+				// if (lines.back() != '}')
+				// 	lines.pop_back();
 				if (lines.find("listen") != std::string::npos)
 				{
 					classconfig.listen = ft_split(lines, " \t");
@@ -365,65 +403,82 @@ int	main(void)
 					std::vector<std::string>::iterator it;
 					for (it = (classconfig.listen.begin() + 1); it != classconfig.listen.end(); it++)
 					{
-						if (!ft_isDigit(*it))
-							return (ft_error("listen: error is didgit"), 1);
+						if (!ft_isDigit(*it) || !ft_check_rangeofports(*it))
+							return (ft_error("listen: error is didgit or range"), 1);
 					}
 					ft_check_double(classconfig.listen);
 				}
 				else if (lines.substr(0, 4) == "host")
 				{
 					classconfig.host = ft_split(lines, " \t");
+					classconfig.host.back().pop_back();
 					std::vector<std::string>::iterator it;
-					for (it = classconfig.host.begin(); it != classconfig.host.end(); it++)
+					for (it = classconfig.host.begin() + 1; it != classconfig.host.end(); it++)
 					{
-						if (!ft_checkRang_nbr(*(it +1)))
+						if (!ft_checkRang_nbr(*(it)))
 							return (ft_error("host: error rang"), 1);
 					}
 				}
 				else if (lines.substr(0, 11) == "server_name")
+				{
 					classconfig.server_name = ft_split(lines, " \t");
+					classconfig.server_name.back().pop_back();
+				}
 				else if(lines.substr(0, 4) == "root")
+				{
 					classconfig.root = ft_parse_root(lines);
+					classconfig.root.back().pop_back();
+				}
 				else if (lines.substr(0, 5) == "index")
+				{
+					lines.pop_back();
 					classconfig.index = ft_parse_index(lines);
+				}
 				else if (lines.find("client_max_body_size") != std::string::npos)
+				{
+					lines.pop_back();
 					classconfig.client_max_body_size = ft_parse_cmbsize(lines);
+				}
 				else if (lines.find("error_page") != std::string::npos)
+				{
 					classconfig.error_page =  ft_parse_errorpage(lines);
+					classconfig.error_page.back().pop_back();
+				}
 			}
 			if (InTheLocationBlock)
 			{
-				ft_ft(lines);
 				if (lines.back() != '}')
 					lines.pop_back();
 				if(lines.substr(0, 4) == "root")
 				{
-					classconfig.obj_location.root = ft_parse_root(lines);
+					location_.root = ft_parse_root(lines);
 
 				}
 				else if (lines.substr(0, 5) == "index")
-					classconfig.obj_location.index = ft_parse_index(lines);
+					location_.index = ft_parse_index(lines);
 				else if (lines.find("error_page") != std::string::npos)
-					classconfig.obj_location.error_page = ft_parse_errorpage(lines);
+					location_.error_page = ft_parse_errorpage(lines);
 				else if (lines.find("client_max_body_size") != std::string::npos)
-					classconfig.obj_location.client_max_body_size = ft_parse_cmbsize(lines);
+				{
+					location_.client_max_body_size = ft_parse_cmbsize(lines);
+				}
 				else if (lines.substr(0, 6) == "return")
-					classconfig.obj_location.rtn = ft_split(lines, " \t");
+					location_.rtn = ft_split(lines, " \t");
 				else if (lines.substr(0, 8) == "cgi_pass")
-					classconfig.obj_location.cgi = ft_split(lines, " \t");
+					location_.cgi = ft_split(lines, " \t");
 				else if (lines.substr(0, 5) == "allow")
 				{
-					classconfig.obj_location.allow = ft_split(lines, " \t");
-					if (!ft_check_allowed(classconfig.obj_location.allow))
-						return (ft_error("classconfig.obj_location allow: error allow"), 1);
+					location_.allow = ft_split(lines, " \t");
+					if (!ft_check_allowed(location_.allow))
+						return (ft_error("location_ allow: error allow"), 1);
 				}
 				else if (lines.substr(0, 9) == "autoindex")
 				{
-					classconfig.obj_location.autoindex = ft_split(lines, " \t");
-					if (classconfig.obj_location.autoindex.size() != 2)
+					location_.autoindex = ft_split(lines, " \t");
+					if (location_.autoindex.size() != 2)
 						return (ft_error("location_ autoindex: error autoindex1"), 1);
 					std::vector<std::string>::iterator	it;
-					it = (classconfig.obj_location.autoindex.begin() + 1);
+					it = (location_.autoindex.begin() + 1);
 					if (!ft_check_autoindex(*it))
 						return (ft_error("location_ autoindex: error autoindex2"), 1);
 				}
@@ -431,7 +486,6 @@ int	main(void)
 
 			if (lines == "}")
 			{
-				// puts("\n\ntimes\n\n");
 				if (InTheServerBlock && InTheLocationBlock == false)
 				{
 					InTheServerBlock = false;
@@ -440,21 +494,14 @@ int	main(void)
 				}
 				if (InTheServerBlock && InTheLocationBlock)
 				{
-					puts("\n\n#@@#2#2#2#232\n\n");
-					classconfig.obj_location = location_;
-					std::vector<std::string>::iterator it10;
-					for (it10 = location_.autoindex.begin(); it10 != location_.autoindex.end(); it10++)
-						std::cout << "it10 = " << *it10 << std::endl;
-					in_block.push_back(classconfig.obj_location);
+					classconfig.obj_location.push_back(location_);
 					InTheLocationBlock = false;
 					ft_clearvectorlocation(location_);
 				}
 			}
 		}
 		file_conf.close();
-		puts("\n^^^^^^^^^^^^^^^^^^^^^^^\n");
 		ft_show(block);
-		puts("\n^^^^^^^^^^^^^^^^^^^^^^^\n");
 	}
 	return 0;
 }

@@ -15,7 +15,7 @@ class server
 		// server(const server &obj);
 		// server	&operator=(const server &obj);
 		~server();
-		location					obj_location;
+		std::vector<location>		obj_location;
 		std::vector<std::string>	listen;
 		std::vector<std::string>	host;
 		std::vector<std::string>	root;
