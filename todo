@@ -2,3 +2,4 @@ find the mandatory of file config.
 listen // root // ipadress=host
 multiple server block and derivtives
 -> handle server_name if it has a ip not url
+move the all errors into exeption
