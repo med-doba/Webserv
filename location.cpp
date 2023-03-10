@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:49:40 by med-doba          #+#    #+#             */
-/*   Updated: 2023/03/09 21:40:42 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/03/10 10:28:50 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,6 @@ location::location()
 	cgi_ = false;
 	autoindex_ = false;
 	allow_methods_ = false;
-	// allow_methods_exist = false;
-	// autoindex_exist = false;
-	// rtn_exist = false;
-	// cgi_exist = false;
-	// root_exist = false;
-	// index_exist = false;
-	// error_page_exist = false;
-	// client_max_body_size_exist = false;
 }
 
 location::~location()
@@ -77,6 +69,7 @@ bool	location::ft_check_autoindex(std::string &str)
 
 void	location::ft_clearclasslocation(location &location_)
 {
+	location_.path.clear();
 	location_.client_max_body_size.clear();
 	location_.error_page.clear();
 	location_.root.clear();

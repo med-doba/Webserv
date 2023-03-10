@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:29:45 by med-doba          #+#    #+#             */
-/*   Updated: 2023/03/09 21:47:06 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/03/10 11:32:20 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,15 @@
 #include "server.hpp"
 #include <stdlib.h>
 
+void	ft_delete_comment(std::string	&str)
+{
+	size_t pos = str.find("#");
+	if (pos != std::string::npos)
+		str.erase(pos, (str.length() - pos));
+}
+
 int	main(void)
 {
-	// int	required_directives = 0;
 	server	classconfig;
 	location	location_;
 	std::vector<server>	block;
@@ -37,6 +43,7 @@ int	main(void)
 			classconfig.ft_trim(lines);
 			if (lines[0] == '#')
 				continue;
+			ft_delete_comment(lines);
 			if (!lines.empty() && lines.back() == '{')
 			{
 				if (lines.find("server") != std::string::npos)
@@ -45,6 +52,9 @@ int	main(void)
 				{
 					InTheLocationBlock = true;
 					classconfig.location_find = true;
+					location_.path = *(classconfig.ft_split(lines, " \t").begin() + 1);
+					std::cout << "=> " <<  location_.path << "\n";
+					// location_.path = classconfig.ft_split(lines, " \t");
 				}
 				continue;
 			}
@@ -137,12 +147,23 @@ int	main(void)
 				}
 				else if (lines.find("error_page") != std::string::npos)
 				{
-					classconfig.error_page_find = true;
-					classconfig.error_page =  classconfig.ft_parse_errorpage(lines);
-					classconfig.error_page.back().pop_back();
+					if (!classconfig.error_page_)
+					{
+						classconfig.error_page_find = true;
+						classconfig.error_page =  classconfig.ft_parse_errorpage(lines);
+						classconfig.error_page.back().pop_back();
+						classconfig.error_page_ = true;
+					}
+					else
+					{
+						std::vector<std::string>	tmp_error_page;
+						tmp_error_page = classconfig.ft_parse_errorpage(lines);
+						tmp_error_page.back().pop_back();
+						classconfig.error_page.insert(classconfig.error_page.end(), (tmp_error_page.begin() + 1), tmp_error_page.end());
+					}
 				}
-				// else
-				// 	return (classconfig.ft_error("error: invalid directives"), 1);
+				else
+					return (classconfig.ft_error("error: invalid directives"), 1);
 			}
 			else if (InTheLocationBlock && lines != "}")
 			{
@@ -219,8 +240,8 @@ int	main(void)
 					else
 						return (classconfig.ft_error("1error: Duplicate directives"), 1);
 				}
-				// else
-				// 	return (classconfig.ft_error("error: invalid directives"), 1);
+				else
+					return (classconfig.ft_error("error: invalid directives"), 1);
 			}
 
 			else if (lines == "}")
@@ -229,7 +250,6 @@ int	main(void)
 				{
 					InTheServerBlock = false;
 					block.push_back(classconfig);
-					location_.ft_clearclasslocation(location_);
 					classconfig.ft_clearvectorlocation_test(classconfig.obj_location);
 					classconfig.ft_clearvectorserv(classconfig);
 					classconfig.listen_ = false;
@@ -240,7 +260,23 @@ int	main(void)
 				}
 				else if (InTheServerBlock && InTheLocationBlock)
 				{
+					// std::cout << "path >>= " << location_.path << "\n\n";
+					// std::cout << "path 22>>= " << classconfig.obj_location[0].path << "\n\n";
 					classconfig.obj_location.push_back(location_);
+
+
+					// std::vector<location>::iterator it75 = classconfig.obj_location.begin();
+
+					// int i = 0;
+					// while(i < 2)
+					// {
+					// 	// for (it75 = classconfig.obj_location.begin(); it75 != classconfig.obj_location.end(); it75++)
+					// 	// 	std::cout << *(it75).base() << std::endl;
+					// 	// 	i++;
+					// 	std::cout << "lol = " << classconfig.obj_location[i].path << std::endl;
+					// 	i++;
+					// }
+					location_.ft_clearclasslocation(location_);
 					InTheLocationBlock = false;
 					location_.client_max_body_size_ = false;
 					location_.index_ = false;

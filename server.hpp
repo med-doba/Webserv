@@ -47,21 +47,20 @@ class server
 		std::vector<std::string>	ft_split(const std::string str, std::string split);
 		bool	ft_isDigit(std::string &str);
 		//show
-		void	ft_show(std::vector<server> &block);
+		void	ft_show(std::vector<server>  &block);
 		//
 		bool	listen_;
 		bool	server_name_;
 		bool	client_max_body_size_;
 		bool	index_;
 		bool	root_;
+		bool	error_page_;
 		//
 		bool	listen_find;
 		bool	host_find;
 		bool	root_find;
-		// bool	index_find;
 		bool	error_page_find;
 		bool	location_find;
-		// bool	client_max_body_size_find;
 };
 
 #endif

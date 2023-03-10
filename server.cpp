@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/03/09 21:54:33 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/03/10 11:32:14 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,11 @@ server::server()
 	server_name_ = false;
 	index_ = false;
 	client_max_body_size_ = false;
+	error_page_ = false;
 	listen_find = false;
 	host_find = false;
 	root_find = false;
-	// index_find = false;
 	error_page_find = false;
-	// client_max_body_size_find = false;
 }
 
 server::~server()
@@ -91,7 +90,7 @@ bool	server::ft_checkRang_nbr(std::string str)
 {
 	std::vector<std::string>	array;
 	std::vector<std::string>::iterator	it;
-	
+
 	if (ft_occurrences_of_char_v2(str, '.') != 3)
 		return false;
 	array = ft_split(str, ".");
@@ -316,6 +315,9 @@ void	server::ft_show(std::vector<server> &block)
 		for (size_t j = 0; j < block[i].obj_location.size(); j++)
 		{
 			std::cout << "-----------location block-----------------\n";
+			std::cout << "-----------path-----------------\n";
+			std::cout << "path = " << block[i].obj_location[j].path << "\n";
+			std::cout << "-----------path-----------------\n";
 			std::vector<std::string>::iterator it7;
 			for (it7 = block[i].obj_location[j].error_page.begin(); it7 != block[i].obj_location[j].error_page.end(); it7++)
 				std::cout << *it7 << std::endl;

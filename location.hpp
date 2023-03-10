@@ -13,6 +13,7 @@ class location
 		location(const location &obj);
 		location	&operator=(const location &obj);
 		~location();
+		std::string	path;
 		std::vector<std::string>	allow_methods;
 		std::vector<std::string>	autoindex;
 		std::vector<std::string>	rtn;
@@ -33,14 +34,6 @@ class location
 		bool	autoindex_;
 		bool	allow_methods_;
 		//
-		// bool	allow_methods_exist;
-		// bool	autoindex_exist;
-		// bool	rtn_exist;
-		// bool	cgi_exist;
-		// bool	root_exist;
-		// bool	index_exist;
-		// bool	error_page_exist;
-		// bool	client_max_body_size_exist;
 };
 
 #endif
