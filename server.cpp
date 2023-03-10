@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/03/10 11:32:14 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/03/10 13:42:21 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,9 +166,8 @@ void	server::ft_clearvectorlocation_test(std::vector<location> &location_)
 
 bool	server::ft_check_rangeofports(std::string &str)
 {
-	int	i, nbr;
+	int	nbr;
 
-	i = 0;
 	nbr = std::stoi(str);
 	if (nbr >= 1 && nbr <= 65535)
 		return true;

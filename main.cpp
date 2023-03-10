@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:29:45 by med-doba          #+#    #+#             */
-/*   Updated: 2023/03/10 11:32:20 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/03/10 14:34:39 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,11 +260,7 @@ int	main(void)
 				}
 				else if (InTheServerBlock && InTheLocationBlock)
 				{
-					// std::cout << "path >>= " << location_.path << "\n\n";
-					// std::cout << "path 22>>= " << classconfig.obj_location[0].path << "\n\n";
 					classconfig.obj_location.push_back(location_);
-
-
 					// std::vector<location>::iterator it75 = classconfig.obj_location.begin();
 
 					// int i = 0;
@@ -284,6 +280,8 @@ int	main(void)
 					location_.cgi_ = false;
 					location_.autoindex_ = false;
 					location_.allow_methods_ = false;
+
+
 				}
 				else
 					return (classconfig.ft_error("error: missing or mismatched brackets"), 1);
