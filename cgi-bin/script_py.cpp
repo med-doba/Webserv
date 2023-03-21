@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 14:17:23 by med-doba          #+#    #+#             */
-/*   Updated: 2023/03/14 16:38:20 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/03/21 13:14:01 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ char**	ft_enviroment(void)
 	// env[1] = "REQUEST_METHOD=GET";
 	// rtn[1] = (char *)env[1].c_str();
 	rtn[1] = strdup("REQUEST_METHOD=GET");
+	// rtn[1] = strdup("REQUEST_METHOD=POST");
 	// env[2] = "CONTENT_TYPE=text/html";
 	// rtn[2] = (char *)env[2].c_str();
 	rtn[2] = strdup("CONTENT_TYPE=text/html");
