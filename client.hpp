@@ -17,7 +17,7 @@ class client
 	std::ofstream file;
 	std::vector<char> content_buffer;
 	int bytes_read;
-	int ignore;
+	int flag;
 
 	int extractheader();
 	void openfile();

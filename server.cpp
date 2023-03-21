@@ -102,12 +102,17 @@ void server::monitor()
 						this->receive(j);
 				}
 			}
-			else if (pfds[i].revents & POLLOUT)
+			else if (this->pfds[i].revents & POLLOUT)
 			{
 				for (size_t j = 0; j < clients.size(); j++)
 				{
 					if (pfds[i].fd == clients[j].client_socket)
-						this->response(j);
+					{
+						// if (clients[j].flag != 1)
+						// 	break ;
+						// else
+							this->response(j);
+					}
 				}
 			}
 		}
@@ -144,7 +149,6 @@ void server::disconnect(int index)
 
 void server::response(int index)
 {
-	// std::cout << "inside " << std::endl;
 	if (clients[index].extractheader() == 1)
 	{
 		std::cout << "fav sock client before disconnect == " << clients[index].client_socket << std::endl;
@@ -152,8 +156,8 @@ void server::response(int index)
 		this->disconnect(index);
 		return ;
 	}
-	std::cout << clients[index].ignore << std::endl;
-	if (clients[index].ignore != 1)
+	// std::cout << clients[index].ignore << std::endl;
+	if (!clients[index].header_request.empty())
 	{
 		clients[index].openfile();
 		if (clients[index].response() == 1)
@@ -170,15 +174,21 @@ void server::receive(int index)
 {
 	char buffer[BUFFER];
 	memset(buffer, 0, BUFFER);
-	// std::cout << "here" << std::endl;
 	clients[index].bytes_read = recv(clients[index].client_socket, buffer, BUFFER, 0);
-	if (clients[index].bytes_read <= 0)
+	if (clients[index].bytes_read < 0)
 	{
+		std::cout << "lol" << std::endl;
+		clients[index].flag = 1;
+		return ;
+	}
+	else if (clients[index].bytes_read <= 0)
+	{
+		std::cout << "disconnect from recv " << std::endl;
 		// std::cout << "index == " << index << std::endl;
 		// std::cout << "sock == " << clients[index].client_socket << std::endl;
 		// std::cout << "size == " << clients.size() << std::endl;
-		// std::cout << "bytes == " << clients[index].bytes_read << std::endl;
-		// std::cout << clients[index].header_request << std::endl;
+		std::cout << "bytes == " << clients[index].bytes_read << std::endl;
+		std::cout << clients[index].header_request << std::endl;
 		// std::cout << "disconnect recv " << clients[index].client_socket << std::endl;
 		// std::cout << clients[index].header_request << std::endl;
 		this->disconnect(index);
@@ -188,6 +198,13 @@ void server::receive(int index)
 	// std::cout << clients[index].bytes_read << "\n";
 	if (clients[index].bytes_read > BUFFER)
 		clients[index].bytes_read = BUFFER;
-	std::string str(buffer,clients[index].bytes_read);
+
+	// std::cout << "read from recv "  << clients[index].client_socket << std::endl;
+	// std::cout << buffer << std::endl;
+	// std::cout << "end recv" << std::endl;
+	// std::cout << "create str"  << clients[index].bytes_read << std::endl;
+	std::string str(buffer,clients[index].bytes_read);	
+	// std::cout << str << std::endl;
+	// std::cout << "end str" << std::endl;
 	clients[index].buffer += str;
 }

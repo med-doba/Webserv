@@ -6,14 +6,11 @@ int client::extractheader()
 	size_t pos = 0;
 
 	res = buffer.find("/favicon.ico");
-	// std::cout << "sock " << this->client_socket << std::endl;
-	// std::cout << buffer << std::endl;
-	// std::cout << "end print" << std::endl;
 	if (res != std::string::npos)
 	{
 		std::cout << "lol\n";
-		this->ignore = 1;
-		return (1);
+		buffer.clear();
+		return (0);
 	}
 	// std::cout << "extract sock " << this->client_socket << std::endl;
 	if (this->header_request.empty())
@@ -97,34 +94,39 @@ int client::response()
 							"Content-Type: video/mp4\r\n"
 							"Content-length: " + std::to_string(content_buffer.size()) + "\r\n"
 							"\r\n";
-			// int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
-			// std::cout << "socket client " << this->client_socket << std::endl;
-			// std::cout << "header req" << std::endl;
+			// std::cout << "buffer begin " << this->client_socket << std::endl;
+			// std::cout << buffer << std::endl;
+			// std::cout << "buffer end" << std::endl;
+			// std::cout << "header begin " << this->client_socket << std::endl;
 			// std::cout << header_request << std::endl;
-			// std::cout << "end client " << this->client_socket << std::endl;
-			// if (i < 0)
-			// {
-			// 	std::cout << "send error" << std::endl;
-			// 	return (1);
-			// }
-			// if (i > 0)
-			// 	std::cout << "sent success " << this->client_socket << std::endl;
-			// response_header.clear();
-			std::cout << "sock response " << this->client_socket << std::endl;
+			// std::cout << "header end" << std::endl;
+			// std::cout << "ignore == " << ignore << std::endl;
 			response_header += std::string(content_buffer.begin(), content_buffer.end());
 		}
-		size_t size = 100000;
+		// size_t size = 100000;
 		if (!response_header.empty())
 		{
-			if (response_header.size() < size)
-				size = response_header.size();
-			std::string send_req = response_header.substr(0, size);
-			send(this->client_socket, send_req.c_str(), send_req.size(), 0);
-			response_header.erase(0, size);
+			// if (response_header.size() < size)
+			// 	size = response_header.size();
+			// std::string send_req = response_header.substr(0, size);
+			// int i = send(this->client_socket, send_req.c_str(), send_req.size(), 0);
+			// response_header.erase(0, i);
+			int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
+			if (i < 0)
+			{
+				response_header.clear();
+				return (0);
+			}
+			response_header.erase(0, i);
+			std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
 		}
 		else
 		{
 			std::cout << "sent complete " << this->client_socket << std::endl;
+			input.close();
+			buffer.clear();
+			header_request.clear();
+			content_buffer.clear();
 			return (0);
 		}
 	}
@@ -133,7 +135,7 @@ int client::response()
 
 client::client()
 {
-	this->ignore = 0;
+	flag = 0;
 }
 
 client::client(const client &obj)
@@ -149,7 +151,7 @@ client& client::operator=(const client& obj)
 		this->buffer = obj.buffer;
 		this->header_request = obj.header_request;
 		this->bytes_read = obj.bytes_read;
-		this->ignore = obj.ignore;
+		this->flag = obj.flag;
 	}
 	return (*this);
 }
