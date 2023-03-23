@@ -1,3 +1,6 @@
+#ifndef SERVER_HPP
+#define SERVER_HPP
+
 #include <iostream>
 #include <vector>
 #include <fcntl.h>
@@ -22,7 +25,10 @@ class server
 	void monitor();
 	void disconnect(int index);
 	void fill();
-	void receive(int index);
 	void response(int index);
+	void receive(int index);
+	// void response(int index);
 	void new_connection(int index);
 };
+
+#endif

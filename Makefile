@@ -8,6 +8,8 @@ CFILES = main.cpp\
 		client.cpp\
 		miniserver.cpp\
 		server.cpp\
+		parssingOfBody.cpp\
+		parssingOfHeader.cpp\
 
 
 OFILES = $(addprefix $(OBJ_DIR)/,$(CFILES:.cpp=.o))

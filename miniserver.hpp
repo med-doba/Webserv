@@ -1,3 +1,6 @@
+#ifndef MINISERVER_HPP
+#define MINISERVER_HPP
+
 #include <iostream>
 #include <vector>
 #include <sys/socket.h>
@@ -6,7 +9,7 @@
 #include "client.hpp"
 
 #define BACKLOG 10
-#define BUFFER 1024
+#define BUFFER 10000
 
 class miniserver
 {
@@ -23,3 +26,5 @@ class miniserver
 	miniserver& operator=(const miniserver& obj);
 	~miniserver();
 };
+
+#endif

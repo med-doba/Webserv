@@ -31,7 +31,7 @@ server::~server()
 void server::fill()
 {
 	miniserver obj;
-	obj.port = 8080;
+	obj.port = 8081;
 	obj.str_port = std::to_string(obj.port);
 	obj.address.sin_family = AF_INET;
 	obj.address.sin_addr.s_addr = INADDR_ANY;
@@ -67,7 +67,7 @@ void server::lunch_servers()
 			perror("bind failed");
 			exit(EXIT_FAILURE);
 		}
-		fcntl(servers[i].socket_server, F_SETFL, O_NONBLOCK);
+		// fcntl(servers[i].socket_server, F_SETFL, O_NONBLOCK);
 		if (listen(servers[i].socket_server, BACKLOG) < 0)
 		{
 			perror("listen");
@@ -132,7 +132,7 @@ void server::new_connection(int index)
 		exit(EXIT_FAILURE);
 	}
 	c.fd = obj.client_socket;
-	fcntl(obj.client_socket, F_SETFL, O_NONBLOCK);
+	// fcntl(obj.client_socket, F_SETFL, O_NONBLOCK);
 	c.events = POLLIN | POLLOUT;
 	pfds.push_back(c);
 	clients.push_back(obj);
@@ -152,13 +152,13 @@ void server::response(int index)
 	if (clients[index].extractheader() == 1)
 	{
 		std::cout << "fav sock client before disconnect == " << clients[index].client_socket << std::endl;
-		std::cout << clients[index].header_request << std::endl;
+		std::cout << clients[index].headerOfRequest << std::endl;
 		this->disconnect(index);
 		return ;
 	}
 	// std::cout << clients[index].ignore << std::endl;
-	if (!clients[index].header_request.empty())
-	{
+	// if (!clients[index].headerOfRequest.empty())
+	// {
 		clients[index].openfile();
 		if (clients[index].response() == 1)
 		{
@@ -167,9 +167,45 @@ void server::response(int index)
 			this->disconnect(index);
 			return ;
 		}
-	}
+	// }
 }
 
+// void server::receive(int index)
+// {
+//     int rtn;
+
+//     rtn = clients[index].pushToBuffer();
+     
+//     if(rtn == 0 || rtn == -1)
+// 	{
+// 		cout << "r == " << rtn << endl;
+//         return ;
+// 	}
+//     rtn = clients[index].checkHeaderOfreq();
+
+//     if(rtn == -2)
+// 	{
+// 		cout << "r == " << rtn << endl;
+//         return ;
+// 	}
+//     if(clients[index].flag == 1) // if has content lenght
+// 	{
+// 		cout << "lol" << endl;
+//         clients[index].bodyParss.handle_post(clients[index].headerOfRequest,clients[index].buffer,clients[index].ContentLength,clients[index].i, clients[index].flag);
+// 	}
+    // else if(flag == 2)
+    // {
+    //     // check header line and headers
+    //      // without budy
+    // }
+    // if(flag == 3)
+    //     handling_chunked_data();
+    // if(flag == 4)
+    //     handling_form_data();
+    
+        
+    // return 1;
+// }
 void server::receive(int index)
 {
 	char buffer[BUFFER];
@@ -188,7 +224,7 @@ void server::receive(int index)
 		// std::cout << "sock == " << clients[index].client_socket << std::endl;
 		// std::cout << "size == " << clients.size() << std::endl;
 		std::cout << "bytes == " << clients[index].bytes_read << std::endl;
-		std::cout << clients[index].header_request << std::endl;
+		std::cout << clients[index].headerOfRequest << std::endl;
 		// std::cout << "disconnect recv " << clients[index].client_socket << std::endl;
 		// std::cout << clients[index].header_request << std::endl;
 		this->disconnect(index);
