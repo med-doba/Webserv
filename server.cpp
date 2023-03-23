@@ -106,7 +106,7 @@ void server::monitor()
 			{
 				for (size_t j = 0; j < clients.size(); j++)
 				{
-					if (pfds[i].fd == clients[j].client_socket)
+					if (pfds[i].fd == clients[j].client_socket && clients[j].ignore != 1)
 					{
 						// if (clients[j].flag != 1)
 						// 	break ;
@@ -159,14 +159,14 @@ void server::response(int index)
 	// std::cout << clients[index].ignore << std::endl;
 	// if (!clients[index].headerOfRequest.empty())
 	// {
-		clients[index].openfile();
-		if (clients[index].response() == 1)
-		{
-			// std::cout << "disconnect response " << clients[index].client_socket << std::endl;
-			// std::cout << clients[index].header_request << std::endl;
-			this->disconnect(index);
-			return ;
-		}
+	// 	clients[index].openfile();
+	// 	if (clients[index].response() == 1)
+	// 	{
+	// 		// std::cout << "disconnect response " << clients[index].client_socket << std::endl;
+	// 		// std::cout << clients[index].header_request << std::endl;
+	// 		this->disconnect(index);
+	// 		return ;
+	// 	}
 	// }
 }
 
@@ -206,6 +206,7 @@ void server::response(int index)
         
     // return 1;
 // }
+
 void server::receive(int index)
 {
 	char buffer[BUFFER];

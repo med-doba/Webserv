@@ -5,13 +5,14 @@ int client::extractheader()
 	size_t res = 0;
 	size_t pos = 0;
 
-	// res = buffer.find("/favicon.ico");
-	// if (res != std::string::npos)
-	// {
-	// 	std::cout << "lol\n";
-	// 	buffer.clear();
-	// 	return (0);
-	// }
+	res = buffer.find("/favicon.ico");
+	if (res != std::string::npos)
+	{
+		std::cout << "lol\n";
+		this->ignore = 1;
+		// buffer.clear();
+		return (0);
+	}
 	// std::cout << "extract sock " << this->client_socket << std::endl;
 		// std::cout << "lol" << std::endl;
 	if (this->headerOfRequest.empty() == true)
@@ -141,6 +142,7 @@ client::client()
 	flag = 0;
 	tmp = 0;
 	i = 0;
+	ignore = 0;
 	flag_ = 0;
 }
 

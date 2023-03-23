@@ -30,6 +30,7 @@ class client
 	std::vector<char> content_buffer;
 	int bytes_read;
 	int flag;
+	int ignore;
 
 
 	parssingOfHeader headerParss;
