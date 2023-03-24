@@ -9,7 +9,7 @@
 #include "client.hpp"
 
 #define BACKLOG 10
-#define BUFFER 10000
+#define BUFFER 1024
 
 class miniserver
 {

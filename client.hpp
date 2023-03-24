@@ -15,17 +15,19 @@ using std::string;
 using std::cout;
 using std::endl;
 
-#define BUFFER 10000
+#define BUFFER 1024
 
 class client
 {
 	public:
 	int client_socket;
 	std::string buffer;
+	std::string boundary;
 	std::string response_header;
 	std::string body;
 	std::ifstream input;
 	std::string headerOfRequest;
+	std::string bodyofRequest;
 	std::ofstream file;
 	std::vector<char> content_buffer;
 	int bytes_read;
@@ -37,7 +39,9 @@ class client
 	parssingOfBody   bodyParss;
 	int tmp;
 	int flag_;
-	unsigned long i;
+	int total_bytes_received;
+	int i;
+	int j;
 	unsigned long ContentLength;
 
 	int extractheader();

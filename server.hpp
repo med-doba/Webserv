@@ -7,6 +7,7 @@
 #include <cstring>
 #include <sys/ioctl.h>
 #include "miniserver.hpp"
+#include "client.hpp"
 
 class server
 {

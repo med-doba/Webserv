@@ -77,7 +77,7 @@ int client::response()
 
 	if (file.is_open())
 	{
-		std::cout << "lol1 " << client_socket << std::endl;
+		// std::cout << "lol1 " << client_socket << std::endl;
 		file << buffer;
 		file.flush();
 	}
@@ -139,11 +139,11 @@ int client::response()
 
 client::client()
 {
-	flag = 0;
-	tmp = 0;
-	i = 0;
-	ignore = 0;
-	flag_ = 0;
+    total_bytes_received  = 0;
+    i  = flag = flag_  = j = 0;
+    tmp = 0;
+    buffer = bodyofRequest = boundary = "";
+    tmp = 0;
 }
 
 client::client(const client &obj)
@@ -188,9 +188,34 @@ int client::checkHeaderOfreq()
                 if(headerParss.checkHeaderOfreq_(headerOfRequest,tmp) == -2)
                     return -2;
                 
+                i = headerOfRequest.find("Transfer-Encoding: chunked");   // find way to check if boundry
+                if(i != -1)
+                { 
+                    buffer.erase(buffer.begin(),buffer.begin() + pos + 2);
+                    flag = 3;
+                    return 1;
+                }
                 pos = headerOfRequest.find("Content-Length");  
                 if(pos != -1)
                 {
+                    j = headerOfRequest.find("boundary");
+                    if(j != -1)
+                    {
+                        flag = 4;
+                        ContentLength = ft_atoi(headerOfRequest.substr(pos + 16,headerOfRequest.size()).c_str());
+                        if(ContentLength == 0)
+                            return -2;
+                        i = headerOfRequest.size() + 3;// after herder
+                        bytes_read -= i;
+                        tmp = j + 9;
+                        char *temp = (char*)buffer.data() + tmp;// because string() dont handle '\r'
+                        tmp = 0;
+                        while (temp[tmp] != '\r' && temp[tmp + 1] != '\n')
+                            tmp++;
+                        boundary.append("--").append(ft_substr(temp,0,tmp));// free boundry and temp?
+                        
+                         return 1;
+                    }
                     ContentLength = ft_atoi(headerOfRequest.substr(pos + 16,headerOfRequest.size()).c_str());
                     if(ContentLength == 0)
                         return -2;
