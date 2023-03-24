@@ -57,9 +57,9 @@ class server
 		bool	error_page_;
 		//
 		bool	listen_find;
-		bool	host_find;
 		bool	root_find;
 		bool	error_page_find;
+		bool	host_find;
 		bool	location_find;
 };
 

@@ -22,6 +22,9 @@ class location
 		std::vector<std::string>	index;
 		std::vector<std::string>	error_page;
 		std::vector<std::string>	client_max_body_size;
+		std::vector<std::string>	cgi_path;
+		std::vector<std::string>	cgi_ext;
+		std::vector<std::string>	client_body_temp_path;
 		//
 		bool	ft_check_autoindex(std::string &str);
 		void	ft_clearclasslocation(location &location_);
