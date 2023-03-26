@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 14:17:23 by med-doba          #+#    #+#             */
-/*   Updated: 2023/03/21 13:14:01 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/03/26 17:13:22 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <fstream>
 #include <unistd.h>
 #include <vector>
+#include <fcntl.h>
 
 size_t	ft_strlen(char	*str)
 {
@@ -63,13 +64,17 @@ void	ft_cgi(std::string	fileName)
 {
 	std::ifstream	file(fileName);
 	pid_t	pid;
+	int		fd, tmp_in;
 	std::string	path("/usr/local/bin/python3");
 
 	if (file.is_open())
 	{
+		fd = open("output_cgi", O_CREAT | O_RDWR, 0777);
 		pid = fork();
 		if (!pid)
 		{
+			tmp_in = dup(1);
+			dup2(fd, 1);
 			char	*argv[] = {strdup("/usr/local/bin/python3"), (char *)fileName.c_str(), NULL};
 			char	**envp = ft_enviroment();
 			if (execve(path.c_str(), argv, envp) == -1)
@@ -79,7 +84,8 @@ void	ft_cgi(std::string	fileName)
 	}
 	else
 		std::cerr << "error: file not open" << std::endl;
-	std::cout << "Content-type: text/html" << std::endl << std::endl;
+	// std::cout << "Content-type: text/html" << std::endl << std::endl;
+
 
 }
 int	main(void)
