@@ -23,14 +23,14 @@ INC = *.hpp
 NAME = webserv
 
 $(NAME) : $(OBJ_DIR) $(OFILES)
-	@$(CC) $(CFLAGS) $(OFILES) -o $(NAME)
+	$(CC) $(CFLAGS) $(OFILES) -o $(NAME)
 	@echo "done for webserv"
 
 $(OBJ_DIR):
 	@mkdir OBJ
 
 $(OFILES): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp $(INC)
-	@$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 clean :
 	@rm -rf $(OBJ_DIR)

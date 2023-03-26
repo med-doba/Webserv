@@ -15,8 +15,30 @@
 using std::string;
 using std::cout;
 using std::endl;
-
 #define BUFFER 1024
+
+// class parssingOfBody;
+class client;
+
+// class parssingOfBody
+// {
+//     private:
+
+//     public:
+//         std::string             file;
+//         std::string             exetention;
+//         int                     fd;
+
+//         parssingOfBody(/* args */);
+//         void putDataTofile(std::string  data, std::string & bodyofRequest);
+//         void handling_form_data(std::string& buffer, std::string &boundary,std::string &bodyofRequest,  int &total_bytes_received,unsigned long &ContentLength, int  &, int &);
+//         // void handle_post(std::string &headerOfRequest, std::string &buffer, unsigned long &ContentLength, int &i, int &flag);
+//         void handle_post(client &obj);
+//         void handle_post(std::string &headerOfRequest,std::string &bodyofRequest, unsigned long & ContentLength, int & i,int & flag_,int &);
+//         void handling_chunked_data(std::string &buffer,std::string &headerOfRequest, std::string &bodyofRequest, int & flag_);
+//         ~parssingOfBody();
+// };
+
 
 class client
 {
@@ -57,4 +79,6 @@ class client
 	client& operator=(const client& obj);
 	~client();
 };
+
+typedef client rapper;
 #endif

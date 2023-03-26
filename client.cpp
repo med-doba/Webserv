@@ -186,7 +186,10 @@ int client::checkHeaderOfreq()
             {
                 headerOfRequest = buffer.substr(0,pos - 1);// not include \r\n
                 if(headerParss.checkHeaderOfreq_(headerOfRequest,tmp) == -2)
+				{
+					std::cout << "here" <<std::endl;
                     return -2;
+				}
                 
                 i = headerOfRequest.find("Transfer-Encoding: chunked");   // find way to check if boundry
                 if(i != -1)

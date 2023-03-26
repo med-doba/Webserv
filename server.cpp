@@ -189,14 +189,15 @@ void server::receive(int index)
 	// std::cout << rtn << std::endl;
     if(rtn == -2)
 	{
-		cout << "r2 == " << rtn << endl;
+		// cout << "r2 == " << rtn << endl;
         return ;
 	}
     if(clients[index].flag == 1) // if has content lenght
 	{
-		cout << "lol" << endl;
-        clients[index].bodyParss.handle_post(clients[index].headerOfRequest,clients[index].buffer,clients[index].ContentLength,clients[index].i, clients[index].flag);
-		cout << "lol50" << endl;
+		// cout << "lol" << endl;
+        // clients[index].bodyParss.handle_post(clients[index].headerOfRequest,clients[index].buffer,clients[index].ContentLength,clients[index].i, clients[index].flag);
+        clients[index].bodyParss.handle_post(clients[index]);
+		// cout << "lol50" << endl;
 	}
     // else if(flag == 2)
     // {

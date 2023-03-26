@@ -72,9 +72,12 @@ int parssingOfHeader::checkHeaders(int index, string headerOfRequest, int & tmp)
         i = str.find("Host: ");
         if(i == -1)
             return -2;
-        i = str.find("Content-Length: ");
-        if(i == -1)
-            return -2;
+        // i = str.find("Content-Length: ");
+        // if(i == -1)
+        // {
+        //     std::cout << "lol" << std::endl;
+        //     return -2;
+        // }
         i = str.find("Content-Type: ");
         if(i == -1)
             return -2;
@@ -146,9 +149,10 @@ int parssingOfHeader::checkHeaderOfreq_(string headerOfRequest, int & tmp)
  
     if(rtn == -1)
         return -2;
-    
+    std::cout << headerOfRequest << std::endl;
     rtn = checkHeaders(rtn,headerOfRequest,tmp);
     
+    std::cout << "rtn == " << rtn << std::endl;
     return rtn;
 }
 

@@ -1,10 +1,9 @@
 #include "parssingOfBody.hpp"
-#include "client.hpp"
 #include <cstdlib>
 
 #include <string.h>
 
-
+using namespace std;
 
 parssingOfBody::parssingOfBody(/* args */)
 {
@@ -92,45 +91,46 @@ void parssingOfBody::handling_form_data(string& buffer, string &boundary,string 
 
 
 
-void parssingOfBody::handle_post(std::string &headerOfRequest, std::string &buffer, unsigned long &ContentLength, int &i, int &flag)
+// void parssingOfBody::handle_post(std::string &headerOfRequest, std::string &buffer, unsigned long &ContentLength, int &i, int &flag)
+void parssingOfBody::handle_post(client &obj)
 {
     int rtn;
     
-    i += BUFFER;
-    if(i >= (int)ContentLength )// finish recivng
+    obj.i += BUFFER;
+    std::cout << "buffer size == " << obj.buffer.size() << std::endl;
+    if(obj.buffer.size() >= obj.ContentLength )// finish recivng
     { 
         
         exetention = std::to_string(rand() % 100000);
-        rtn = headerOfRequest.find("mp4");
+        rtn = obj.headerOfRequest.find("mp4");
         if(rtn != -1)
             fd = open((char*)(file.append(exetention).append(".mp4").data()),O_CREAT | O_RDWR , 0777);
-        rtn = headerOfRequest.find("jpg");
+        rtn = obj.headerOfRequest.find("jpg");
         if(rtn != -1)
             fd = open((char*)(file.append(exetention).append(".jpg").data()),O_CREAT | O_RDWR , 0777);
-        rtn = headerOfRequest.find("jpeg");
+        rtn = obj.headerOfRequest.find("jpeg");
         if(rtn != -1)
             fd = open((char*)(file.append(exetention).append(".jpeg").data()),O_CREAT | O_RDWR , 0777);
 
-        rtn = headerOfRequest.find("png");
+        rtn = obj.headerOfRequest.find("png");
         if(rtn != -1)
             fd = open((char*)(file.append(exetention).append(".png").data()),O_CREAT | O_RDWR , 0777);
-        rtn = headerOfRequest.find("pdf");
+        rtn = obj.headerOfRequest.find("pdf");
         if(rtn != -1)
             fd = open((char*)(file.append(exetention).append(".pdf").data()),O_CREAT | O_RDWR , 0777);
-        rtn = headerOfRequest.find("text/plain"); // ?
+        rtn = obj.headerOfRequest.find("text/plain"); // ?
             
         if(rtn != -1)
             fd = open((char*)(file.append(exetention).data()),O_CREAT | O_RDWR , 0777);// should handle any text file
         
-        write(fd,(void*)(buffer.substr(headerOfRequest.size() + 3,ContentLength).data()),buffer.substr(headerOfRequest.size() + 3,ContentLength).size());
+        write(fd,(void*)(obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength).data()),obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength).size());
         // headerOfRequest.clear();
         // buffer.clear();
         // headerOfRequest.clear();
         // exetention.clear();
         // file.clear();
         // i = 0;
-		flag = -1;
-		std::cout << "i == " << i << std::endl;
+		obj.flag = -1;
         close(fd);
     }
 }
@@ -167,10 +167,18 @@ void  parssingOfBody::handling_chunked_data(string &buffer,string &headerOfReque
                 
                 if(rtn != -1)
                     fd = open((char*)(file.append(exetention).append(".mp4").data()),O_CREAT | O_RDWR , 0777);
+
+                rtn = headerOfRequest.find("jpeg");
+                if(rtn != -1)
+                    fd = open((char*)(file.append(exetention).append(".jpeg").data()),O_CREAT | O_RDWR , 0777);
+
                 rtn = headerOfRequest.find("jpg");
                 if(rtn != -1)
                     fd = open((char*)(file.append(exetention).append(".jpg").data()),O_CREAT | O_RDWR , 0777);
 
+                rtn = headerOfRequest.find("png");
+                if(rtn != -1)
+                    fd = open((char*)(file.append(exetention).append(".png").data()),O_CREAT | O_RDWR , 0777);
                 rtn = headerOfRequest.find("pdf");
                 if(rtn != -1)
                     fd = open((char*)(file.append(exetention).append(".pdf").data()),O_CREAT | O_RDWR , 0777);
