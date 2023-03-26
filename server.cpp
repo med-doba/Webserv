@@ -177,7 +177,7 @@ void server::receive(int index)
     int rtn;
 
     rtn = clients[index].pushToBuffer();
-     
+
     if(rtn == 0 || rtn == -1)
 	{
 		cout << "r == " << rtn << endl;
@@ -194,8 +194,9 @@ void server::receive(int index)
 	}
     if(clients[index].flag == 1) // if has content lenght
 	{
-		// cout << "lol" << endl;
-        clients[index].bodyParss.handle_post(clients[index].headerOfRequest,clients[index].buffer,clients[index].ContentLength,clients[index].i);
+		cout << "lol" << endl;
+        clients[index].bodyParss.handle_post(clients[index].headerOfRequest,clients[index].buffer,clients[index].ContentLength,clients[index].i, clients[index].flag);
+		cout << "lol50" << endl;
 	}
     // else if(flag == 2)
     // {

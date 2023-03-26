@@ -92,7 +92,7 @@ void parssingOfBody::handling_form_data(string& buffer, string &boundary,string 
 
 
 
-void parssingOfBody::handle_post(std::string &headerOfRequest, std::string &buffer, unsigned long &ContentLength, int &i)
+void parssingOfBody::handle_post(std::string &headerOfRequest, std::string &buffer, unsigned long &ContentLength, int &i, int &flag)
 {
     int rtn;
     
@@ -129,6 +129,8 @@ void parssingOfBody::handle_post(std::string &headerOfRequest, std::string &buff
         // exetention.clear();
         // file.clear();
         // i = 0;
+		flag = -1;
+		std::cout << "i == " << i << std::endl;
         close(fd);
     }
 }

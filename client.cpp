@@ -124,15 +124,15 @@ int client::response()
 			response_header.erase(0, i);
 			std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
 		}
-			else
-			{ 
-				std::cout << "sent complete " << this->client_socket << std::endl;
-				input.close();
-				buffer.clear();
-				headerOfRequest.clear();
-				content_buffer.clear();
-				return (0);
-			}
+		else
+		{ 
+			std::cout << "sent complete " << this->client_socket << std::endl;
+			input.close();
+			buffer.clear();
+			headerOfRequest.clear();
+			content_buffer.clear();
+			return (0);
+		}
 	}
 	return (0);
 }
@@ -202,6 +202,7 @@ int client::checkHeaderOfreq()
                     if(j != -1)
                     {
                         flag = 4;
+						std::cout << "lol1\n";
                         ContentLength = ft_atoi(headerOfRequest.substr(pos + 16,headerOfRequest.size()).c_str());
                         if(ContentLength == 0)
                             return -2;
@@ -221,6 +222,7 @@ int client::checkHeaderOfreq()
                         return -2;
                     flag = 1;
                     i = headerOfRequest.size();
+					std::cout << "lol2 == " << i << endl;
                     return  1;
                 }
                 else
@@ -235,7 +237,7 @@ int client::checkHeaderOfreq()
         pos++;
     }
     // in entring second times
-    if(flag == 1 || flag == 2 || flag == 3 || flag == 4)
+    if(flag == -1 || flag == 1 || flag == 2 || flag == 3 || flag == 4)
         return 1;
     else
         return -2;

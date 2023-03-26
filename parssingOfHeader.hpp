@@ -2,6 +2,7 @@
 #define PARSSINGOFHEADER_HPP
 
 #include <iostream>
+#include <cstring>
  
 class parssingOfHeader
 {
