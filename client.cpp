@@ -179,22 +179,21 @@ int client::checkHeaderOfreq()
     
     while (buffer[pos] && flag == 0)// for entring one time
     { 
-        if(buffer[pos] == '\r' && buffer[pos + 1] == '\n')
+        if((buffer[pos] == '\r' || buffer[pos] == '\n') && buffer[pos + 1] == '\n')
         {
             pos += 2;
-            if(buffer[pos] == '\r' && buffer[pos + 1] == '\n' )
+            if((buffer[pos] == '\r' || buffer[pos] == '\n') && buffer[pos + 1] == '\n' )
             {
                 headerOfRequest = buffer.substr(0,pos - 1);// not include \r\n
                 if(headerParss.checkHeaderOfreq_(headerOfRequest,tmp) == -2)
-				{
-					std::cout << "here" <<std::endl;
                     return -2;
-				}
                 
                 i = headerOfRequest.find("Transfer-Encoding: chunked");   // find way to check if boundry
                 if(i != -1)
                 { 
-                    buffer.erase(buffer.begin(),buffer.begin() + pos + 2);
+                    // buffer.erase(buffer.begin(),buffer.begin() + pos + 2);
+                    i = pos  + 2;
+                    // len -= i;
                     flag = 3;
                     return 1;
                 }
@@ -205,7 +204,6 @@ int client::checkHeaderOfreq()
                     if(j != -1)
                     {
                         flag = 4;
-						std::cout << "lol1\n";
                         ContentLength = ft_atoi(headerOfRequest.substr(pos + 16,headerOfRequest.size()).c_str());
                         if(ContentLength == 0)
                             return -2;
@@ -214,7 +212,7 @@ int client::checkHeaderOfreq()
                         tmp = j + 9;
                         char *temp = (char*)buffer.data() + tmp;// because string() dont handle '\r'
                         tmp = 0;
-                        while (temp[tmp] != '\r' && temp[tmp + 1] != '\n')
+                        while (temp[tmp] != '\r' && temp[tmp] != '\n' && temp[tmp + 1] != '\n')
                             tmp++;
                         boundary.append("--").append(ft_substr(temp,0,tmp));// free boundry and temp?
                         
@@ -225,7 +223,6 @@ int client::checkHeaderOfreq()
                         return -2;
                     flag = 1;
                     i = headerOfRequest.size();
-					std::cout << "lol2 == " << i << endl;
                     return  1;
                 }
                 else
@@ -240,7 +237,7 @@ int client::checkHeaderOfreq()
         pos++;
     }
     // in entring second times
-    if(flag == -1 || flag == 1 || flag == 2 || flag == 3 || flag == 4)
+    if(flag == 1 || flag == 2 || flag == 3 || flag == 4)
         return 1;
     else
         return -2;
@@ -309,5 +306,5 @@ int client::pushToBuffer()
         buffer.push_back(data[j]);
         j++;
     }
-    return 1;
+    return this->bytes_read;
 }

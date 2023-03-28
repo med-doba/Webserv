@@ -175,12 +175,13 @@ void server::response(int index)
 void server::receive(int index)
 {
     int rtn;
-
+	int t;
     rtn = clients[index].pushToBuffer();
 
+	t = rtn;
     if(rtn == 0 || rtn == -1)
 	{
-		cout << "r == " << rtn << endl;
+		std::cout << "r == " << rtn << std::endl;
 		this->disconnect(index);
         return ;
 	}
@@ -193,23 +194,20 @@ void server::receive(int index)
         return ;
 	}
     if(clients[index].flag == 1) // if has content lenght
+		clients[index].bodyParss.handle_post(clients[index]);
+    
+    else if(clients[index].flag == 2)
+    {
+        // without budy => GET method
+    }
+    else if(clients[index].flag == 3)// // handle chunked data when resend request
 	{
-		// cout << "lol" << endl;
-        // clients[index].bodyParss.handle_post(clients[index].headerOfRequest,clients[index].buffer,clients[index].ContentLength,clients[index].i, clients[index].flag);
-        clients[index].bodyParss.handle_post(clients[index]);
-		// cout << "lol50" << endl;
+			clients[index].bodyParss.handling_chunked_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,t,clients[index].flag_);
+			// clients[index].bodyParss.handling_chunked_data(clients[index]);
 	}
-    // else if(flag == 2)
-    // {
-    //     // check header line and headers
-    //      // without budy
-    // }
-    if(clients[index].flag == 3)// // handle chunked data when resend request
-        clients[index].bodyParss.handling_chunked_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].bodyofRequest,clients[index].flag_);
-    if(clients[index].flag == 4)
-        clients[index].bodyParss.handling_form_data(clients[index].buffer,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,clients[index].bytes_read);
-    
-    
+    // else if(clients[index].flag == 4)
+    //     clients[index].bodyParss.handling_form_data(buffer,headerOfRequest,boundary,bodyofRequest,total_bytes_received,ContentLength,i,bytes_received,flag_);
+        
         
     // return 1;
 }

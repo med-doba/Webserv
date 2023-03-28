@@ -1,8 +1,8 @@
 #ifndef PARSSINGOFHEADER_HPP
 #define PARSSINGOFHEADER_HPP
 
+// #include "clients_obj.hpp"
 #include <iostream>
-#include <cstring>
  
 class parssingOfHeader
 {

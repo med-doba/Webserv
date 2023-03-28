@@ -6,39 +6,55 @@
 #include <strings.h>
 #include <unistd.h>
 #include <sstream>
+#include <vector>
+#include <cstring>
 #include <sys/socket.h>
 #include <fstream>
 #include <fcntl.h>
-#include "parssingOfBody.hpp"
-#include "parssingOfHeader.hpp"
+// #include "parssingOfBody.hpp"
+// #include "parssingOfHeader.hpp"
 
 using std::string;
-using std::cout;
-using std::endl;
-#define BUFFER 1024
+using std::vector;
+#define BUFFER 100000
 
-// class parssingOfBody;
 class client;
 
-// class parssingOfBody
-// {
-//     private:
+class parssingOfBody
+{
+    private:
 
-//     public:
-//         std::string             file;
-//         std::string             exetention;
-//         int                     fd;
+    public:
+        std::string             file;
+        std::string             exetention;
+        int                     fd;
 
-//         parssingOfBody(/* args */);
-//         void putDataTofile(std::string  data, std::string & bodyofRequest);
-//         void handling_form_data(std::string& buffer, std::string &boundary,std::string &bodyofRequest,  int &total_bytes_received,unsigned long &ContentLength, int  &, int &);
-//         // void handle_post(std::string &headerOfRequest, std::string &buffer, unsigned long &ContentLength, int &i, int &flag);
-//         void handle_post(client &obj);
-//         void handle_post(std::string &headerOfRequest,std::string &bodyofRequest, unsigned long & ContentLength, int & i,int & flag_,int &);
-//         void handling_chunked_data(std::string &buffer,std::string &headerOfRequest, std::string &bodyofRequest, int & flag_);
-//         ~parssingOfBody();
-// };
+        parssingOfBody(/* args */);
+        void handle_post(client &obj);
+        void handling_chunked_data(std::string &buffer,std::string &headerOfRequest, std::string &boundary,std::string &bodyofRequest, int & total_bytes_received, unsigned long & ContentLength, int & i, int & bytes_received,int & flag_);
+        // void handling_chunked_data(client &obj);
+        void handling_form_data(std::string& buffer, std::string &headerOfRequest, std::string &boundary,std::string & bodyofRequest ,int &total_bytes_received,unsigned long &ContentLength,  int & i, int & bytes_received, int & flag_);
+        void putDataTofile(std::string  data, std::string & bodyofRequest);
+        void  create_file_and_put_content(std::string & bodyofRequest,std::string & headerOfRequest);
 
+        ~parssingOfBody();
+};
+
+class parssingOfHeader
+{
+    private:
+
+    public:
+
+        parssingOfHeader();
+
+        long long	ft_atoi(const char *str);
+
+        int checkHeaderOfreq_(std::string, int &);
+        int checkHeaderLine(std::string, int &);
+        int checkHeaders(int index, std::string, int &);
+        ~parssingOfHeader();
+};
 
 class client
 {
@@ -65,6 +81,7 @@ class client
 	int total_bytes_received;
 	int i;
 	int j;
+	int len;
 	unsigned long ContentLength;
 
 	int extractheader();
@@ -80,5 +97,4 @@ class client
 	~client();
 };
 
-typedef client rapper;
 #endif
