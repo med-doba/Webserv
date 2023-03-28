@@ -16,7 +16,7 @@
 
 using std::string;
 using std::vector;
-#define BUFFER 100000
+#define BUFFER 500000
 
 class client;
 
@@ -88,7 +88,7 @@ class client
 	void openfile();
 	int response();
 	int pushToBuffer();
-	int checkHeaderOfreq();
+	int checkHeaderOfreq(int &len);
 	long long	ft_atoi(const char *str);
 	char *ft_substr(char const *s, unsigned int start, size_t len);
 	client();

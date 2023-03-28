@@ -185,7 +185,7 @@ void server::receive(int index)
 		this->disconnect(index);
         return ;
 	}
-    rtn = clients[index].checkHeaderOfreq();
+    rtn = clients[index].checkHeaderOfreq(t);
 	// std::cout << clients[index].headerOfRequest << std::endl;
 	// std::cout << rtn << std::endl;
     if(rtn == -2)
@@ -202,8 +202,9 @@ void server::receive(int index)
     }
     else if(clients[index].flag == 3)// // handle chunked data when resend request
 	{
-			clients[index].bodyParss.handling_chunked_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,t,clients[index].flag_);
-			// clients[index].bodyParss.handling_chunked_data(clients[index]);
+		std::cout << "chunked " << std::endl;
+		clients[index].bodyParss.handling_chunked_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,t,clients[index].flag_);
+		// clients[index].bodyParss.handling_chunked_data(clients[index]);
 	}
     // else if(clients[index].flag == 4)
     //     clients[index].bodyParss.handling_form_data(buffer,headerOfRequest,boundary,bodyofRequest,total_bytes_received,ContentLength,i,bytes_received,flag_);

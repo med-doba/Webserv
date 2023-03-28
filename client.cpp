@@ -173,7 +173,7 @@ client::~client()
 {
 }
 
-int client::checkHeaderOfreq()
+int client::checkHeaderOfreq(int &len)
 {
     int pos = 0;
     
@@ -191,9 +191,12 @@ int client::checkHeaderOfreq()
                 i = headerOfRequest.find("Transfer-Encoding: chunked");   // find way to check if boundry
                 if(i != -1)
                 { 
+					std::cout << "lol" << std::endl;
                     // buffer.erase(buffer.begin(),buffer.begin() + pos + 2);
                     i = pos  + 2;
-                    // len -= i;
+					
+                    len -= i;
+					
                     flag = 3;
                     return 1;
                 }
@@ -216,7 +219,7 @@ int client::checkHeaderOfreq()
                             tmp++;
                         boundary.append("--").append(ft_substr(temp,0,tmp));// free boundry and temp?
                         
-                         return 1;
+                        return 1;
                     }
                     ContentLength = ft_atoi(headerOfRequest.substr(pos + 16,headerOfRequest.size()).c_str());
                     if(ContentLength == 0)

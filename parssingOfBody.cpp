@@ -163,26 +163,26 @@ void  parssingOfBody::handling_chunked_data(string &buffer,string &headerOfReque
             }
              
             dec = std::stoul(buffer.substr(k,i), NULL, 16);
+			std::cout << "dec == " << dec<< std::endl;
              
             i+=2;
             j+=2;
+            // std::cout << "flag == " << flag_ << std::endl;
             if(dec == 0 && flag_ == 0)
             {
-                if(dec == 0 && flag_ == 0)
+                std::cout << "lol" << std::endl;
+                dec = headerOfRequest.find("boundary");
+                if(dec != -1)
                 {
-                    dec = headerOfRequest.find("boundary");
-                    if(dec != -1)
-                    {
-                        i = 0;
-                        buffer = bodyofRequest;
-                        flag_ = 5;
-                        // handling_form_data(buffer,headerOfRequest,boundary,bodyofRequest ,total_bytes_received,ContentLength,  i, bytes_received,flag_);
-                        return ;
-                    }
-					std::cout << "content == " << ContentLength<< std::endl;
-                    create_file_and_put_content(bodyofRequest,headerOfRequest);
-                    flag_ = 10;
+                    i = 0;
+                    buffer = bodyofRequest;
+                    flag_ = 5;
+                    // handling_form_data(buffer,headerOfRequest,boundary,bodyofRequest ,total_bytes_received,ContentLength,  i, bytes_received,flag_);
+                    return ;
                 }
+                std::cout << "content == " << ContentLength<< std::endl;
+                create_file_and_put_content(bodyofRequest,headerOfRequest);
+                flag_ = 10;
                 return;
             }
             while (dec--)
@@ -202,7 +202,7 @@ void  parssingOfBody::handling_chunked_data(string &buffer,string &headerOfReque
 void parssingOfBody::handle_post(client &obj)
 {
 	string test = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
-    obj.i += obj.len;
+    // obj.i += obj.len;
 	std::cout << "test size == "<< test.size() << std::endl;
     // obj.i += BUFFER;
 	// if(obj.i >= (int)obj.ContentLength)// finish recivng
