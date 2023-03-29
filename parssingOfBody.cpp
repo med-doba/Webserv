@@ -163,14 +163,14 @@ void  parssingOfBody::handling_chunked_data(string &buffer,string &headerOfReque
             }
              
             dec = std::stoul(buffer.substr(k,i), NULL, 16);
-			std::cout << "dec == " << dec<< std::endl;
+			// std::cout << "dec == " << dec<< std::endl;
              
             i+=2;
             j+=2;
             // std::cout << "flag == " << flag_ << std::endl;
             if(dec == 0 && flag_ == 0)
             {
-                std::cout << "lol" << std::endl;
+                // std::cout << "lol" << std::endl;
                 dec = headerOfRequest.find("boundary");
                 if(dec != -1)
                 {

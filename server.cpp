@@ -67,7 +67,7 @@ void server::lunch_servers()
 			perror("bind failed");
 			exit(EXIT_FAILURE);
 		}
-		// fcntl(servers[i].socket_server, F_SETFL, O_NONBLOCK);
+		fcntl(servers[i].socket_server, F_SETFL, O_NONBLOCK);
 		if (listen(servers[i].socket_server, BACKLOG) < 0)
 		{
 			perror("listen");
@@ -124,15 +124,17 @@ void server::new_connection(int index)
 	client obj;
 	struct pollfd c;
 	struct sockaddr_in address;
-	unsigned int addrlen;
+	unsigned int addrlen = sizeof(address);
 
+	std::cout << "socket server == " << servers[index].socket_server << std::endl;
+	std::cout << "index == "<< index << std::endl;
 	if ((obj.client_socket = accept(servers[index].socket_server, (struct sockaddr*)&(address), (socklen_t*)&(addrlen))) < 0) 
 	{
 		perror("accept");
 		exit(EXIT_FAILURE);
 	}
 	c.fd = obj.client_socket;
-	// fcntl(obj.client_socket, F_SETFL, O_NONBLOCK);
+	fcntl(obj.client_socket, F_SETFL, O_NONBLOCK);
 	c.events = POLLIN | POLLOUT;
 	pfds.push_back(c);
 	clients.push_back(obj);
@@ -176,6 +178,7 @@ void server::receive(int index)
 {
     int rtn;
 	int t;
+	// std::cout << "flag before check  == " << clients[index].flag_ << std::endl;
     rtn = clients[index].pushToBuffer();
 
 	t = rtn;
@@ -203,6 +206,7 @@ void server::receive(int index)
     else if(clients[index].flag == 3)// // handle chunked data when resend request
 	{
 		std::cout << "chunked " << std::endl;
+		std::cout << "flag outside  == " << clients[index].flag_ << std::endl;
 		clients[index].bodyParss.handling_chunked_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,t,clients[index].flag_);
 		// clients[index].bodyParss.handling_chunked_data(clients[index]);
 	}

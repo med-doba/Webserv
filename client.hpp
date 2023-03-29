@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <fstream>
 #include <fcntl.h>
+#include <cstdlib>
 // #include "parssingOfBody.hpp"
 // #include "parssingOfHeader.hpp"
 

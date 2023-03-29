@@ -1,4 +1,14 @@
+
+
+sometimes accept fails and the program exits find out why it fails
+
+
+
+
+
+
 Prototype of a response
+
 std::string request(buffer, bytes);
 
 Parse request

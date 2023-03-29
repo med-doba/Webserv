@@ -157,13 +157,22 @@ client& client::operator=(const client& obj)
 	{
 		this->client_socket = obj.client_socket;
 		this->buffer = obj.buffer;
+		this->boundary = obj.boundary;
+		this->response_header = obj.response_header;
+		this->body = obj.body;
 		this->headerOfRequest = obj.headerOfRequest;
+		this->bodyofRequest = obj.bodyofRequest;
+		this->content_buffer = obj.content_buffer;
 		this->bytes_read = obj.bytes_read;
 		this->flag = obj.flag;
-		this->headerOfRequest = obj.headerOfRequest;
 		this->bodyParss = obj.bodyParss;
+		this->headerParss = obj.headerParss;
 		this->tmp = obj.tmp;
+		this->flag_ = obj.flag_;
+		this->total_bytes_received = obj.total_bytes_received;
 		this->i = obj.i;
+		this->j = obj.j;
+		this->len = obj.len;
 		this->ContentLength = obj.ContentLength;
 	}
 	return (*this);
