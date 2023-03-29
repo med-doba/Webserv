@@ -65,10 +65,12 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
 
 void parssingOfBody::putDataTofile(string  data, string & bodyofRequest)
 {
+
     int pos = data.find("filename=\"");
- 
+    
     if(pos != -1)
-    {
+    {    
+         
         int t = pos + 10;
         while (data[t] != '"')
             t++;
@@ -90,10 +92,11 @@ void parssingOfBody::putDataTofile(string  data, string & bodyofRequest)
     }
 }
 
-void parssingOfBody::handling_form_data(string& buffer, string &headerOfRequest, string &boundary,string & bodyofRequest ,int &total_bytes_received,unsigned long &ContentLength,  int & i, int & bytes_received, int & flag_)
+void parssingOfBody::handling_form_data(string& buffer, string &headerOfRequest, string &boundary,string & bodyofRequest ,int &total_bytes_received,int &ContentLength,  int & i, int & bytes_received, int & flag_)
 {
     if(flag_ == 5)
     {
+         
         int j = headerOfRequest.find("boundary");
        
         int tmp = j + 9;
@@ -106,12 +109,13 @@ void parssingOfBody::handling_form_data(string& buffer, string &headerOfRequest,
         total_bytes_received = ContentLength;
         i = 0;
         bodyofRequest.clear();
+         
     }
     else
         total_bytes_received += bytes_received;
-    if(total_bytes_received >= (int)ContentLength)
+    if(total_bytes_received >= ContentLength)
     { 
-        
+      
         size_t start_idx = i;
         string separator = boundary;
         vector<string> substrings; // clear ?
@@ -129,10 +133,12 @@ void parssingOfBody::handling_form_data(string& buffer, string &headerOfRequest,
             start_idx = end_idx + separator.length();
         }
         substrings.erase(substrings.end() - 1);// remove "--" after last boundry
-        string s;
+    
         vector<string>::iterator it = substrings.begin();
+       
         while (it != substrings.end())
         { 
+             
             if(!it->empty())
                 putDataTofile(*it,bodyofRequest);
             it++;
@@ -144,57 +150,50 @@ void parssingOfBody::handling_form_data(string& buffer, string &headerOfRequest,
 
 
 // void  parssingOfBody::handling_chunked_data(client &obj)
-void  parssingOfBody::handling_chunked_data(string &buffer,string &headerOfRequest, string &boundary,string &bodyofRequest, int & total_bytes_received, unsigned long & ContentLength, int & i, int & bytes_received,int & flag_)
+void  parssingOfBody::handling_chunked_data(string &buffer,string &headerOfRequest, string &boundary,string &bodyofRequest, int & total_bytes_received, int & ContentLength, int & i, int & bytes_received,int & flag_)
 {
-    
-	(void)boundary;
-	(void)total_bytes_received;
-    int dec;
-     int j = 0;
-    while (j < bytes_received)
+    int pos = buffer.find("\r\n0\r\n\r\n");
+    if(pos != -1 )
     {
-        if(isalnum(buffer[i]) || isalpha(buffer[i]))
+         
+        while (i < (int)buffer.size())
         {
-            int k = i;
-            while ((isalnum(buffer[i]) || isalpha(buffer[i])))
+            if(isalnum(buffer[i]) || isalpha(buffer[i]))
             {
-                i++;
-                j++;
-            }
-             
-            dec = std::stoul(buffer.substr(k,i), NULL, 16);
-			// std::cout << "dec == " << dec<< std::endl;
-             
-            i+=2;
-            j+=2;
-            // std::cout << "flag == " << flag_ << std::endl;
-            if(dec == 0 && flag_ == 0)
-            {
-                // std::cout << "lol" << std::endl;
-                dec = headerOfRequest.find("boundary");
-                if(dec != -1)
+                int k = i;
+                while ((isalnum(buffer[i]) || isalpha(buffer[i])))
+                    i++;
+                
+                int dec = std::stoul(buffer.substr(k,i), NULL, 16);
+                
+                i+=2;
+                if(dec == 0 )
+                    break;
+                
+                while (dec--)
                 {
-                    i = 0;
-                    buffer = bodyofRequest;
-                    flag_ = 5;
-                    // handling_form_data(buffer,headerOfRequest,boundary,bodyofRequest ,total_bytes_received,ContentLength,  i, bytes_received,flag_);
-                    return ;
+                   
+                    bodyofRequest.push_back(buffer[i]);
+                    i++;
                 }
-                std::cout << "content == " << ContentLength<< std::endl;
-                create_file_and_put_content(bodyofRequest,headerOfRequest);
-                flag_ = 10;
-                return;
+                i+=2;
             }
-            while (dec--)
-            {
-                bodyofRequest.push_back(buffer[i]);
-                i++;
-                j++;
-            }
-            i+=2; 
-            j+=2; 
         }
-        j++;
+       
+        if(flag_ == 0)
+        {
+            int dec = headerOfRequest.find("boundary");
+            if(dec != -1)
+            {
+                buffer = bodyofRequest;
+                flag_ = 5;
+                handling_form_data(buffer,headerOfRequest,boundary,bodyofRequest ,total_bytes_received,ContentLength,  i, bytes_received,flag_);
+                return ;
+            }
+            create_file_and_put_content(bodyofRequest,headerOfRequest);
+            
+            flag_ = 10;
+        } 
     }
 }
 
@@ -207,7 +206,7 @@ void parssingOfBody::handle_post(client &obj)
     // obj.i += BUFFER;
 	// if(obj.i >= (int)obj.ContentLength)// finish recivng
 	// if(obj.buffer.size() >= obj.ContentLength)// finish recivng
-	if(test.size() >= obj.ContentLength)// finish recivng
+	if((int)test.size() >= obj.ContentLength)// finish recivng
     { 
 		std::cout << "i == " << obj.i << std::endl;
 		std::cout << "content == "<< obj.ContentLength << std::endl;

@@ -210,8 +210,8 @@ void server::receive(int index)
 		clients[index].bodyParss.handling_chunked_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,t,clients[index].flag_);
 		// clients[index].bodyParss.handling_chunked_data(clients[index]);
 	}
-    // else if(clients[index].flag == 4)
-    //     clients[index].bodyParss.handling_form_data(buffer,headerOfRequest,boundary,bodyofRequest,total_bytes_received,ContentLength,i,bytes_received,flag_);
+    else if(clients[index].flag == 4)
+        clients[index].bodyParss.handling_form_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,clients[index].bytes_read,clients[index].flag_);
         
         
     // return 1;
