@@ -151,26 +151,13 @@ void server::disconnect(int index)
 
 void server::response(int index)
 {
-	if (clients[index].extractheader() == 1)
+	if (clients[index].response() == 1)
 	{
-		std::cout << "fav sock client before disconnect == " << clients[index].client_socket << std::endl;
-		std::cout << clients[index].headerOfRequest << std::endl;
+		// std::cout << "disconnect response " << clients[index].client_socket << std::endl;
+		// std::cout << clients[index].header_request << std::endl;
 		this->disconnect(index);
 		return ;
 	}
-	std::cout << "sock " << clients[index].client_socket << std::endl;
-	std::cout << clients[index].headerOfRequest << std::endl;
-	// std::cout << clients[index].ignore << std::endl;
-	// if (!clients[index].headerOfRequest.empty())
-	// {
-		clients[index].openfile();
-		if (clients[index].response() == 1)
-		{
-			// std::cout << "disconnect response " << clients[index].client_socket << std::endl;
-			// std::cout << clients[index].header_request << std::endl;
-			this->disconnect(index);
-			return ;
-		}
 	// }
 }
 
@@ -205,53 +192,18 @@ void server::receive(int index)
     }
     else if(clients[index].flag == 3)// // handle chunked data when resend request
 	{
-		std::cout << "chunked " << std::endl;
-		std::cout << "flag outside  == " << clients[index].flag_ << std::endl;
-		clients[index].bodyParss.handling_chunked_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,t,clients[index].flag_);
-		// clients[index].bodyParss.handling_chunked_data(clients[index]);
+		// std::cout << "chunked " << std::endl;
+		// std::cout << "flag outside  == " << clients[index].flag_ << std::endl;
+		// clients[index].bodyParss.handling_chunked_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,t,clients[index].flag_);
+		clients[index].bodyParss.handling_chunked_data(clients[index]);
 	}
     else if(clients[index].flag == 4)
-        clients[index].bodyParss.handling_form_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,clients[index].bytes_read,clients[index].flag_);
+	{
+		clients[index].bodyParss.handling_form_data(clients[index]);
+		// clients[index].bodyParss.handling_form_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,clients[index].bytes_read,clients[index].flag_);
+	}
         
         
     // return 1;
 }
 
-// void server::receive(int index)
-// {
-// 	char buffer[BUFFER];
-// 	memset(buffer, 0, BUFFER);
-// 	clients[index].bytes_read = recv(clients[index].client_socket, buffer, BUFFER, 0);
-// 	if (clients[index].bytes_read < 0)
-// 	{
-// 		std::cout << "lol" << std::endl;
-// 		clients[index].flag = 1;
-// 		return ;
-// 	}
-// 	else if (clients[index].bytes_read <= 0)
-// 	{
-// 		std::cout << "disconnect from recv " << std::endl;
-// 		// std::cout << "index == " << index << std::endl;
-// 		// std::cout << "sock == " << clients[index].client_socket << std::endl;
-// 		// std::cout << "size == " << clients.size() << std::endl;
-// 		std::cout << "bytes == " << clients[index].bytes_read << std::endl;
-// 		std::cout << clients[index].headerOfRequest << std::endl;
-// 		// std::cout << "disconnect recv " << clients[index].client_socket << std::endl;
-// 		// std::cout << clients[index].header_request << std::endl;
-// 		this->disconnect(index);
-// 		return ;
-// 	}
-// 	// std::cout << "bytes == " << clients[index].bytes_read << std::endl;
-// 	// std::cout << clients[index].bytes_read << "\n";
-// 	if (clients[index].bytes_read > BUFFER)
-// 		clients[index].bytes_read = BUFFER;
-
-// 	// std::cout << "read from recv "  << clients[index].client_socket << std::endl;
-// 	// std::cout << buffer << std::endl;
-// 	// std::cout << "end recv" << std::endl;
-// 	// std::cout << "create str"  << clients[index].bytes_read << std::endl;
-// 	std::string str(buffer,clients[index].bytes_read);	
-// 	// std::cout << str << std::endl;
-// 	// std::cout << "end str" << std::endl;
-// 	clients[index].buffer += str;
-// }

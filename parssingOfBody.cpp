@@ -92,44 +92,44 @@ void parssingOfBody::putDataTofile(string  data, string & bodyofRequest)
     }
 }
 
-void parssingOfBody::handling_form_data(string& buffer, string &headerOfRequest, string &boundary,string & bodyofRequest ,int &total_bytes_received,int &ContentLength,  int & i, int & bytes_received, int & flag_)
+void parssingOfBody::handling_form_data(client &obj)
 {
-    if(flag_ == 5)
+    if(obj.flag_ == 5)
     {
          
-        int j = headerOfRequest.find("boundary");
+        int j = obj.headerOfRequest.find("boundary");
        
         int tmp = j + 9;
        
-        char *temp = (char*)headerOfRequest.data() + tmp;// because string() dont handle '\r'
+        char *temp = (char*)obj.headerOfRequest.data() + tmp;// because string() dont handle '\r'
         tmp = 0;
         while (temp[tmp] != '\r' && temp[tmp + 1] != '\n')
             tmp++;
-        boundary.append("--").append(ft_substr_(temp,0,tmp));// free boundry and temp?    
-        total_bytes_received = ContentLength;
-        i = 0;
-        bodyofRequest.clear();
+        obj.boundary.append("--").append(ft_substr_(temp,0,tmp));// free boundry and temp?    
+        obj.total_bytes_received = obj.ContentLength;
+        obj.i = 0;
+        obj.bodyofRequest.clear();
          
     }
     else
-        total_bytes_received += bytes_received;
-    if(total_bytes_received >= ContentLength)
+        obj.total_bytes_received += obj.bytes_read;
+    if(obj.total_bytes_received >= obj.ContentLength)
     { 
       
-        size_t start_idx = i;
-        string separator = boundary;
+        size_t start_idx = obj.i;
+        string separator = obj.boundary;
         vector<string> substrings; // clear ?
 
         while (true) 
         {
-            size_t end_idx = buffer.find(separator, start_idx);
+            size_t end_idx = obj.buffer.find(separator, start_idx);
             if (end_idx == string::npos) 
             {
-                substrings.push_back(buffer.substr(start_idx));
+                substrings.push_back(obj.buffer.substr(start_idx));
                 break;
             }
 
-            substrings.push_back(buffer.substr(start_idx, end_idx - start_idx));
+            substrings.push_back(obj.buffer.substr(start_idx, end_idx - start_idx));
             start_idx = end_idx + separator.length();
         }
         substrings.erase(substrings.end() - 1);// remove "--" after last boundry
@@ -140,7 +140,7 @@ void parssingOfBody::handling_form_data(string& buffer, string &headerOfRequest,
         { 
              
             if(!it->empty())
-                putDataTofile(*it,bodyofRequest);
+                putDataTofile(*it,obj.bodyofRequest);
             it++;
         }
     }
@@ -149,50 +149,52 @@ void parssingOfBody::handling_form_data(string& buffer, string &headerOfRequest,
 
 
 
-// void  parssingOfBody::handling_chunked_data(client &obj)
-void  parssingOfBody::handling_chunked_data(string &buffer,string &headerOfRequest, string &boundary,string &bodyofRequest, int & total_bytes_received, int & ContentLength, int & i, int & bytes_received,int & flag_)
+// void  parssingOfBody::handling_chunked_data(string &buffer,string &headerOfRequest, string &boundary,string &bodyofRequest, int & total_bytes_received, int & ContentLength, int & i, int & bytes_received,int & flag_)
+void  parssingOfBody::handling_chunked_data(client &obj)
 {
-    int pos = buffer.find("\r\n0\r\n\r\n");
+    int pos = obj.buffer.find("\r\n0\r\n\r\n");
     if(pos != -1 )
     {
          
-        while (i < (int)buffer.size())
+        while (obj.i < (int)obj.buffer.size())
         {
-            if(isalnum(buffer[i]) || isalpha(buffer[i]))
+            if(isalnum(obj.buffer[obj.i]) || isalpha(obj.buffer[obj.i]))
             {
-                int k = i;
-                while ((isalnum(buffer[i]) || isalpha(buffer[i])))
-                    i++;
+                int k = obj.i;
+                while ((isalnum(obj.buffer[obj.i]) || isalpha(obj.buffer[obj.i])))
+                    obj.i++;
                 
-                int dec = std::stoul(buffer.substr(k,i), NULL, 16);
+                int dec = std::stoul(obj.buffer.substr(k,obj.i), NULL, 16);
                 
-                i+=2;
+                obj.i+=2;
                 if(dec == 0 )
                     break;
                 
                 while (dec--)
                 {
                    
-                    bodyofRequest.push_back(buffer[i]);
-                    i++;
+                    obj.bodyofRequest.push_back(obj.buffer[obj.i]);
+                    obj.i++;
                 }
-                i+=2;
+                obj.i+=2;
             }
         }
        
-        if(flag_ == 0)
+        if(obj.flag_ == 0)
         {
-            int dec = headerOfRequest.find("boundary");
+            int dec = obj.headerOfRequest.find("boundary");
             if(dec != -1)
             {
-                buffer = bodyofRequest;
-                flag_ = 5;
-                handling_form_data(buffer,headerOfRequest,boundary,bodyofRequest ,total_bytes_received,ContentLength,  i, bytes_received,flag_);
+                obj.buffer = obj.bodyofRequest;
+                obj.flag_ = 5;
+				std::cout << "lol" << std::endl;
+                // handling_form_data(buffer,headerOfRequest,boundary,bodyofRequest ,total_bytes_received,ContentLength,  i, bytes_received,flag_);
+                handling_form_data(obj);
                 return ;
             }
-            create_file_and_put_content(bodyofRequest,headerOfRequest);
+            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest);
             
-            flag_ = 10;
+            obj.flag_ = 10;
         } 
     }
 }
