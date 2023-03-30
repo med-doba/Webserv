@@ -99,19 +99,20 @@ void server::monitor()
 				for (size_t j = 0; j < clients.size(); j++)
 				{
 					if (pfds[i].fd == clients[j].client_socket)
+					{
+						std::cout << "ready to recv" << std::endl;
 						this->receive(j);
+					}
 				}
 			}
-			else if (this->pfds[i].revents & POLLOUT)
+			if (this->pfds[i].revents & POLLOUT)
 			{
 				for (size_t j = 0; j < clients.size(); j++)
 				{
-					if (pfds[i].fd == clients[j].client_socket && clients[j].ignore != 1)
+					if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 1)
 					{
-						// if (clients[j].flag != 1)
-						// 	break ;
-						// else
-							// this->response(j);
+						std::cout << "ready to send" << std::endl;
+						this->response(j);
 					}
 				}
 			}
@@ -126,8 +127,6 @@ void server::new_connection(int index)
 	struct sockaddr_in address;
 	unsigned int addrlen = sizeof(address);
 
-	std::cout << "socket server == " << servers[index].socket_server << std::endl;
-	std::cout << "index == "<< index << std::endl;
 	if ((obj.client_socket = accept(servers[index].socket_server, (struct sockaddr*)&(address), (socklen_t*)&(addrlen))) < 0) 
 	{
 		perror("accept");
@@ -153,19 +152,16 @@ void server::response(int index)
 {
 	if (clients[index].response() == 1)
 	{
-		// std::cout << "disconnect response " << clients[index].client_socket << std::endl;
-		// std::cout << clients[index].header_request << std::endl;
 		this->disconnect(index);
 		return ;
 	}
-	// }
 }
 
 void server::receive(int index)
 {
     int rtn;
 	int t;
-	// std::cout << "flag before check  == " << clients[index].flag_ << std::endl;
+
     rtn = clients[index].pushToBuffer();
 
 	t = rtn;
@@ -188,6 +184,10 @@ void server::receive(int index)
     
     else if(clients[index].flag == 2)
     {
+		std::cout << "get method" << std::endl;
+		clients[index].check();
+		// clients[index].ready = 1;
+		return ;
         // without budy => GET method
     }
     else if(clients[index].flag == 3)// // handle chunked data when resend request

@@ -4,66 +4,62 @@ int client::response()
 {
 	char c;
 
-	if (file.is_open())
+	if (!input.is_open())
 	{
-		// std::cout << "lol1 " << client_socket << std::endl;
-		file << buffer;
-		file.flush();
-	}
-	else if (!file.is_open() && headerOfRequest.empty() == false)
-	{
-		std::cout << "lol2 " << headerOfRequest << std::endl;
+		std::cout << "lol2 " << std::endl;
+		input.open("../tests/pic.jpeg");
 		if (!input.is_open())
 		{
-			input.open("../test/test.pdf");
-			if (!input.is_open())
-			{
-				std::cout << "couldn't open file" << std::endl;
-				return (1);
-			}
-			while (input.get(c))
-				content_buffer.push_back(c);
-			response_header = "HTTP/1.1 200 OK\r\n"
-							"Content-Type: application/pdf\r\n"
-							"Content-length: " + std::to_string(content_buffer.size()) + "\r\n"
-							"\r\n";
-			// std::cout << "buffer begin " << this->client_socket << std::endl;
-			// std::cout << buffer << std::endl;
-			// std::cout << "buffer end" << std::endl;
-			// std::cout << "header begin " << this->client_socket << std::endl;
-			// std::cout << headerOfRequest << std::endl;
-			// std::cout << "header end" << std::endl;
-			// std::cout << "ignore == " << ignore << std::endl;
-			response_header += std::string(content_buffer.begin(), content_buffer.end());
+			std::cout << "couldn't open file" << std::endl;
+			return (1);
 		}
-		// size_t size = 100000;
-		if (!response_header.empty())
+		while (input.get(c))
 		{
-			// if (response_header.size() < size)
-			// 	size = response_header.size();
-			// std::string send_req = response_header.substr(0, size);
-			// int i = send(this->client_socket, send_req.c_str(), send_req.size(), 0);
-			// response_header.erase(0, i);
-			int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
-			if (i < 0)
-			{
-				response_header.clear();
-				return (0);
-			}
-			response_header.erase(0, i);
-			std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
+			std::cout << "loop" << std::endl;
+			content_buffer.push_back(c);
 		}
-		else
-		{ 
-			std::cout << "sent complete " << this->client_socket << std::endl;
-			input.close();
-			buffer.clear();
-			headerOfRequest.clear();
-			content_buffer.clear();
+		response_header = "HTTP/1.1 200 OK\r\n"
+						"Content-Type: image/jpeg\r\n"
+						"Content-length: " + std::to_string(content_buffer.size()) + "\r\n"
+						"\r\n";
+		response_header += std::string(content_buffer.begin(), content_buffer.end());
+	}
+	if (!response_header.empty())
+	{
+		std::cout << "send chunks" << std::endl;
+		int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
+		if (i < 0)
+		{
+			std::cout << "error " << std::endl;
+			response_header.clear();
 			return (0);
 		}
+		response_header.erase(0, i);
+		std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
+	}
+	else
+	{ 
+		std::cout << "sent complete " << this->client_socket << std::endl;
+		ready = 0;
+		headerOfRequest.clear();
+		content_buffer.clear();
+		buffer.clear();
+		flag = 0;
+		// input.close();
+		return (0);
 	}
 	return (0);
+}
+
+void client::check(void)
+{
+	int res;
+
+	res = headerOfRequest.find("/favicon.ico");
+	if (res != -1)
+		this->ready = 0;
+	else
+		this->ready = 1;
 }
 
 client::client()
@@ -73,6 +69,7 @@ client::client()
     tmp = 0;
     buffer = bodyofRequest = boundary = "";
     tmp = 0;
+	ready = 0;
 }
 
 client::client(const client &obj)

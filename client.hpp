@@ -73,7 +73,8 @@ class client
 	std::vector<char> content_buffer;
 	int bytes_read;
 	int flag;
-	int ignore;
+	// int ignore;
+	int ready;
 
 
 	parssingOfHeader headerParss;
@@ -93,6 +94,7 @@ class client
 	int checkHeaderOfreq(int &len);
 	long long	ft_atoi(const char *str);
 	char *ft_substr(char const *s, unsigned int start, size_t len);
+	void check(void);
 	client();
 	client(const client &obj);
 	client& operator=(const client& obj);
