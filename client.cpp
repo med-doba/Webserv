@@ -2,27 +2,36 @@
 
 int client::response()
 {
-	char c;
+	// char c;
 
 	if (!input.is_open())
 	{
 		std::cout << "lol2 " << std::endl;
-		input.open("../tests/pic.jpeg");
+		input.open("../tests/pdf.pdf");
 		if (!input.is_open())
 		{
 			std::cout << "couldn't open file" << std::endl;
 			return (1);
 		}
-		while (input.get(c))
-		{
-			std::cout << "loop" << std::endl;
-			content_buffer.push_back(c);
-		}
+		// while (input.get(c))
+		// {
+		// 	std::cout << "loop" << std::endl;
+		// 	content_buffer.push_back(c);
+		// }
+		input.seekg(0, std::ios::end);
+		size_t size = input.tellg();
+		input.seekg(0, std::ios::beg);
+
+		// Reserve space in the buffer
+		std::vector<char> content(size);
+
+		// Read the file in chunks
+		input.read(&content[0], size);
 		response_header = "HTTP/1.1 200 OK\r\n"
-						"Content-Type: image/jpeg\r\n"
-						"Content-length: " + std::to_string(content_buffer.size()) + "\r\n"
+						"Content-Type: application/pdf\r\n"
+						"Content-length: " + std::to_string(content.size()) + "\r\n"
 						"\r\n";
-		response_header += std::string(content_buffer.begin(), content_buffer.end());
+		response_header += std::string(content.begin(), content.end());
 	}
 	if (!response_header.empty())
 	{
