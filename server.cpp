@@ -100,7 +100,7 @@ void server::monitor()
 				{
 					if (pfds[i].fd == clients[j].client_socket)
 					{
-						std::cout << "ready to recv" << std::endl;
+						std::cout << "ready to recv " << clients[j].client_socket << std::endl;
 						this->receive(j);
 					}
 				}
@@ -111,7 +111,7 @@ void server::monitor()
 				{
 					if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 1)
 					{
-						std::cout << "ready to send" << std::endl;
+						// std::cout << "ready to send" << std::endl;
 						this->response(j);
 					}
 				}
@@ -165,9 +165,16 @@ void server::receive(int index)
     rtn = clients[index].pushToBuffer();
 
 	t = rtn;
+	if (rtn == -1)
+	{
+		std::cout << "socket client " << clients[index].client_socket << std::endl;
+		std::cout << clients[index].headerOfRequest << std::endl;
+		return ;
+	}
     if(rtn == 0 || rtn == -1)
 	{
-		std::cout << "r == " << rtn << std::endl;
+		std::cout << "r == " << rtn << " socket client " << clients[index].client_socket << std::endl;
+		std::cout << clients[index].headerOfRequest << std::endl;
 		this->disconnect(index);
         return ;
 	}
@@ -184,7 +191,7 @@ void server::receive(int index)
     
     else if(clients[index].flag == 2)
     {
-		std::cout << "get method" << std::endl;
+		std::cout << "get method " << clients[index].client_socket << std::endl;
 		clients[index].check();
 		// clients[index].ready = 1;
 		return ;

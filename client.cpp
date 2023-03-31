@@ -6,8 +6,9 @@ int client::response()
 
 	if (!input.is_open())
 	{
-		std::cout << "lol2 " << std::endl;
-		input.open("../tests/pdf.pdf");
+		// std::cout << "lol2 " << std::endl;
+		// input.open("../tests/pdf.pdf");
+		input.open("../test/pic.png");
 		if (!input.is_open())
 		{
 			std::cout << "couldn't open file" << std::endl;
@@ -28,33 +29,34 @@ int client::response()
 		// Read the file in chunks
 		input.read(&content[0], size);
 		response_header = "HTTP/1.1 200 OK\r\n"
-						"Content-Type: application/pdf\r\n"
+						"Content-Type: image/png\r\n"
 						"Content-length: " + std::to_string(content.size()) + "\r\n"
 						"\r\n";
 		response_header += std::string(content.begin(), content.end());
 	}
 	if (!response_header.empty())
 	{
-		std::cout << "send chunks" << std::endl;
+		// std::cout << "send chunks" << std::endl;
 		int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
 		if (i < 0)
 		{
-			std::cout << "error " << std::endl;
-			response_header.clear();
+			std::cout << "error "  << this->client_socket << std::endl;
+			printf("errno = %d: %s\n", errno, strerror(errno));
+			// response_header.clear();
 			return (0);
 		}
 		response_header.erase(0, i);
-		std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
+		// std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
 	}
 	else
 	{ 
-		std::cout << "sent complete " << this->client_socket << std::endl;
-		ready = 0;
-		headerOfRequest.clear();
-		content_buffer.clear();
-		buffer.clear();
-		flag = 0;
-		// input.close();
+		// std::cout << "sent complete " << this->client_socket << std::endl;
+		// headerOfRequest.clear();
+		// content_buffer.clear();
+		// buffer.clear();
+		// ready = 0;
+		// flag = 0;
+		input.close();
 		return (0);
 	}
 	return (0);
