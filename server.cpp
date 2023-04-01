@@ -101,7 +101,7 @@ void server::monitor()
 					if (pfds[i].fd == clients[j].client_socket)
 					{
 						std::cout << "ready to recv " << clients[j].client_socket << std::endl;
-						this->receive(j);
+						this->receive(i, j);
 					}
 				}
 			}
@@ -112,7 +112,7 @@ void server::monitor()
 					if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 1)
 					{
 						// std::cout << "ready to send" << std::endl;
-						this->response(j);
+						this->response(i, this->pfds, j);
 					}
 				}
 			}
@@ -148,16 +148,16 @@ void server::disconnect(int index)
 	clients.erase(clients.begin() + index);
 }
 
-void server::response(int index)
+void server::response(int pfds_index, std::vector<struct pollfd> &pfds, int index)
 {
-	if (clients[index].response() == 1)
+	if (clients[index].response(pfds_index, pfds) == 1)
 	{
 		this->disconnect(index);
 		return ;
 	}
 }
 
-void server::receive(int index)
+void server::receive(int pfds_index, int index)
 {
     int rtn;
 	int t;
@@ -192,8 +192,10 @@ void server::receive(int index)
     else if(clients[index].flag == 2)
     {
 		std::cout << "get method " << clients[index].client_socket << std::endl;
+		std::cout << clients[index].headerOfRequest << std::endl;
 		clients[index].check();
 		// clients[index].ready = 1;
+		pfds[pfds_index].revents &= ~POLLIN;
 		return ;
         // without budy => GET method
     }

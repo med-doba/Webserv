@@ -12,6 +12,14 @@
 #include <fstream>
 #include <fcntl.h>
 #include <cstdlib>
+#include <iostream>
+#include <vector>
+#include <fcntl.h>
+#include <cstring>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <poll.h>
 // #include "parssingOfBody.hpp"
 // #include "parssingOfHeader.hpp"
 
@@ -89,7 +97,7 @@ class client
 
 	int extractheader();
 	void openfile();
-	int response();
+	int response(int pfds_index, vector<struct pollfd> &pfds);
 	int pushToBuffer();
 	int checkHeaderOfreq(int &len);
 	long long	ft_atoi(const char *str);
