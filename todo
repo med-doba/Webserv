@@ -1,6 +1,73 @@
 
 
 sometimes accept fails and the program exits find out why it fails
+fix if a client disconnect in the recv and the index gets checked for pollout
+
+
+fix get method with body should return a bad request
+if a request get sent with a get method and has transfer-encoding or Content-Length or Content-Type
+should return bad request
+it's okay with Content-Length aslong as the value is zero
+
+
+
+
+Sure, here are some headers that should not be included in certain HTTP methods:
+
+Content-Length: This header should not be included in GET requests, as GET requests do not have a request body. If a GET request includes a Content-Length header, you should respond with a "400 Bad Request" error.
+
+Transfer-Encoding: This header should not be included in GET requests, as GET requests do not have a request body. If a GET request includes a Transfer-Encoding header, you should respond with a "400 Bad Request" error.
+
+Host: This header is required for all HTTP requests, so if it is not included in the request, you should respond with a "400 Bad Request" error.
+
+Content-Type: This header should be included in POST requests, as the request body may contain data in various formats. If this header is not included in a POST request, you should respond with a "400 Bad Request" error.
+
+Authorization: This header should be included in requests that require authentication. If it is not included and authentication is required, you should respond with a "401 Unauthorized" error.
+
+Range: This header should not be included in POST or DELETE requests, as those methods do not retrieve partial content of a resource. If it is included in a POST or DELETE request, you should respond with a "400 Bad Request" error.
+If-Modified-Since: This header should not be included in POST or DELETE requests, as those methods do not modify resources based on a specific timestamp. If it is included in a POST or DELETE request, you should respond with a "400 Bad Request" error.
+
+
+Note that these are just some examples, and the exact headers that are allowed or disallowed for a particular HTTP method may vary depending on the server implementation or specific use case.
+
+
+
+
+
+
+Here are some of the necessary headers and behaviors for the three HTTP methods GET, POST, and DELETE:
+
+GET method
+
+Required headers: Host
+Optional headers: If-Modified-Since, If-Unmodified-Since, If-None-Match, If-Match, Range
+Response for missing Host: 400 Bad Request
+POST method
+
+Required headers: Host, Content-Type, Content-Length
+Optional headers: If-Modified-Since, If-Unmodified-Since, If-None-Match, If-Match
+Response for missing Host: 400 Bad Request
+Response for missing Content-Type: 400 Bad Request
+Response for missing Content-Length: 411 Length Required
+DELETE method
+
+Required headers: Host
+Optional headers: If-Match, If-Unmodified-Since
+Response for missing Host: 400 Bad Request
+Note that there may be additional headers required or optional for specific use cases, but these are some of the most common ones.
+
+For missing required headers, the server should respond with a 400 Bad Request status code. For optional headers, the server should still process the request even if the header is missing.
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -72,19 +72,19 @@ int parssingOfHeader::checkHeaders(int index, string headerOfRequest, int & tmp)
     {
         i = str.find("Host: ");
         if(i == -1)
-            return -2;
+            return -4;
         i = str.find("Content-Length: ");
         if(i == -1)
-            return -2;
+            return -5;
         i = str.find("Content-Type: ");
         if(i == -1)
-            return -2;
+            return -6;
     }
     else
     {
         i = str.find("Host: ");
         if(i == -1)
-            return -2;
+            return -4;
     }
     
     i = 0;
@@ -136,7 +136,7 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp)
     if(temp[0] != '/')
     {
         free(temp);
-        return -1;
+        return -2;
     }
     free(temp);
 
@@ -149,7 +149,7 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp)
     if( strcmp(temp,"HTTP/1.1\r\n") != 0 && strcmp(temp,"HTTP/1.1\n\n") != 0)
     {
         free(temp);
-        return -1;
+        return -3;
     }
     free(temp);
     i+=2;
@@ -161,8 +161,8 @@ int parssingOfHeader::checkHeaderOfreq_(string headerOfRequest, int & tmp)
 {
     int rtn = checkHeaderLine(headerOfRequest, tmp);
  
-    if(rtn == -1)
-        return -2;
+    if(rtn < 0)
+        return rtn;
     rtn = checkHeaders(rtn,headerOfRequest,tmp);
     
     return rtn;

@@ -150,21 +150,34 @@ void server::disconnect(int index)
 
 void server::response(int pfds_index, std::vector<struct pollfd> &pfds, int index)
 {
-	if (clients[index].response(pfds_index, pfds) == 1)
+	if (clients[index].check_method() == 1)
+		clients[index].error_method(pfds[pfds_index]);
+	else if (clients[index].check_version() == 1)
+		clients[index].error_version(pfds[pfds_index]);
+	else if (clients[index].check_location() == 1)
+		clients[index].error_location(pfds[pfds_index]);
+	else if (clients[index].flag_res <= -4)
 	{
+		clients[index].error_headers(pfds[pfds_index]);
 		this->disconnect(index);
-		return ;
 	}
+	else
+		clients[index].normal_response(pfds[pfds_index]);
+	// else if (clients[index].response(pfds_index, pfds) == 1)
+	// {
+	// 	this->disconnect(index);
+	// 	return ;
+	// }
 }
 
 void server::receive(int pfds_index, int index)
 {
     int rtn;
-	int t;
+	// int t;
 
     rtn = clients[index].pushToBuffer();
 
-	t = rtn;
+	// t = rtn;
 	if (rtn == -1)
 	{
 		std::cout << "socket client " << clients[index].client_socket << std::endl;
@@ -178,7 +191,7 @@ void server::receive(int pfds_index, int index)
 		this->disconnect(index);
         return ;
 	}
-    rtn = clients[index].checkHeaderOfreq(t);
+    rtn = clients[index].checkHeaderOfreq();
 	// std::cout << clients[index].headerOfRequest << std::endl;
 	// std::cout << rtn << std::endl;
     if(rtn == -2)
@@ -187,8 +200,11 @@ void server::receive(int pfds_index, int index)
         return ;
 	}
     if(clients[index].flag == 1) // if has content lenght
+	{
+		std::cout << "post handle" << std::endl;
 		clients[index].bodyParss.handle_post(clients[index]);
-    
+	}
+   
     else if(clients[index].flag == 2)
     {
 		std::cout << "get method " << clients[index].client_socket << std::endl;
@@ -201,6 +217,7 @@ void server::receive(int pfds_index, int index)
     }
     else if(clients[index].flag == 3)// // handle chunked data when resend request
 	{
+		std::cout << "chunked handle" << std::endl;
 		// std::cout << "chunked " << std::endl;
 		// std::cout << "flag outside  == " << clients[index].flag_ << std::endl;
 		// clients[index].bodyParss.handling_chunked_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,t,clients[index].flag_);
@@ -208,6 +225,7 @@ void server::receive(int pfds_index, int index)
 	}
     else if(clients[index].flag == 4)
 	{
+		std::cout << "form handle" << std::endl;
 		clients[index].bodyParss.handling_form_data(clients[index]);
 		// clients[index].bodyParss.handling_form_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,clients[index].bytes_read,clients[index].flag_);
 	}

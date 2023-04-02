@@ -93,16 +93,25 @@ class client
 	int i;
 	int j;
 	int len;
+	int flag_res;
 	int ContentLength;
 
 	int extractheader();
 	void openfile();
 	int response(int pfds_index, vector<struct pollfd> &pfds);
 	int pushToBuffer();
-	int checkHeaderOfreq(int &len);
+	int checkHeaderOfreq();
 	long long	ft_atoi(const char *str);
 	char *ft_substr(char const *s, unsigned int start, size_t len);
 	void check(void);
+	int check_method();
+	void error_method(struct pollfd &pfds);
+	int check_version();
+	void error_version(struct pollfd &pfds);
+	int check_location();
+	void error_location(struct pollfd &pfds);
+	void error_headers(struct pollfd &pfds);
+	void normal_response(struct pollfd &pfds);
 	client();
 	client(const client &obj);
 	client& operator=(const client& obj);

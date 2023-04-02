@@ -1,9 +1,52 @@
 #include "client.hpp"
 
+void client::normal_response(struct pollfd &pfds)
+{
+	if (response_header.empty())
+	{
+		std::string res = "hello from server";
+		response_header = "HTTP/1.1 200 OK\r\n"
+						"Content-Type: text/plain\r\n"
+						"Content-length: " + std::to_string(res.size()) + "\r\n"
+						"\r\n";
+		response_header += std::string(res.begin(), res.end());
+	}
+	if (!response_header.empty())
+	{
+		// std::cout << "send chunks" << std::endl;
+		int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
+		if (i < 0)
+		{
+			std::cout << "error "  << this->client_socket << std::endl;
+			std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
+			std::cout << this->headerOfRequest << std::endl;
+			printf("errno = %d: %s\n", errno, strerror(errno));
+			// response_header.clear();
+			return ;
+		}
+		response_header.erase(0, i);
+		// std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
+	}
+	else
+	{ 
+		std::cout << "sent complete " << this->client_socket << std::endl;
+		std::cout << "ready -- " << this->ready << std::endl;
+		std::cout << this->headerOfRequest << std::endl;
+		headerOfRequest.clear();
+		// content_buffer.clear();
+		buffer.clear();
+		ready = 0;
+		flag = 0;
+		pfds.revents &= ~POLLOUT;
+		input.close();
+		return ;
+	}
+}
 int client::response(int pfds_index, std::vector<struct pollfd> &pfds)
 {
 	// char c;
 
+	std::cout << "normal response" << std::endl;
 	if (!input.is_open())
 	{
 		// std::cout << "lol2 " << std::endl;
@@ -86,6 +129,7 @@ client::client()
     buffer = bodyofRequest = boundary = "";
     tmp = 0;
 	ready = 0;
+	flag_res = 0;
 }
 
 client::client(const client &obj)
@@ -111,6 +155,7 @@ client& client::operator=(const client& obj)
 		this->headerParss = obj.headerParss;
 		this->tmp = obj.tmp;
 		this->flag_ = obj.flag_;
+		this->flag_res = obj.flag_res;
 		this->total_bytes_received = obj.total_bytes_received;
 		this->i = obj.i;
 		this->j = obj.j;
@@ -124,7 +169,7 @@ client::~client()
 {
 }
 
-int client::checkHeaderOfreq(int &len)
+int client::checkHeaderOfreq()
 {
     int pos = 0;
     
@@ -136,8 +181,14 @@ int client::checkHeaderOfreq(int &len)
             if((buffer[pos] == '\r' || buffer[pos] == '\n') && buffer[pos + 1] == '\n' )
             {
                 headerOfRequest = buffer.substr(0,pos - 1);// not include \r\n
-                if(headerParss.checkHeaderOfreq_(headerOfRequest,tmp) == -2)
-                    return -2;
+				this->flag_res = headerParss.checkHeaderOfreq_(headerOfRequest, tmp);
+				if (this->flag_res < 0)
+				{
+					flag = 2;
+					return (1);
+				}
+                // if(headerParss.checkHeaderOfreq_(headerOfRequest,tmp) == -2)
+                //     return -2;
                 
                 i = headerOfRequest.find("Transfer-Encoding: chunked");   // find way to check if boundry
                 if(i != -1)
@@ -146,7 +197,7 @@ int client::checkHeaderOfreq(int &len)
                     // buffer.erase(buffer.begin(),buffer.begin() + pos + 2);
                     i = pos  + 2;
 					
-                    len -= i;
+                    // len -= i;
 					
                     flag = 3;
                     return 1;
@@ -261,4 +312,113 @@ int client::pushToBuffer()
         j++;
     }
     return this->bytes_read;
+}
+
+int client::check_method()
+{
+	if (flag_res == -1)
+		return (1);
+	return (0);
+}
+
+void client::error_method(struct pollfd &pfds)
+{
+	std::cout << "error method" << std::endl;
+	this->response_header = "HTTP/1.1 405 Method Not Allowed\r\nAllow: GET, POST, DELETE\r\nContent-Length: 0\r\n\r\n";
+	int i = send(this->client_socket, response_header.c_str(), response_header.size(),0);
+	if (i < 0)
+	{
+		std::cout << "error send in method error" << std::endl;
+		return ;
+	}
+	else if (i == (int)response_header.size())
+	{
+		std::cout << "response sent " << std::endl;
+		response_header.clear();
+		headerOfRequest.clear();
+		buffer.clear();
+		ready = 0;
+		flag = 0;
+		pfds.revents &= ~POLLOUT;
+	}
+}
+
+int client::check_version()
+{
+	if (flag_res == -3)
+		return (1);
+	return (0);
+}
+
+void client::error_version(struct pollfd &pfds)
+{
+	std::cout << "error version" << std::endl;
+	this->response_header = "HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Length: 0\r\n\r\n";
+	int i = send(this->client_socket, response_header.c_str(), response_header.size(),0);
+	if (i < 0)
+	{
+		std::cout << "error send in method error" << std::endl;
+		return ;
+	}
+	else if (i == (int)response_header.size())
+	{
+		response_header.clear();
+		headerOfRequest.clear();
+		buffer.clear();
+		ready = 0;
+		flag = 0;
+		pfds.revents &= ~POLLOUT;
+	}
+}
+
+int client::check_location()
+{
+	if (flag_res == -2)
+		return (1);
+	return (0);
+}
+
+void client::error_location(struct pollfd &pfds)
+{
+	std::cout << "error location" << std::endl;
+	this->response_header = "HTTP/1.1 405 Method Not Allowed\r\nAllow: GET, POST, DELETE\r\nContent-Length: 0\r\n\r\n";
+	int i = send(this->client_socket, response_header.c_str(), response_header.size(),0);
+	if (i < 0)
+	{
+		std::cout << "error send in method error" << std::endl;
+		return ;
+	}
+	else if (i == (int)response_header.size())
+	{
+		response_header.clear();
+		headerOfRequest.clear();
+		buffer.clear();
+		ready = 0;
+		flag = 0;
+		pfds.revents &= ~POLLOUT;
+	}
+}
+
+void client::error_headers(struct pollfd &pfds)
+{
+	std::cout << "error headers" << std::endl;
+	if (flag_res == -4 || flag_res == -6)
+		this->response_header = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+	if (flag_res == -5)
+		this->response_header = "HTTP/1.1 411 Length Required\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+	int i = send(this->client_socket, response_header.c_str(), response_header.size(),0);
+	if (i < 0)
+	{
+		std::cout << "error send in method error" << std::endl;
+		return ;
+	}
+	else if (i == (int)response_header.size())
+	{
+		response_header.clear();
+		headerOfRequest.clear();
+		buffer.clear();
+		ready = 0;
+		flag = 0;
+		pfds.revents &= ~POLLOUT;
+	}
 }
