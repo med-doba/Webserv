@@ -54,13 +54,13 @@ long long	parssingOfHeader::ft_atoi(const char *str)
 }
 
 
-int parssingOfHeader::checkHeaders(int index, string headerOfRequest, int & tmp)
+int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp)
 {
      
     // when add char after \r\n will add in first of the second line
     int i;
     string str = "";
-    i = index; 
+    i = 0; 
       
     while (i < (int)headerOfRequest.size())// sometimes in content has '\0' , dont loop
     {
@@ -68,23 +68,48 @@ int parssingOfHeader::checkHeaders(int index, string headerOfRequest, int & tmp)
         i++;
     }
 
-    if(tmp)// when upload to to server sould present this headers
+	i = str.find("Host: ");
+	if(i == -1)
+		return -4;
+    if(tmp == 1)// when upload to to server sould present this headers
     {
-        i = str.find("Host: ");
-        if(i == -1)
-            return -4;
         i = str.find("Content-Length: ");
         if(i == -1)
             return -5;
         i = str.find("Content-Type: ");
         if(i == -1)
             return -6;
+        i = str.find("If-Modified-Since: ");
+        if(i != -1)
+            return -7;
+        i = str.find("Range: ");
+        if(i != -1)
+            return -8;
     }
-    else
+    else if(tmp == 0)//get method
     {
-        i = str.find("Host: ");
-        if(i == -1)
-            return -4;
+        i = str.find("Content-Length: ");
+        if(i != -1)
+		{
+			int ContentLength = ft_atoi(headerOfRequest.substr(i + 16,headerOfRequest.size()).c_str());
+			if (ContentLength > 0)
+				return -9;
+		}
+        i = str.find("Transfer-Encoding: ");
+		if (i != -1)
+			return (-10);
+        i = str.find("Content-Type: ");
+        if(i != -1)
+            return -11;
+    }
+    else if(tmp == 2)//delete method
+    {
+        i = str.find("If-Modified-Since: ");
+        if(i != -1)
+            return -12;
+        i = str.find("Range: ");
+        if(i != -1)
+            return -13;
     }
     
     i = 0;
@@ -121,6 +146,10 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp)
     temp = ft_substr(headerOfRequest.data(),j,i);
     if(strcmp(temp,"POST") == 0)
         tmp = 1;
+    if(strcmp(temp,"GET") == 0)
+        tmp = 0;
+    if(strcmp(temp,"DELETE") == 0)
+        tmp = 2;
     if( strcmp(temp,"GET") != 0 && strcmp(temp,"POST") != 0 && strcmp(temp,"DELETE") != 0)
     {
         free(temp);
@@ -157,13 +186,15 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp)
 }
  
 
-int parssingOfHeader::checkHeaderOfreq_(string headerOfRequest, int & tmp)
+int parssingOfHeader::checkHeaderOfreq_(string &headerOfRequest, int & tmp)
 {
     int rtn = checkHeaderLine(headerOfRequest, tmp);
  
-    if(rtn < 0)
-        return rtn;
-    rtn = checkHeaders(rtn,headerOfRequest,tmp);
+	if(rtn < 0)
+		return rtn;
+
+	headerOfRequest = &headerOfRequest[rtn];
+    rtn = checkHeaders(headerOfRequest,tmp);
     
     return rtn;
 }

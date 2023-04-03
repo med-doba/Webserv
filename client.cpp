@@ -24,6 +24,19 @@ void client::normal_response(struct pollfd &pfds)
 			// response_header.clear();
 			return ;
 		}
+		if (i == (int)response_header.size())
+		{
+			std::cout << "sent complete " << this->client_socket << std::endl;
+			std::cout << "ready -- " << this->ready << std::endl;
+			std::cout << this->headerOfRequest << std::endl;
+			headerOfRequest.clear();
+			buffer.clear();
+			ready = 0;
+			flag = 0;
+			pfds.revents &= ~POLLOUT;
+			input.close();
+			return ;
+		}
 		response_header.erase(0, i);
 		// std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
 	}
@@ -181,7 +194,8 @@ int client::checkHeaderOfreq()
             if((buffer[pos] == '\r' || buffer[pos] == '\n') && buffer[pos + 1] == '\n' )
             {
                 headerOfRequest = buffer.substr(0,pos - 1);// not include \r\n
-				this->flag_res = headerParss.checkHeaderOfreq_(headerOfRequest, tmp);
+				std::string copyheader = headerOfRequest;
+				this->flag_res = headerParss.checkHeaderOfreq_(copyheader, tmp);
 				if (this->flag_res < 0)
 				{
 					flag = 2;
@@ -190,7 +204,7 @@ int client::checkHeaderOfreq()
                 // if(headerParss.checkHeaderOfreq_(headerOfRequest,tmp) == -2)
                 //     return -2;
                 
-                i = headerOfRequest.find("Transfer-Encoding: chunked");   // find way to check if boundry
+                i = copyheader.find("Transfer-Encoding: chunked");   // find way to check if boundry
                 if(i != -1)
                 { 
 					std::cout << "lol" << std::endl;
@@ -202,17 +216,17 @@ int client::checkHeaderOfreq()
                     flag = 3;
                     return 1;
                 }
-                pos = headerOfRequest.find("Content-Length");  
+                pos = copyheader.find("Content-Length");  
                 if(pos != -1)
                 {
-                    j = headerOfRequest.find("boundary");
+                    j = copyheader.find("boundary");
                     if(j != -1)
                     {
                         flag = 4;
-                        ContentLength = ft_atoi(headerOfRequest.substr(pos + 16,headerOfRequest.size()).c_str());
+                        ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
                         if(ContentLength == 0)
                             return -2;
-                        i = headerOfRequest.size() + 3;// after herder
+                        i = copyheader.size() + 3;// after herder
                         bytes_read -= i;
                         tmp = j + 9;
                         char *temp = (char*)buffer.data() + tmp;// because string() dont handle '\r'
@@ -223,11 +237,11 @@ int client::checkHeaderOfreq()
                         
                         return 1;
                     }
-                    ContentLength = ft_atoi(headerOfRequest.substr(pos + 16,headerOfRequest.size()).c_str());
+                    ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
                     if(ContentLength == 0)
                         return -2;
                     flag = 1;
-                    i = headerOfRequest.size();
+                    i = copyheader.size();
                     return  1;
                 }
                 else

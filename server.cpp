@@ -1,9 +1,8 @@
 #include "server.hpp"
 server::server()
 {
-	this->flag_con = 0;
+	this->remove = 0;
 	this->poll_count = 0;
-
 }
 server::server(const server &obj)
 {
@@ -17,7 +16,7 @@ server& server::operator=(const server& obj)
 		this->servers = obj.servers;
 		this->clients = obj.clients;
 		this->pfds = obj.pfds;
-		this->flag_con = obj.flag_con;
+		this->remove = obj.remove;
 		this->poll_count = obj.poll_count;
 	}
 	return (*this);
@@ -83,6 +82,7 @@ void server::monitor()
 {
 	while (1)
 	{
+		this->remove = 0;
 		this->poll_count = poll(&pfds[0], this->pfds.size(), 10);
 		for (size_t i = 0; i < this->pfds.size(); i++)
 		{
@@ -105,14 +105,14 @@ void server::monitor()
 					}
 				}
 			}
-			if (this->pfds[i].revents & POLLOUT)
+			if (this->remove == 0 && this->pfds[i].revents & POLLOUT)
 			{
 				for (size_t j = 0; j < clients.size(); j++)
 				{
 					if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 1)
 					{
 						// std::cout << "ready to send" << std::endl;
-						this->response(i, this->pfds, j);
+						this->response(this->pfds[i], j);
 					}
 				}
 			}
@@ -146,23 +146,58 @@ void server::disconnect(int index)
 	close(clients[index].client_socket);
 	pfds.erase(pfds.begin() + index + servers.size());
 	clients.erase(clients.begin() + index);
+	this->remove = 1;
 }
 
-void server::response(int pfds_index, std::vector<struct pollfd> &pfds, int index)
+void server::response(struct pollfd &pfds, int index)
 {
 	if (clients[index].check_method() == 1)
-		clients[index].error_method(pfds[pfds_index]);
+		clients[index].error_method(pfds);
 	else if (clients[index].check_version() == 1)
-		clients[index].error_version(pfds[pfds_index]);
+		clients[index].error_version(pfds);
 	else if (clients[index].check_location() == 1)
-		clients[index].error_location(pfds[pfds_index]);
-	else if (clients[index].flag_res <= -4)
+		clients[index].error_location(pfds);
+	else if (clients[index].flag_res < 0)
 	{
-		clients[index].error_headers(pfds[pfds_index]);
+		clients[index].error_headers(pfds);
 		this->disconnect(index);
 	}
+	else if(clients[index].flag == 1) // if has content lenght
+	{
+		std::cout << "post handle" << std::endl;
+		clients[index].bodyParss.handle_post(clients[index]);
+		clients[index].headerOfRequest.clear();
+		clients[index].buffer.clear();
+		clients[index].ready = 0;
+		clients[index].flag = 0;
+		pfds.revents &= ~POLLOUT;
+		clients[index].input.close();
+		return ;
+	}
+	else if(clients[index].flag == 3)// // handle chunked data when resend request
+	{
+		std::cout << "chunked handle" << std::endl;
+		clients[index].bodyParss.handling_chunked_data(clients[index]);
+		clients[index].headerOfRequest.clear();
+		clients[index].buffer.clear();
+		clients[index].ready = 0;
+		clients[index].flag = 0;
+		pfds.revents &= ~POLLOUT;
+		clients[index].input.close();
+	}
+	else if(clients[index].flag == 4)
+	{
+		std::cout << "form handle" << std::endl;
+		clients[index].bodyParss.handling_form_data(clients[index]);
+		clients[index].headerOfRequest.clear();
+		clients[index].buffer.clear();
+		clients[index].ready = 0;
+		clients[index].flag = 0;
+		pfds.revents &= ~POLLOUT;
+		clients[index].input.close();
+	}
 	else
-		clients[index].normal_response(pfds[pfds_index]);
+		clients[index].normal_response(pfds);
 	// else if (clients[index].response(pfds_index, pfds) == 1)
 	// {
 	// 	this->disconnect(index);
@@ -202,15 +237,20 @@ void server::receive(int pfds_index, int index)
     if(clients[index].flag == 1) // if has content lenght
 	{
 		std::cout << "post handle" << std::endl;
-		clients[index].bodyParss.handle_post(clients[index]);
+		string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].ContentLength);
+		if((int)test.size() >= clients[index].ContentLength)// finish recivng
+		{
+			clients[index].check();
+			pfds[pfds_index].revents &= ~POLLIN;
+		}
+		// clients[index].bodyParss.handle_post(clients[index]);
 	}
    
     else if(clients[index].flag == 2)
     {
-		std::cout << "get method " << clients[index].client_socket << std::endl;
-		std::cout << clients[index].headerOfRequest << std::endl;
+		// std::cout << "get method " << clients[index].client_socket << std::endl;
+		// std::cout << clients[index].headerOfRequest << std::endl;
 		clients[index].check();
-		// clients[index].ready = 1;
 		pfds[pfds_index].revents &= ~POLLIN;
 		return ;
         // without budy => GET method
@@ -218,17 +258,19 @@ void server::receive(int pfds_index, int index)
     else if(clients[index].flag == 3)// // handle chunked data when resend request
 	{
 		std::cout << "chunked handle" << std::endl;
-		// std::cout << "chunked " << std::endl;
-		// std::cout << "flag outside  == " << clients[index].flag_ << std::endl;
-		// clients[index].bodyParss.handling_chunked_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,t,clients[index].flag_);
-		clients[index].bodyParss.handling_chunked_data(clients[index]);
+		int pos = clients[index].buffer.find("\r\n0\r\n\r\n");
+		if (pos != -1)
+		{
+			clients[index].check();
+			pfds[pfds_index].revents &= ~POLLIN;
+		}
 	}
-    else if(clients[index].flag == 4)
-	{
-		std::cout << "form handle" << std::endl;
-		clients[index].bodyParss.handling_form_data(clients[index]);
-		// clients[index].bodyParss.handling_form_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,clients[index].bytes_read,clients[index].flag_);
-	}
+ //    else if(clients[index].flag == 4)
+	// {
+	// 	std::cout << "form handle" << std::endl;
+	// 	clients[index].bodyParss.handling_form_data(clients[index]);
+	// 	// clients[index].bodyParss.handling_form_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,clients[index].bytes_read,clients[index].flag_);
+	// }
         
         
     // return 1;

@@ -15,7 +15,7 @@ class server
 	std::vector<miniserver> servers;
 	std::vector<client> clients;
 	std::vector<struct pollfd> pfds;
-	int flag_con;
+	int remove;
 	int poll_count;
 
 	server();
@@ -26,7 +26,7 @@ class server
 	void monitor();
 	void disconnect(int index);
 	void fill();
-	void response(int pfds_index, vector<struct pollfd> &pfds, int index);
+	void response(struct pollfd &pfds, int index);
 	void receive(int pfds_index, int index);
 	// void response(int index);
 	void new_connection(int index);
