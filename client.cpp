@@ -371,7 +371,7 @@ void client::error_version(struct pollfd &pfds)
 	int i = send(this->client_socket, response_header.c_str(), response_header.size(),0);
 	if (i < 0)
 	{
-		std::cout << "error send in method error" << std::endl;
+		std::cout << "error send in version error" << std::endl;
 		return ;
 	}
 	else if (i == (int)response_header.size())
@@ -399,7 +399,7 @@ void client::error_location(struct pollfd &pfds)
 	int i = send(this->client_socket, response_header.c_str(), response_header.size(),0);
 	if (i < 0)
 	{
-		std::cout << "error send in method error" << std::endl;
+		std::cout << "error send in location error" << std::endl;
 		return ;
 	}
 	else if (i == (int)response_header.size())
@@ -420,10 +420,14 @@ void client::error_headers(struct pollfd &pfds)
 		this->response_header = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
 	if (flag_res == -5)
 		this->response_header = "HTTP/1.1 411 Length Required\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+	if (flag_res == -7)
+		this->response_header = "HTTP/1.1 405 Method Not Allowed\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+	if (flag_res == -8)
+		this->response_header = "HTTP/1.1 416 Requested Range Not Satisfiable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
 	int i = send(this->client_socket, response_header.c_str(), response_header.size(),0);
 	if (i < 0)
 	{
-		std::cout << "error send in method error" << std::endl;
+		std::cout << "error send in headers error" << std::endl;
 		return ;
 	}
 	else if (i == (int)response_header.size())

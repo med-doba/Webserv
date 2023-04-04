@@ -12,6 +12,15 @@ it's okay with Content-Length aslong as the value is zero
 
 
 
+to handle errors in the request create a response class that 
+a status code and phrase that explaines the error and function
+that generate the request depending on the status code and the phrase 
+this way it becomes easier and more portable solution the errors
+handling i should incoprate this in the normal response as well
+
+
+
+
 Sure, here are some headers that should not be included in certain HTTP methods:
 
 Content-Length: This header should not be included in GET requests, as GET requests do not have a request body. If a GET request includes a Content-Length header, you should respond with a "400 Bad Request" error.

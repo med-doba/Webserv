@@ -152,13 +152,23 @@ void server::disconnect(int index)
 void server::response(struct pollfd &pfds, int index)
 {
 	if (clients[index].check_method() == 1)
+	{
+		std::cout << "method error" << std::endl;
 		clients[index].error_method(pfds);
+	}
 	else if (clients[index].check_version() == 1)
+	{
+		std::cout << "version error" << std::endl;
 		clients[index].error_version(pfds);
+	}
 	else if (clients[index].check_location() == 1)
+	{
+		std::cout << "location error" << std::endl;
 		clients[index].error_location(pfds);
+	}
 	else if (clients[index].flag_res < 0)
 	{
+		std::cout << "headers error" << std::endl;
 		clients[index].error_headers(pfds);
 		this->disconnect(index);
 	}
