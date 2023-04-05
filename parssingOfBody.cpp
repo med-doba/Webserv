@@ -41,7 +41,7 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
     int rtn;
 
     exetention = std::to_string(rand() % 100000);
-    
+    std::cout << headerOfRequest << std::endl;
     if( (rtn = headerOfRequest.find("mp4") ) != -1) 
         fd = open((char*)(file.append(exetention).append(".mp4").data()),O_CREAT | O_RDWR , 0777);
     else if((rtn = headerOfRequest.find("mp3")) != -1 )
@@ -111,8 +111,8 @@ void parssingOfBody::handling_form_data(client &obj)
         obj.bodyofRequest.clear();
          
     }
-    else
-        obj.total_bytes_received += obj.bytes_read;
+    // else
+    //     obj.total_bytes_received += obj.bytes_read;
     if(obj.total_bytes_received >= obj.ContentLength)
     { 
       
@@ -192,7 +192,8 @@ void  parssingOfBody::handling_chunked_data(client &obj)
                 handling_form_data(obj);
                 return ;
             }
-            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest);
+            if (!obj.bodyofRequest.empty())
+                create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest);
             
             obj.flag_ = 10;
         } 
@@ -214,7 +215,8 @@ void parssingOfBody::handle_post(client &obj)
 		std::cout << "content == "<< obj.ContentLength << std::endl;
 		std::cout << "buffer23 size == " << obj.buffer.size()<< std::endl;
         obj.bodyofRequest = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
-        create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest);
+        if (!obj.bodyofRequest.empty())
+            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest);
     }
 }
 

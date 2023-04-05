@@ -76,22 +76,55 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
 		respond.type = 1;
 		respond.body = "No Host Header Found";
 		respond.close = 1;
+        respond.content = 1;
 		return -4;
 	}
     if(tmp == 1)// when upload to to server sould present this headers
     {
         i = str.find("Content-Length: ");
         if(i == -1)
+        {
+            respond.type = 1;
+            respond.status_code = 411;
+            respond.phrase = "Length Required";
+            respond.content = 1;
+            respond.body = "No Content-Length Header Found";
+            respond.close = 1;
             return -5;
+        }
         i = str.find("Content-Type: ");
         if(i == -1)
+        {
+            respond.type = 1;
+            respond.status_code = 400;
+            respond.phrase = "Bad Request";
+            respond.content = 1;
+            respond.body = "No Content-Type Header Found";
+            respond.close = 1;
             return -6;
+        }
         i = str.find("If-Modified-Since: ");
         if(i != -1)
+        {
+            respond.type = 1;
+            respond.status_code = 405;
+            respond.phrase = "Requested Range Not Satisfiable";
+            respond.content = 1;
+            respond.body = "The request has a malformed header";
+            respond.close = 1;
             return -7;
+        }
         i = str.find("Range: ");
         if(i != -1)
+        {
+            respond.type = 1;
+            respond.status_code = 416;
+            respond.phrase = "Bad Request";
+            respond.content = 1;
+            respond.body = "The request has a malformed header";
+            respond.close = 1;
             return -8;
+        }
     }
     else if(tmp == 0)//get method
     {
@@ -100,20 +133,52 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
 		{
 			int ContentLength = ft_atoi(headerOfRequest.substr(i + 16,headerOfRequest.size()).c_str());
 			if (ContentLength > 0)
+            {
+                respond.type = 1;
+                respond.status_code = 400;
+                respond.phrase = "Bad Request";
+                respond.content = 1;
+                respond.body = "The request has a malformed header";
+                respond.close = 1;
 				return -9;
+            }
 		}
         i = str.find("Transfer-Encoding: ");
 		if (i != -1)
+        {
+            respond.type = 1;
+            respond.status_code = 400;
+            respond.phrase = "Bad Request";
+            respond.content = 1;
+            respond.body = "Invalid request: GET requests must not have a body with Transfer-Encoding.";
+            respond.close = 1;
 			return (-10);
+        }
         i = str.find("Content-Type: ");
         if(i != -1)
+        {
+            respond.type = 1;
+            respond.status_code = 400;
+            respond.phrase = "Bad Request";
+            respond.content = 1;
+            respond.body = "The request contained a Content-Type header, but it should not be included in a GET request.";
+            respond.close = 1;
             return -11;
+        }
     }
     else if(tmp == 2)//delete method
     {
         i = str.find("If-Modified-Since: ");
         if(i != -1)
+        {
+            respond.type = 1;
+            respond.status_code = 405;
+            respond.phrase = "Method Not Allowed";
+            respond.content = 1;
+            respond.body = "The request has a malformed header";
+            respond.close = 1;
             return -12;
+        }
         i = str.find("Range: ");
         if(i != -1)
             return -13;
@@ -160,6 +225,12 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response
     if( strcmp(temp,"GET") != 0 && strcmp(temp,"POST") != 0 && strcmp(temp,"DELETE") != 0)
     {
         free(temp);
+        respond.type = 1;
+        respond.status_code = 405;
+        respond.phrase = "Method Not Allowed";
+        respond.headers.push_back("Allow: GET, POST, DELETE");
+        // respond.body = "No Host Header Found";
+        // respond.close = 1;
         return -1;
     }
     free(temp);
@@ -185,6 +256,11 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response
     if( strcmp(temp,"HTTP/1.1\r\n") != 0 && strcmp(temp,"HTTP/1.1\n\n") != 0)
     {
         free(temp);
+        respond.type = 1;
+        respond.status_code = 505;
+        respond.phrase = "HTTP Version Not Supported";
+        // respond.body = "No Host Header Found";
+        // respond.close = 1;
         return -3;
     }
     free(temp);

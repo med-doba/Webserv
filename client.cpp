@@ -19,7 +19,7 @@ void client::normal_response(struct pollfd &pfds)
 		{
 			std::cout << "error "  << this->client_socket << std::endl;
 			std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
-			std::cout << this->headerOfRequest << std::endl;
+			// std::cout << this->headerOfRequest << std::endl;
 			printf("errno = %d: %s\n", errno, strerror(errno));
 			// response_header.clear();
 			return ;
@@ -29,12 +29,9 @@ void client::normal_response(struct pollfd &pfds)
 			std::cout << "sent complete " << this->client_socket << std::endl;
 			std::cout << "ready -- " << this->ready << std::endl;
 			std::cout << this->headerOfRequest << std::endl;
-			headerOfRequest.clear();
-			buffer.clear();
-			ready = 0;
-			flag = 0;
+			// std::cout << this->buffer << std::endl;
+			this->clear();
 			pfds.revents &= ~POLLOUT;
-			input.close();
 			return ;
 		}
 		response_header.erase(0, i);
@@ -45,13 +42,8 @@ void client::normal_response(struct pollfd &pfds)
 		std::cout << "sent complete " << this->client_socket << std::endl;
 		std::cout << "ready -- " << this->ready << std::endl;
 		std::cout << this->headerOfRequest << std::endl;
-		headerOfRequest.clear();
-		// content_buffer.clear();
-		buffer.clear();
-		ready = 0;
-		flag = 0;
+		this->clear();
 		pfds.revents &= ~POLLOUT;
-		input.close();
 		return ;
 	}
 }
@@ -132,6 +124,15 @@ void client::check(void)
 		this->ready = 0;
 	else
 		this->ready = 1;
+}
+
+void client::clear()
+{
+	headerOfRequest.clear();
+	buffer.clear();
+	ready = 0;
+	flag = 0;
+	input.close();
 }
 
 client::client()
@@ -239,8 +240,8 @@ int client::checkHeaderOfreq()
                         return 1;
                     }
                     ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
-                    if(ContentLength == 0)
-                        return -2;
+                    // if(ContentLength == 0)
+                    //     return -2;
                     flag = 1;
                     i = copyheader.size();
                     return  1;

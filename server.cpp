@@ -88,6 +88,7 @@ void server::monitor()
 		{
 			if (this->pfds[i].revents & POLLIN)
 			{
+				std::cout << "lol2" << std::endl;
 				for (size_t j = 0; j < servers.size(); j++)
 				{
 					if (pfds[i].fd == servers[j].socket_server)
@@ -111,7 +112,7 @@ void server::monitor()
 				{
 					if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 1)
 					{
-						// std::cout << "ready to send" << std::endl;
+						std::cout << "ready to send" << std::endl;
 						this->response(this->pfds[i], j);
 					}
 				}
@@ -153,9 +154,11 @@ void server::response(struct pollfd &pfds, int index)
 {
 	if (clients[index].flag_res < 0)
 	{
+		clients[index].respond.defineContentType();
+		std::cout << clients[index].headerOfRequest << std::endl;
 		clients[index].respond.generate_response();
-		clients[index].respond.send_response(clients[index], pfds);
-		this->disconnect(index);
+		if (clients[index].respond.send_response(clients[index], pfds) == 1)
+			this->disconnect(index);
 	}
 	// if (clients[index].check_method() == 1)
 	// {
@@ -178,39 +181,27 @@ void server::response(struct pollfd &pfds, int index)
 	// 	clients[index].error_headers(pfds);
 	// 	this->disconnect(index);
 	// }
-	else if(clients[index].flag == 1) // if has content lenght
+	else if(clients[index].flag == 1) // if has content length
 	{
 		std::cout << "post handle" << std::endl;
 		clients[index].bodyParss.handle_post(clients[index]);
-		clients[index].headerOfRequest.clear();
-		clients[index].buffer.clear();
-		clients[index].ready = 0;
-		clients[index].flag = 0;
+		clients[index].clear();
 		pfds.revents &= ~POLLOUT;
-		clients[index].input.close();
 		return ;
 	}
 	else if(clients[index].flag == 3)// // handle chunked data when resend request
 	{
 		std::cout << "chunked handle" << std::endl;
 		clients[index].bodyParss.handling_chunked_data(clients[index]);
-		clients[index].headerOfRequest.clear();
-		clients[index].buffer.clear();
-		clients[index].ready = 0;
-		clients[index].flag = 0;
+		clients[index].clear();
 		pfds.revents &= ~POLLOUT;
-		clients[index].input.close();
 	}
 	else if(clients[index].flag == 4)
 	{
-		std::cout << "form handle" << std::endl;
+		std::cout << "form handle1" << std::endl;
 		clients[index].bodyParss.handling_form_data(clients[index]);
-		clients[index].headerOfRequest.clear();
-		clients[index].buffer.clear();
-		clients[index].ready = 0;
-		clients[index].flag = 0;
+		clients[index].clear();
 		pfds.revents &= ~POLLOUT;
-		clients[index].input.close();
 	}
 	else
 		clients[index].normal_response(pfds);
@@ -266,6 +257,17 @@ void server::receive(int pfds_index, int index)
     {
 		// std::cout << "get method " << clients[index].client_socket << std::endl;
 		// std::cout << clients[index].headerOfRequest << std::endl;
+		string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].buffer.size() - clients[index].headerOfRequest.size() + 3);
+		if (!test.empty() && clients[index].tmp == 0)
+		{
+			clients[index].respond.status_code = 400;
+			clients[index].respond.phrase = "Bad Request";
+			clients[index].respond.type = 1;
+			clients[index].respond.body = "No Body Should Exist With The Method Get";
+			clients[index].respond.close = 1;
+			clients[index].respond.content = 1;
+			clients[index].flag_res = -1;
+		}
 		clients[index].check();
 		pfds[pfds_index].revents &= ~POLLIN;
 		return ;
@@ -281,12 +283,28 @@ void server::receive(int pfds_index, int index)
 			pfds[pfds_index].revents &= ~POLLIN;
 		}
 	}
- //    else if(clients[index].flag == 4)
-	// {
-	// 	std::cout << "form handle" << std::endl;
-	// 	clients[index].bodyParss.handling_form_data(clients[index]);
-	// 	// clients[index].bodyParss.handling_form_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,clients[index].bytes_read,clients[index].flag_);
-	// }
+    else if(clients[index].flag == 4)
+	{
+		std::cout << "form handle" << std::endl;
+		std::cout << clients[index].ContentLength << std::endl;
+		std::cout << clients[index].total_bytes_received << std::endl;
+		if(clients[index].total_bytes_received >= clients[index].ContentLength)// finish recivng
+		{
+			clients[index].check();
+			std::cout << "here" << std::endl;
+			pfds[pfds_index].revents &= ~POLLIN;
+		}
+		else
+		{
+			std::cout << "here2" << std::endl;
+			clients[index].total_bytes_received += clients[index].bytes_read;
+			std::cout << clients[index].ContentLength << std::endl;
+			std::cout << clients[index].total_bytes_received << std::endl;
+		}
+		// clients[index].bodyParss.handling_form_data(clients[index]);
+		// clients[index].bodyParss.handling_form_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,clients[index].bytes_read,clients[index].flag_);
+	}
+	std::cout << "flag == " << clients[index].flag << std::endl;
         
         
     // return 1;

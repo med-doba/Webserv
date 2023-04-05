@@ -47,13 +47,21 @@ class response
 		int status_code;
 		std::string phrase;
 		int type;
-		int close;
 		std::string response_req;
 		std::string body;
+		std::vector<std::string>headers;
+		std::string version;
+		std::string del;
+		std::string closeheader;
+		int close;
+		std::string contentlength;
+		std::string contenttype;
+		int content;
 		
         response(/* args */);
 		void generate_response();
-		void send_response(client &obj, struct pollfd &pfds);
+		int send_response(client &obj, struct pollfd &pfds);
+		void defineContentType();
 		response(const response &obj);
 		response& operator=(const response &obj);
 		void clear();
@@ -112,6 +120,7 @@ class client
 	void openfile();
 	// int response(int pfds_index, vector<struct pollfd> &pfds);
 	int pushToBuffer();
+	void clear();
 	int checkHeaderOfreq();
 	long long	ft_atoi(const char *str);
 	char *ft_substr(char const *s, unsigned int start, size_t len);
