@@ -55,73 +55,73 @@ void client::normal_response(struct pollfd &pfds)
 		return ;
 	}
 }
-int client::response(int pfds_index, std::vector<struct pollfd> &pfds)
-{
-	// char c;
-
-	std::cout << "normal response" << std::endl;
-	if (!input.is_open())
-	{
-		// std::cout << "lol2 " << std::endl;
-		// input.open("../tests/pdf.pdf");
-		input.open("../test/bigpdf.pdf");
-		if (!input.is_open())
-		{
-			std::cout << "couldn't open file" << std::endl;
-			return (1);
-		}
-		// while (input.get(c))
-		// {
-		// 	std::cout << "loop" << std::endl;
-		// 	content_buffer.push_back(c);
-		// }
-		input.seekg(0, std::ios::end);
-		size_t size = input.tellg();
-		input.seekg(0, std::ios::beg);
-
-		// Reserve space in the buffer
-		std::vector<char> content(size);
-
-		// Read the file in chunks
-		input.read(&content[0], size);
-		response_header = "HTTP/1.1 200 OK\r\n"
-						"Content-Type: application/pdf\r\n"
-						"Content-length: " + std::to_string(content.size()) + "\r\n"
-						"\r\n";
-		response_header += std::string(content.begin(), content.end());
-	}
-	if (!response_header.empty())
-	{
-		// std::cout << "send chunks" << std::endl;
-		int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
-		if (i < 0)
-		{
-			std::cout << "error "  << this->client_socket << std::endl;
-			std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
-			std::cout << this->headerOfRequest << std::endl;
-			printf("errno = %d: %s\n", errno, strerror(errno));
-			// response_header.clear();
-			return (0);
-		}
-		response_header.erase(0, i);
-		// std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
-	}
-	else
-	{ 
-		std::cout << "sent complete " << this->client_socket << std::endl;
-		std::cout << "ready -- " << this->ready << std::endl;
-		std::cout << this->headerOfRequest << std::endl;
-		headerOfRequest.clear();
-		// content_buffer.clear();
-		buffer.clear();
-		ready = 0;
-		flag = 0;
-		pfds[pfds_index].revents &= ~POLLOUT;
-		input.close();
-		return (0);
-	}
-	return (0);
-}
+// int client::response(int pfds_index, std::vector<struct pollfd> &pfds)
+// {
+// 	// char c;
+//
+// 	std::cout << "normal response" << std::endl;
+// 	if (!input.is_open())
+// 	{
+// 		// std::cout << "lol2 " << std::endl;
+// 		// input.open("../tests/pdf.pdf");
+// 		input.open("../test/bigpdf.pdf");
+// 		if (!input.is_open())
+// 		{
+// 			std::cout << "couldn't open file" << std::endl;
+// 			return (1);
+// 		}
+// 		// while (input.get(c))
+// 		// {
+// 		// 	std::cout << "loop" << std::endl;
+// 		// 	content_buffer.push_back(c);
+// 		// }
+// 		input.seekg(0, std::ios::end);
+// 		size_t size = input.tellg();
+// 		input.seekg(0, std::ios::beg);
+//
+// 		// Reserve space in the buffer
+// 		std::vector<char> content(size);
+//
+// 		// Read the file in chunks
+// 		input.read(&content[0], size);
+// 		response_header = "HTTP/1.1 200 OK\r\n"
+// 						"Content-Type: application/pdf\r\n"
+// 						"Content-length: " + std::to_string(content.size()) + "\r\n"
+// 						"\r\n";
+// 		response_header += std::string(content.begin(), content.end());
+// 	}
+// 	if (!response_header.empty())
+// 	{
+// 		// std::cout << "send chunks" << std::endl;
+// 		int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
+// 		if (i < 0)
+// 		{
+// 			std::cout << "error "  << this->client_socket << std::endl;
+// 			std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
+// 			std::cout << this->headerOfRequest << std::endl;
+// 			printf("errno = %d: %s\n", errno, strerror(errno));
+// 			// response_header.clear();
+// 			return (0);
+// 		}
+// 		response_header.erase(0, i);
+// 		// std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
+// 	}
+// 	else
+// 	{ 
+// 		std::cout << "sent complete " << this->client_socket << std::endl;
+// 		std::cout << "ready -- " << this->ready << std::endl;
+// 		std::cout << this->headerOfRequest << std::endl;
+// 		headerOfRequest.clear();
+// 		// content_buffer.clear();
+// 		buffer.clear();
+// 		ready = 0;
+// 		flag = 0;
+// 		pfds[pfds_index].revents &= ~POLLOUT;
+// 		input.close();
+// 		return (0);
+// 	}
+// 	return (0);
+// }
 
 void client::check(void)
 {
@@ -169,6 +169,7 @@ client& client::operator=(const client& obj)
 		this->tmp = obj.tmp;
 		this->flag_ = obj.flag_;
 		this->flag_res = obj.flag_res;
+		this->respond = obj.respond;
 		this->total_bytes_received = obj.total_bytes_received;
 		this->i = obj.i;
 		this->j = obj.j;
@@ -195,7 +196,7 @@ int client::checkHeaderOfreq()
             {
                 headerOfRequest = buffer.substr(0,pos - 1);// not include \r\n
 				std::string copyheader = headerOfRequest;
-				this->flag_res = headerParss.checkHeaderOfreq_(copyheader, tmp);
+				this->flag_res = headerParss.checkHeaderOfreq_(copyheader, tmp, respond);
 				if (this->flag_res < 0)
 				{
 					flag = 2;

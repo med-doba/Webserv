@@ -10,6 +10,7 @@ CFILES = main.cpp\
 		server.cpp\
 		parssingOfBody.cpp\
 		parssingOfHeader.cpp\
+		response.cpp\
 
 
 OFILES = $(addprefix $(OBJ_DIR)/,$(CFILES:.cpp=.o))

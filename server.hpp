@@ -28,7 +28,6 @@ class server
 	void fill();
 	void response(struct pollfd &pfds, int index);
 	void receive(int pfds_index, int index);
-	// void response(int index);
 	void new_connection(int index);
 };
 

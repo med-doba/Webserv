@@ -54,7 +54,7 @@ long long	parssingOfHeader::ft_atoi(const char *str)
 }
 
 
-int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp)
+int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& respond)
 {
      
     // when add char after \r\n will add in first of the second line
@@ -70,7 +70,14 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp)
 
 	i = str.find("Host: ");
 	if(i == -1)
+	{
+		respond.status_code = 400;
+		respond.phrase = "Bad Request";
+		respond.type = 1;
+		respond.body = "No Host Header Found";
+		respond.close = 1;
 		return -4;
+	}
     if(tmp == 1)// when upload to to server sould present this headers
     {
         i = str.find("Content-Length: ");
@@ -132,17 +139,17 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp)
 }
 
 
-int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp)
+int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response& respond)
 {
     int i = 0;
     int j = 0;
     char *temp;
-     
+	(void)respond;
+
 
     j = i;
     while (headerOfRequest[i] && headerOfRequest[i] != ' ')
         i++;
-    
     temp = ft_substr(headerOfRequest.data(),j,i);
     if(strcmp(temp,"POST") == 0)
         tmp = 1;
@@ -186,15 +193,15 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp)
 }
  
 
-int parssingOfHeader::checkHeaderOfreq_(string &headerOfRequest, int & tmp)
+int parssingOfHeader::checkHeaderOfreq_(string &headerOfRequest, int & tmp, response& respond)
 {
-    int rtn = checkHeaderLine(headerOfRequest, tmp);
+    int rtn = checkHeaderLine(headerOfRequest, tmp, respond);
  
 	if(rtn < 0)
 		return rtn;
 
 	headerOfRequest = &headerOfRequest[rtn];
-    rtn = checkHeaders(headerOfRequest,tmp);
+    rtn = checkHeaders(headerOfRequest,tmp, respond);
     
     return rtn;
 }

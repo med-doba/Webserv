@@ -12,16 +12,9 @@
 #include <fstream>
 #include <fcntl.h>
 #include <cstdlib>
-#include <iostream>
-#include <vector>
-#include <fcntl.h>
-#include <cstring>
 #include <sys/ioctl.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <poll.h>
-// #include "parssingOfBody.hpp"
-// #include "parssingOfHeader.hpp"
 
 using std::string;
 using std::vector;
@@ -40,14 +33,32 @@ class parssingOfBody
 
         parssingOfBody(/* args */);
         void handle_post(client &obj);
-        // void handling_chunked_data(std::string &buffer,std::string &headerOfRequest, std::string &boundary,std::string &bodyofRequest, int & total_bytes_received, int & ContentLength, int & i, int & bytes_received,int & flag_);
         void handling_chunked_data(client &obj);
-        // void handling_form_data(std::string& buffer, std::string &headerOfRequest, std::string &boundary,std::string & bodyofRequest ,int &total_bytes_received,int &ContentLength,  int & i, int & bytes_received, int & flag_);
         void handling_form_data(client &obj);
         void putDataTofile(std::string  data, std::string & bodyofRequest);
         void  create_file_and_put_content(std::string & bodyofRequest,std::string & headerOfRequest);
 
         ~parssingOfBody();
+};
+
+class response
+{
+    public:
+		int status_code;
+		std::string phrase;
+		int type;
+		int close;
+		std::string response_req;
+		std::string body;
+		
+        response(/* args */);
+		void generate_response();
+		void send_response(client &obj, struct pollfd &pfds);
+		response(const response &obj);
+		response& operator=(const response &obj);
+		void clear();
+        ~response();
+
 };
 
 class parssingOfHeader
@@ -60,11 +71,12 @@ class parssingOfHeader
 
         long long	ft_atoi(const char *str);
 
-        int checkHeaderOfreq_(std::string&, int &);
-        int checkHeaderLine(std::string, int &);
-        int checkHeaders(std::string, int &);
+        int checkHeaderOfreq_(std::string&, int &, response& respond);
+        int checkHeaderLine(std::string, int &,response & respond);
+        int checkHeaders(std::string, int &, response& respond);
         ~parssingOfHeader();
 };
+
 
 class client
 {
@@ -81,12 +93,12 @@ class client
 	std::vector<char> content_buffer;
 	int bytes_read;
 	int flag;
-	// int ignore;
 	int ready;
 
 
 	parssingOfHeader headerParss;
 	parssingOfBody   bodyParss;
+	response respond;
 	int tmp;
 	int flag_;
 	int total_bytes_received;
@@ -98,7 +110,7 @@ class client
 
 	int extractheader();
 	void openfile();
-	int response(int pfds_index, vector<struct pollfd> &pfds);
+	// int response(int pfds_index, vector<struct pollfd> &pfds);
 	int pushToBuffer();
 	int checkHeaderOfreq();
 	long long	ft_atoi(const char *str);
