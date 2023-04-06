@@ -4,7 +4,8 @@
 
 #include <string.h>
 
-
+using std::endl;
+using std::cout;
 
 parssingOfBody::parssingOfBody(/* args */)
 {
@@ -70,7 +71,7 @@ void parssingOfBody::putDataTofile(string  data, string & bodyofRequest)
     
     if(pos != -1)
     {    
-         
+         std::cout << "here \n";
         int t = pos + 10;
         while (data[t] != '"')
             t++;
@@ -80,7 +81,7 @@ void parssingOfBody::putDataTofile(string  data, string & bodyofRequest)
         while (data[pos] != '\r' && data[pos + 1] != '\n')
             pos++;
         pos += 4;
-        while (pos < (int)data.size())
+        while (pos < (int)data.size() - 2)// for /r/n
         {
             bodyofRequest.push_back(data[pos]);
             pos++;
@@ -116,7 +117,6 @@ void parssingOfBody::handling_form_data(client &obj)
     if(obj.total_bytes_received >= obj.ContentLength)
     { 
         size_t start_idx = obj.i;
-        std::cout << start_idx << std::endl;
         string separator = obj.boundary;
         vector<string> substrings; // clear ?
         // std::cout << obj.buffer << std::endl;
@@ -125,8 +125,7 @@ void parssingOfBody::handling_form_data(client &obj)
             size_t end_idx = obj.buffer.find(separator, start_idx);
             if (end_idx == string::npos) 
             {
-                std::cout << "break" << std::endl;
-                std::cout << obj.buffer.substr(start_idx) << std::endl;
+                // std::cout << obj.buffer.substr(start_idx) << std::endl;
                 substrings.push_back(obj.buffer.substr(start_idx));
                 break;
             }
@@ -134,15 +133,18 @@ void parssingOfBody::handling_form_data(client &obj)
             substrings.push_back(obj.buffer.substr(start_idx, end_idx - start_idx));
             start_idx = end_idx + separator.length();
         }
-        substrings.erase(substrings.end() - 1);// remove "--" after last boundry
-    
+        // std::cout << substrings[0] << std::endl;
+
+        substrings.erase(substrings.end() - 1);// remove "--" after last boundr
+        // std::cout << substrings[0] << std::endl;
         vector<string>::iterator it = substrings.begin();
-       
+        
         // std::cout << "here " << obj.boundary << std::endl;
         while (it != substrings.end())
         { 
-            //  std::cout << *it << std::endl;
+            // std::cout << "lolloop" << std::endl;
             if(!it->empty())
+                cout << *it << endl;
                 putDataTofile(*it,obj.bodyofRequest);
             it++;
         }

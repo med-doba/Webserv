@@ -132,7 +132,7 @@ class client
 	int check_location();
 	void error_location(struct pollfd &pfds);
 	void error_headers(struct pollfd &pfds);
-	void normal_response(struct pollfd &pfds);
+	int normal_response(struct pollfd &pfds);
 	client();
 	client(const client &obj);
 	client& operator=(const client& obj);
