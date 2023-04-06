@@ -84,11 +84,12 @@ void server::monitor()
 	{
 		this->remove = 0;
 		this->poll_count = poll(&pfds[0], this->pfds.size(), 10);
+		// std::cout << "poll count == " << poll_count << std::endl;
 		for (size_t i = 0; i < this->pfds.size(); i++)
 		{
 			if (this->pfds[i].revents & POLLIN)
 			{
-				std::cout << "lol2" << std::endl;
+				std::cout << "lol == " << pfds[i].fd << std::endl;
 				for (size_t j = 0; j < servers.size(); j++)
 				{
 					if (pfds[i].fd == servers[j].socket_server)
@@ -103,6 +104,7 @@ void server::monitor()
 					{
 						std::cout << "ready to recv " << clients[j].client_socket << std::endl;
 						this->receive(i, j);
+						break ;
 					}
 				}
 			}
@@ -114,6 +116,7 @@ void server::monitor()
 					{
 						std::cout << "ready to send" << std::endl;
 						this->response(this->pfds[i], j);
+						break ;
 					}
 				}
 			}
@@ -245,6 +248,8 @@ void server::receive(int pfds_index, int index)
 	{
 		std::cout << "post handle" << std::endl;
 		string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].ContentLength);
+		std::cout << "test size == " << test.size() << std::endl;
+		std::cout << "contentlength == " << clients[index].ContentLength << std::endl;
 		if((int)test.size() >= clients[index].ContentLength)// finish recivng
 		{
 			clients[index].check();
@@ -288,6 +293,7 @@ void server::receive(int pfds_index, int index)
 		std::cout << "form handle" << std::endl;
 		std::cout << clients[index].ContentLength << std::endl;
 		std::cout << clients[index].total_bytes_received << std::endl;
+		std::cout << poll_count << std::endl;
 		if(clients[index].total_bytes_received >= clients[index].ContentLength)// finish recivng
 		{
 			clients[index].check();
@@ -300,6 +306,12 @@ void server::receive(int pfds_index, int index)
 			clients[index].total_bytes_received += clients[index].bytes_read;
 			std::cout << clients[index].ContentLength << std::endl;
 			std::cout << clients[index].total_bytes_received << std::endl;
+		}
+		if(clients[index].total_bytes_received >= clients[index].ContentLength)// finish recivng
+		{
+			clients[index].check();
+			std::cout << "here" << std::endl;
+			pfds[pfds_index].revents &= ~POLLIN;
 		}
 		// clients[index].bodyParss.handling_form_data(clients[index]);
 		// clients[index].bodyParss.handling_form_data(clients[index].buffer,clients[index].headerOfRequest,clients[index].boundary,clients[index].bodyofRequest,clients[index].total_bytes_received,clients[index].ContentLength,clients[index].i,clients[index].bytes_read,clients[index].flag_);

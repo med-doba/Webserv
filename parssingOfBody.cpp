@@ -115,20 +115,22 @@ void parssingOfBody::handling_form_data(client &obj)
     //     obj.total_bytes_received += obj.bytes_read;
     if(obj.total_bytes_received >= obj.ContentLength)
     { 
-      
         size_t start_idx = obj.i;
+        std::cout << start_idx << std::endl;
         string separator = obj.boundary;
         vector<string> substrings; // clear ?
-
+        // std::cout << obj.buffer << std::endl;
         while (true) 
         {
             size_t end_idx = obj.buffer.find(separator, start_idx);
             if (end_idx == string::npos) 
             {
+                std::cout << "break" << std::endl;
+                std::cout << obj.buffer.substr(start_idx) << std::endl;
                 substrings.push_back(obj.buffer.substr(start_idx));
                 break;
             }
-
+            // std::cout << obj.buffer.substr(start_idx, end_idx - start_idx) << std::endl;
             substrings.push_back(obj.buffer.substr(start_idx, end_idx - start_idx));
             start_idx = end_idx + separator.length();
         }
@@ -136,13 +138,15 @@ void parssingOfBody::handling_form_data(client &obj)
     
         vector<string>::iterator it = substrings.begin();
        
+        // std::cout << "here " << obj.boundary << std::endl;
         while (it != substrings.end())
         { 
-             
+            //  std::cout << *it << std::endl;
             if(!it->empty())
                 putDataTofile(*it,obj.bodyofRequest);
             it++;
         }
+        // std::cout << "here2 " << obj.boundary << std::endl;
     }
 }
 
