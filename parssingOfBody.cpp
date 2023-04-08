@@ -66,33 +66,74 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
     close(fd);
 }
 
-void parssingOfBody::putDataTofile(string  data, string & bodyofRequest, int &created)
+int checkFileContent(std::string filename, std::string &data)
+{
+    std::string content;
+    std::string requestBody;
+    std::ifstream file(filename);
+    if (!file) {
+       return (-1);
+    }
+    std::stringstream ss;
+    ss << file.rdbuf();
+    content = ss.str();
+    int pos = data.find("Content-Type:");
+    while (data[pos] != '\r' && data[pos + 1] != '\n')
+        pos++;
+    pos += 4;
+    while (pos < (int)data.size() - 2)// for /r/n
+    {
+        requestBody.push_back(data[pos]);
+        pos++;
+    }
+    if (content == requestBody)
+    {
+        std::cout << "File contents and request body are the same" << std::endl;
+        return (1);
+    } 
+    std::cout << "File contents and request body are different" << std::endl;
+    return (0);
+}
+
+void parssingOfBody::putDataTofile(string  data, client & obj)
 {
 
     int pos = data.find("filename=\"");
     
     if(pos != -1)
     {    
-         std::cout << "here \n";
         int t = pos + 10;
         while (data[t] != '"')
             t++;
         file =  data.substr(pos + 10,t - (pos + 10));
-        fd = open((char*)(file.data()),O_CREAT | O_RDWR , 0777);
+        fd = open((char*)(file.data()),O_CREAT | O_RDWR | O_EXCL , 0777);
+        if (checkFileContent(file, data) == 0 && fd < 0)
+        {
+            obj.respond.flagResponse = UPDATED;
+            fd = open((char*)(file.data()),O_CREAT | O_RDWR | O_TRUNC , 0777);
+        }
+        else if (fd < 0)
+        {
+            obj.respond.flagResponse = EXIST;
+            file.clear();
+            obj.bodyofRequest.clear();
+        }
         pos = data.find("Content-Type:");
         while (data[pos] != '\r' && data[pos + 1] != '\n')
             pos++;
         pos += 4;
         while (pos < (int)data.size() - 2)// for /r/n
         {
-            bodyofRequest.push_back(data[pos]);
+            obj.bodyofRequest.push_back(data[pos]);
             pos++;
         }
-        int i = write(fd,(void*)(bodyofRequest.data()),bodyofRequest.size());
-        if (i == (int)bodyofRequest.size())
-            created = 1;
+        int i = write(fd,(void*)(obj.bodyofRequest.data()),obj.bodyofRequest.size());
+        if (obj.bodyofRequest.empty())
+            obj.respond.flagResponse = EMPTY;
+        else if (i == (int)obj.bodyofRequest.size() && obj.respond.flagResponse == -1)
+            obj.respond.flagResponse = CREATED;
         file.clear();
-        bodyofRequest.clear();
+        obj.bodyofRequest.clear();
         close(fd);
     }
 }
@@ -148,7 +189,7 @@ void parssingOfBody::handling_form_data(client &obj)
         { 
             // std::cout << "lolloop" << std::endl;
             if(!it->empty())
-                putDataTofile(*it,obj.bodyofRequest, obj.respond.created);
+                putDataTofile(*it,obj);
                 // cout << *it << endl;
             it++;
         }
@@ -203,7 +244,7 @@ void  parssingOfBody::handling_chunked_data(client &obj)
                 return ;
             }
             if (!obj.bodyofRequest.empty())
-                create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.created);
+                create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse);
             
             obj.flag_ = 10;
         } 
@@ -226,7 +267,7 @@ void parssingOfBody::handle_post(client &obj)
 		std::cout << "buffer23 size == " << obj.buffer.size()<< std::endl;
         obj.bodyofRequest = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
         if (!obj.bodyofRequest.empty())
-            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.created);
+            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse);
     }
 }
 

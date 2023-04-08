@@ -75,11 +75,11 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
 		respond.phrase = "Bad Request";
 		respond.type = 1;
 		respond.body = "No Host Header Found";
-		respond.close = 1;
+		respond.close = CLOSE;
         respond.content = 1;
 		return -4;
 	}
-    if(tmp == 1)// when upload to to server sould present this headers
+    if(tmp == POST)// when upload to to server sould present this headers
     {
         i = str.find("Content-Length: ");
         if(i == -1)
@@ -89,7 +89,7 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
             respond.phrase = "Length Required";
             respond.content = 1;
             respond.body = "No Content-Length Header Found";
-            respond.close = 1;
+            respond.close = CLOSE;
             return -5;
         }
         i = str.find("Content-Type: ");
@@ -100,7 +100,7 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
             respond.phrase = "Bad Request";
             respond.content = 1;
             respond.body = "No Content-Type Header Found";
-            respond.close = 1;
+            respond.close = CLOSE;
             return -6;
         }
         i = str.find("If-Modified-Since: ");
@@ -111,7 +111,7 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
             respond.phrase = "Requested Range Not Satisfiable";
             respond.content = 1;
             respond.body = "The request has a malformed header";
-            respond.close = 1;
+            respond.close = CLOSE;
             return -7;
         }
         i = str.find("Range: ");
@@ -122,11 +122,11 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
             respond.phrase = "Bad Request";
             respond.content = 1;
             respond.body = "The request has a malformed header";
-            respond.close = 1;
+            respond.close = CLOSE;
             return -8;
         }
     }
-    else if(tmp == 0)//get method
+    else if(tmp == GET)//get method
     {
         i = str.find("Content-Length: ");
         if(i != -1)
@@ -139,7 +139,7 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
                 respond.phrase = "Bad Request";
                 respond.content = 1;
                 respond.body = "The request has a malformed header";
-                respond.close = 1;
+                respond.close = CLOSE;
 				return -9;
             }
 		}
@@ -151,7 +151,7 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
             respond.phrase = "Bad Request";
             respond.content = 1;
             respond.body = "Invalid request: GET requests must not have a body with Transfer-Encoding.";
-            respond.close = 1;
+            respond.close = CLOSE;
 			return (-10);
         }
         i = str.find("Content-Type: ");
@@ -162,11 +162,11 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
             respond.phrase = "Bad Request";
             respond.content = 1;
             respond.body = "The request contained a Content-Type header, but it should not be included in a GET request.";
-            respond.close = 1;
+            respond.close = CLOSE;
             return -11;
         }
     }
-    else if(tmp == 2)//delete method
+    else if(tmp == DELETE)//delete method
     {
         i = str.find("If-Modified-Since: ");
         if(i != -1)
@@ -176,7 +176,7 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
             respond.phrase = "Method Not Allowed";
             respond.content = 1;
             respond.body = "The request has a malformed header";
-            respond.close = 1;
+            respond.close = CLOSE;
             return -12;
         }
         i = str.find("Range: ");
@@ -212,7 +212,7 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
 }
 
 
-int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response& respond)
+int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response& respond, std::string &URI)
 {
     int i = 0;
     int j = 0;
@@ -225,20 +225,25 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response
         i++;
     temp = ft_substr(headerOfRequest.data(),j,i);
     if(strcmp(temp,"POST") == 0)
-        tmp = 1;
+        tmp = POST;
     if(strcmp(temp,"GET") == 0)
-        tmp = 0;
+        tmp = GET;
     if(strcmp(temp,"DELETE") == 0)
-        tmp = 2;
+        tmp = DELETE;
+    // std::cout << "method == " << tmp << std::endl;
     if( strcmp(temp,"GET") != 0 && strcmp(temp,"POST") != 0 && strcmp(temp,"DELETE") != 0)
     {
+        std::cout << "herrererrereree\n";
+        std::cout << "temp == " << temp << std::endl;
+        std::cout << headerOfRequest << std::endl;
+        // std::cout << "size == " << temp << std::endl;
         free(temp);
         respond.type = 1;
         respond.status_code = 405;
         respond.phrase = "Method Not Allowed";
         respond.headers.push_back("Allow: GET, POST, DELETE");
         // respond.body = "No Host Header Found";
-        // respond.close = 1;
+        // respond.close = CLOSE;
         return -1;
     }
     free(temp);
@@ -253,7 +258,9 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response
         free(temp);
         return -2;
     }
+    URI.assign(temp);
     free(temp);
+    std::cout << "URI == " << URI << std::endl;
 
     i++;
     j = i;
@@ -268,7 +275,7 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response
         respond.status_code = 505;
         respond.phrase = "HTTP Version Not Supported";
         // respond.body = "No Host Header Found";
-        // respond.close = 1;
+        // respond.close = CLOSE;
         return -3;
     }
     free(temp);
@@ -277,10 +284,10 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response
 }
  
 
-int parssingOfHeader::checkHeaderOfreq_(string &headerOfRequest, int & tmp, response& respond)
+int parssingOfHeader::checkHeaderOfreq_(string &headerOfRequest, int & tmp, response& respond, std::string& URI)
 {
-    int rtn = checkHeaderLine(headerOfRequest, tmp, respond);
- 
+    int rtn = checkHeaderLine(headerOfRequest, tmp, respond, URI);
+
 	if(rtn < 0)
 		return rtn;
 

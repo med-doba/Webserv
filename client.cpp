@@ -135,6 +135,7 @@ void client::clear()
 	ready = 0;
 	respond.clear();
 	flag = 0;
+	tmp = 0;
 	input.close();
 }
 
@@ -165,7 +166,7 @@ client& client::operator=(const client& obj)
 		this->body = obj.body;
 		this->headerOfRequest = obj.headerOfRequest;
 		this->bodyofRequest = obj.bodyofRequest;
-		this->content_buffer = obj.content_buffer;
+		// this->content_buffer = obj.content_buffer;
 		this->bytes_read = obj.bytes_read;
 		this->flag = obj.flag;
 		this->bodyParss = obj.bodyParss;
@@ -190,6 +191,7 @@ client::~client()
 int client::checkHeaderOfreq()
 {
     int pos = 0;
+	int _tmp = 0;
     
     while (buffer[pos] && flag == 0)// for entring one time
     { 
@@ -200,10 +202,10 @@ int client::checkHeaderOfreq()
             {
                 headerOfRequest = buffer.substr(0,pos - 1);// not include \r\n
 				std::string copyheader = headerOfRequest;
-				this->flag_res = headerParss.checkHeaderOfreq_(copyheader, tmp, respond);
+				this->flag_res = headerParss.checkHeaderOfreq_(copyheader, tmp, respond, URI);
 				if (this->flag_res < 0)
 				{
-					flag = 2;
+					flag = ERROR;
 					return (1);
 				}
                 // if(headerParss.checkHeaderOfreq_(headerOfRequest,tmp) == -2)
@@ -218,7 +220,7 @@ int client::checkHeaderOfreq()
 					
                     // len -= i;
 					
-                    flag = 3;
+                    flag = CHUNKED;
                     return 1;
                 }
                 pos = copyheader.find("Content-Length");  
@@ -227,18 +229,18 @@ int client::checkHeaderOfreq()
                     j = copyheader.find("boundary");
                     if(j != -1)
                     {
-                        flag = 4;
+                        flag = FORM;
                         ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
                         if(ContentLength == 0)
                             return -2;
 						 
                         i = headerOfRequest.size() + 3;// after herder
                         bytes_read -= i;
-                        tmp = j + 9;
-                        char *temp = (char*)copyheader.data() + tmp;// because string() dont handle '\r'
-                        tmp = 0;
-                        while (temp[tmp] != '\r' && temp[tmp] != '\n' && temp[tmp + 1] != '\n')
-                            tmp++;
+                        _tmp = j + 9;
+                        char *temp = (char*)copyheader.data() + _tmp;// because string() dont handle '\r'
+                        _tmp = 0;
+                        while (temp[_tmp] != '\r' && temp[_tmp] != '\n' && temp[_tmp + 1] != '\n')
+                            _tmp++;
                         boundary.append("--").append(ft_substr(temp,0,tmp));// free boundry and temp?
                         std::cout << "=> " <<  boundary << std::endl;
                         return 1;
@@ -246,14 +248,14 @@ int client::checkHeaderOfreq()
                     ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
                     // if(ContentLength == 0)
                     //     return -2;
-                    flag = 1;
+                    flag = NONCHUNKED;
                     i = headerOfRequest.size();
                     return  1;
                 }
                 else
                 {
                     // without body
-                    flag = 2;
+                    flag = GET;
                     return 1;
                 }
             }
@@ -262,7 +264,7 @@ int client::checkHeaderOfreq()
         pos++;
     }
     // in entring second times
-    if(flag == 1 || flag == 2 || flag == 3 || flag == 4)
+    if(flag == GET || flag == CHUNKED || flag == NONCHUNKED || flag == FORM || flag == ERROR)
         return 1;
     else
         return -2;
@@ -334,115 +336,71 @@ int client::pushToBuffer()
     return this->bytes_read;
 }
 
-int client::check_method()
+
+int client::postMethod(struct pollfd &pfds)
 {
-	if (flag_res == -1)
-		return (1);
+	if(this->flag == NONCHUNKED) // if has content length
+	{
+		std::cout << "post handle1" << std::endl;
+		this->bodyParss.handle_post(*this);
+		this->respond.ready = 1;
+	}
+	else if(this->flag == CHUNKED)// // handle chunked data when resend request
+	{
+		std::cout << "chunked handle1" << std::endl;
+		this->bodyParss.handling_chunked_data(*this);
+		this->respond.ready = 1;
+	}
+	else if(this->flag == FORM)
+	{
+		std::cout << "form handle1" << std::endl;
+		this->bodyParss.handling_form_data(*this);
+		this->respond.ready = 1;
+	}
+	if (this->respond.ready == 1)
+	{
+		if (this->respond.flagResponse == CREATED)
+		{
+			this->respond.status_code = 201;
+			this->respond.phrase = "created";
+			this->respond.type = 1;
+			this->respond.content = 1;
+			// this->respond.headers.push_back("Location: " + )
+			this->respond.body = "successfully uploaded";
+		}
+		if (this->respond.flagResponse == EMPTY)
+		{
+			this->respond.status_code = 200;
+			this->respond.phrase = "OK";
+			this->respond.type = 1;
+			this->respond.content = 1;
+			this->respond.body = "No Body Found";
+		}
+		if (this->respond.flagResponse == EXIST)
+		{
+			this->respond.status_code = 409;
+			this->respond.phrase = "Conflict";
+			this->respond.type = 1;
+			this->respond.content = 1;
+			this->respond.body = "Resource Already Exist";
+		}
+		if (this->respond.flagResponse == UPDATED)
+		{
+			this->respond.status_code = 204;
+			this->respond.phrase = "No Content";
+			this->respond.type = 1;
+			// this->respond.content = 1;
+			// this->respond.body = "Resource Already Exist";
+		}
+		this->respond.generate_response();
+		int i = this->respond.send_response(*this ,pfds);
+		if (i == 0)
+		{
+			this->clear();
+			pfds.revents &= ~POLLOUT;
+		}
+		else if (i == CLOSE)
+			return (CLOSE);
+	}
 	return (0);
-}
-
-void client::error_method(struct pollfd &pfds)
-{
-	std::cout << "error method" << std::endl;
-	this->response_header = "HTTP/1.1 405 Method Not Allowed\r\nAllow: GET, POST, DELETE\r\nContent-Length: 0\r\n\r\n";
-	int i = send(this->client_socket, response_header.c_str(), response_header.size(),0);
-	if (i < 0)
-	{
-		std::cout << "error send in method error" << std::endl;
-		return ;
-	}
-	else if (i == (int)response_header.size())
-	{
-		std::cout << "response sent " << std::endl;
-		response_header.clear();
-		headerOfRequest.clear();
-		buffer.clear();
-		ready = 0;
-		flag = 0;
-		pfds.revents &= ~POLLOUT;
-	}
-}
-
-int client::check_version()
-{
-	if (flag_res == -3)
-		return (1);
-	return (0);
-}
-
-void client::error_version(struct pollfd &pfds)
-{
-	std::cout << "error version" << std::endl;
-	this->response_header = "HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Length: 0\r\n\r\n";
-	int i = send(this->client_socket, response_header.c_str(), response_header.size(),0);
-	if (i < 0)
-	{
-		std::cout << "error send in version error" << std::endl;
-		return ;
-	}
-	else if (i == (int)response_header.size())
-	{
-		response_header.clear();
-		headerOfRequest.clear();
-		buffer.clear();
-		ready = 0;
-		flag = 0;
-		pfds.revents &= ~POLLOUT;
-	}
-}
-
-int client::check_location()
-{
-	if (flag_res == -2)
-		return (1);
-	return (0);
-}
-
-void client::error_location(struct pollfd &pfds)
-{
-	std::cout << "error location" << std::endl;
-	this->response_header = "HTTP/1.1 405 Method Not Allowed\r\nAllow: GET, POST, DELETE\r\nContent-Length: 0\r\n\r\n";
-	int i = send(this->client_socket, response_header.c_str(), response_header.size(),0);
-	if (i < 0)
-	{
-		std::cout << "error send in location error" << std::endl;
-		return ;
-	}
-	else if (i == (int)response_header.size())
-	{
-		response_header.clear();
-		headerOfRequest.clear();
-		buffer.clear();
-		ready = 0;
-		flag = 0;
-		pfds.revents &= ~POLLOUT;
-	}
-}
-
-void client::error_headers(struct pollfd &pfds)
-{
-	std::cout << "error headers" << std::endl;
-	if (flag_res == -4 || flag_res == -6)
-		this->response_header = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
-	if (flag_res == -5)
-		this->response_header = "HTTP/1.1 411 Length Required\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
-	if (flag_res == -7)
-		this->response_header = "HTTP/1.1 405 Method Not Allowed\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
-	if (flag_res == -8)
-		this->response_header = "HTTP/1.1 416 Requested Range Not Satisfiable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
-	int i = send(this->client_socket, response_header.c_str(), response_header.size(),0);
-	if (i < 0)
-	{
-		std::cout << "error send in headers error" << std::endl;
-		return ;
-	}
-	else if (i == (int)response_header.size())
-	{
-		response_header.clear();
-		headerOfRequest.clear();
-		buffer.clear();
-		ready = 0;
-		flag = 0;
-		pfds.revents &= ~POLLOUT;
-	}
 }

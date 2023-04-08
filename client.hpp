@@ -16,6 +16,21 @@
 #include <netinet/in.h>
 #include <poll.h>
 
+enum {
+	EMPTY,
+	GET,
+	POST,
+	DELETE,
+	CHUNKED,
+	FORM,
+	NONCHUNKED,
+	ERROR,
+	CREATED,
+	CLOSE,
+	EXIST,
+	UPDATED
+};
+
 using std::string;
 using std::vector;
 #define BUFFER 500000
@@ -35,7 +50,7 @@ class parssingOfBody
         void handle_post(client &obj);
         void handling_chunked_data(client &obj);
         void handling_form_data(client &obj);
-        void putDataTofile(std::string  data, std::string & bodyofRequest, int &created);
+		void putDataTofile(string  data, client & obj);
         void  create_file_and_put_content(std::string & bodyofRequest,std::string & headerOfRequest, int&created);
 
         ~parssingOfBody();
@@ -57,7 +72,7 @@ class response
 		std::string contentlength;
 		std::string contenttype;
 		int content;
-		int created;
+		int flagResponse;
 		int ready;
 		
         response(/* args */);
@@ -81,8 +96,8 @@ class parssingOfHeader
 
         long long	ft_atoi(const char *str);
 
-        int checkHeaderOfreq_(std::string&, int &, response& respond);
-        int checkHeaderLine(std::string, int &,response & respond);
+        int checkHeaderOfreq_(std::string&, int &, response& respond, std::string & URI);
+        int checkHeaderLine(std::string, int &,response & respond, std::string &URI);
         int checkHeaders(std::string, int &, response& respond);
         ~parssingOfHeader();
 };
@@ -100,7 +115,8 @@ class client
 	std::string headerOfRequest;
 	std::string bodyofRequest;
 	std::ofstream file;
-	std::vector<char> content_buffer;
+	// std::vector<char> content_buffer;
+	std::string URI;
 	int bytes_read;
 	int flag;
 	int ready;
@@ -127,14 +143,8 @@ class client
 	long long	ft_atoi(const char *str);
 	char *ft_substr(char const *s, unsigned int start, size_t len);
 	void check(void);
-	int check_method();
-	void error_method(struct pollfd &pfds);
-	int check_version();
-	void error_version(struct pollfd &pfds);
-	int check_location();
-	void error_location(struct pollfd &pfds);
-	void error_headers(struct pollfd &pfds);
 	int normal_response(struct pollfd &pfds);
+	int postMethod(struct pollfd &pfds);
 	client();
 	client(const client &obj);
 	client& operator=(const client& obj);

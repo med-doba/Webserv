@@ -9,7 +9,7 @@ response::response()
 	del = "\r\n";
 	closeheader = "Connection: close";
 	content = 0;
-	created = 0;
+	flagResponse = -1;
 	ready = 0;
 	contentlength = "Content-Length: ";
 	contenttype = "Content-Type: ";
@@ -37,6 +37,7 @@ void response::generate_response()
 	std::cout << "type == " << type << std::endl;
 	if (type == 1)
 	{
+		this->defineContentType();
 		response_req = version + " " + std::to_string(status_code);
 		response_req += " " + phrase + del;
 		if (content != 0)
@@ -45,7 +46,7 @@ void response::generate_response()
 			response_req += contentlength + std::to_string(body.size()) + del;
 			content = 0;
 		}
-		if (close == 1)
+		if (close == CLOSE)
 		{
 			response_req += closeheader + del;
 			close = 0;
@@ -70,13 +71,14 @@ void response::clear()
 	body.clear();
 	close = 0;
 	content = 0;
-	created = 0;
+	flagResponse = -1;
 	ready = 0;
 }
 
 int response::send_response(client &obj, struct pollfd &pfds)
 {
 	int i;
+	int close = 0;
 
 	i = send(obj.client_socket, response_req.c_str(), response_req.size(), 0);
 	if (i < 0)
@@ -87,14 +89,14 @@ int response::send_response(client &obj, struct pollfd &pfds)
 	else if (i == (int)response_req.size())
 	{
 		std::cout << "sent complete" << std::endl;
-		this->clear();
+		close = obj.respond.close;
 		obj.clear();
 		pfds.revents&= ~POLLOUT;
-		return (1);
+		return (close);
 	}
 	else if (i < (int)response_req.size())
 		response_req.erase(0, i);
-	return (0);
+	return (-1);
 }
 
 response::response(const response &obj)
