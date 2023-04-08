@@ -9,6 +9,8 @@ response::response()
 	del = "\r\n";
 	closeheader = "Connection: close";
 	content = 0;
+	created = 0;
+	ready = 0;
 	contentlength = "Content-Length: ";
 	contenttype = "Content-Type: ";
 }
@@ -68,6 +70,8 @@ void response::clear()
 	body.clear();
 	close = 0;
 	content = 0;
+	created = 0;
+	ready = 0;
 }
 
 int response::send_response(client &obj, struct pollfd &pfds)

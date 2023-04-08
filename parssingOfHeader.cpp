@@ -196,7 +196,15 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
         if(str.substr(k,i - k).size() == 0)// if has empty value
             return -2;
         if(str[i] != '\r' && str[i] != '\n' && str[i + 1] == '\n')// if line dont end by '\r'
+        {
+            respond.type = 1;
+            respond.status_code = 400;
+            respond.phrase = "Bad Request";
+            respond.content = 1;
+            respond.body = "The request is invalid or malformed.";
+            respond.close = 1;
             return -2;
+        }
         i++;
     }
     

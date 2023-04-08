@@ -20,6 +20,15 @@ handling i should incoprate this in the normal response as well
 
 
 
+=> handle if a header doesn't have a value only if that header is nessecary
+to the request method (pending ...)
+
+=> handle chanked transfer if size of buffer bigger than the contentlength in the headers (pending ...)
+
+=> handle delete required headers (pending ...)
+
+
+
 
 Sure, here are some headers that should not be included in certain HTTP methods:
 

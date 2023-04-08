@@ -162,51 +162,41 @@ void server::response(struct pollfd &pfds, int index)
 		if (clients[index].respond.send_response(clients[index], pfds) == 1)
 			this->disconnect(index);
 	}
-	// if (clients[index].check_method() == 1)
-	// {
-	// 	std::cout << "method error" << std::endl;
-	// 	clients[index].error_method(pfds);
-	// }
-	// else if (clients[index].check_version() == 1)
-	// {
-	// 	std::cout << "version error" << std::endl;
-	// 	clients[index].error_version(pfds);
-	// }
-	// else if (clients[index].check_location() == 1)
-	// {
-	// 	std::cout << "location error" << std::endl;
-	// 	clients[index].error_location(pfds);
-	// }
-	// else if (clients[index].flag_res < 0)
-	// {
-	// 	std::cout << "headers error" << std::endl;
-	// 	clients[index].error_headers(pfds);
-	// 	this->disconnect(index);
-	// }
 	else if(clients[index].flag == 1) // if has content length
 	{
-		std::cout << "post handle" << std::endl;
+		std::cout << "post handle1" << std::endl;
 		clients[index].bodyParss.handle_post(clients[index]);
-		clients[index].clear();
-		pfds.revents &= ~POLLOUT;
-		return ;
+		clients[index].respond.ready = 1;
 	}
 	else if(clients[index].flag == 3)// // handle chunked data when resend request
 	{
-		std::cout << "chunked handle" << std::endl;
+		std::cout << "chunked handle1" << std::endl;
 		clients[index].bodyParss.handling_chunked_data(clients[index]);
-		clients[index].clear();
-		pfds.revents &= ~POLLOUT;
+		clients[index].respond.ready = 1;
 	}
 	else if(clients[index].flag == 4)
 	{
 		std::cout << "form handle1" << std::endl;
 		clients[index].bodyParss.handling_form_data(clients[index]);
-		clients[index].clear();
-		pfds.revents &= ~POLLOUT;
+		clients[index].respond.ready = 1;
 	}
 	else
 		clients[index].normal_response(pfds);
+	if (clients[index].respond.ready == 1)
+	{
+		if (clients[index].respond.created == 1)
+		{
+			clients[index].respond.status_code = 201;
+			clients[index].respond.phrase = "created";
+			clients[index].respond.type = 1;
+			clients[index].respond.content = 1;
+			clients[index].respond.body = "successfully uploaded";
+			clients[index].respond.generate_response();
+			clients[index].respond.send_response(clients[index], pfds);
+		}
+		clients[index].clear();
+		pfds.revents &= ~POLLOUT;
+	}
 	// else if (clients[index].response(pfds_index, pfds) == 1)
 	// {
 	// 	this->disconnect(index);
@@ -246,15 +236,26 @@ void server::receive(int pfds_index, int index)
     if(clients[index].flag == 1) // if has content lenght
 	{
 		std::cout << "post handle" << std::endl;
-		string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].ContentLength);
-		// std::cout << "test size == " << test.size() << std::endl;
-		// std::cout << "contentlength == " << clients[index].ContentLength << std::endl;
+		// string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].ContentLength);
+		string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].buffer.size() - clients[index].headerOfRequest.size() + 3);
 		// std::cout << "header" << std::endl;
 		// std::cout << clients[index].headerOfRequest << std::endl;
 		// std::cout << "buffer" << std::endl;
 		// std::cout << clients[index].buffer << std::endl;
-		if((int)test.size() >= clients[index].ContentLength)// finish recivng
+		if((int)test.size() == clients[index].ContentLength)// finish recivng
 		{
+			clients[index].check();
+			pfds[pfds_index].revents &= ~POLLIN;
+		}
+		else if ((int)test.size() > clients[index].ContentLength)
+		{
+			clients[index].respond.status_code = 400;
+			clients[index].respond.phrase = "Bad Request";
+			clients[index].respond.type = 1;
+			clients[index].respond.body = "The request is invalid or malformed.";
+			clients[index].respond.close = 1;
+			clients[index].respond.content = 1;
+			clients[index].flag_res = -1;
 			clients[index].check();
 			pfds[pfds_index].revents &= ~POLLIN;
 		}
@@ -265,20 +266,20 @@ void server::receive(int pfds_index, int index)
     {
 		// std::cout << "get method " << clients[index].client_socket << std::endl;
 		// std::cout << clients[index].headerOfRequest << std::endl;
-		string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].buffer.size() - clients[index].headerOfRequest.size() + 3);
-		if (!test.empty() && clients[index].tmp == 0)
-		{
-			// if (test.find("\r\n\r\n") == std::string::npos)
-			// {
-				clients[index].respond.status_code = 400;
-				clients[index].respond.phrase = "Bad Request";
-				clients[index].respond.type = 1;
-				clients[index].respond.body = "No Body Should Exist With The Method Get";
-				clients[index].respond.close = 1;
-				clients[index].respond.content = 1;
-				clients[index].flag_res = -1;
-			// }
-		}
+		// string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].buffer.size() - clients[index].headerOfRequest.size() + 3);
+		// if (!test.empty() && clients[index].tmp == 0)
+		// {
+		// 	// if (test.find("\r\n\r\n") == std::string::npos)
+		// 	// {
+		// 		clients[index].respond.status_code = 400;
+		// 		clients[index].respond.phrase = "Bad Request";
+		// 		clients[index].respond.type = 1;
+		// 		clients[index].respond.body = "No Body Should Exist With The Method Get";
+		// 		clients[index].respond.close = 1;
+		// 		clients[index].respond.content = 1;
+		// 		clients[index].flag_res = -1;
+		// 	// }
+		// }
 		clients[index].check();
 		pfds[pfds_index].revents &= ~POLLIN;
 		return ;
@@ -301,7 +302,6 @@ void server::receive(int pfds_index, int index)
 			clients[index].total_bytes_received += clients[index].bytes_read;
 		if (clients[index].total_bytes_received >= clients[index].ContentLength)
 		{
-			std::cout << "here" << std::endl;
 			clients[index].check();
 			pfds[pfds_index].revents &= ~POLLIN;
 		}

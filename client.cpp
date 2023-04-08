@@ -133,6 +133,7 @@ void client::clear()
 	headerOfRequest.clear();
 	buffer.clear();
 	ready = 0;
+	respond.clear();
 	flag = 0;
 	input.close();
 }

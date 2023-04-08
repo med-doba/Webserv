@@ -35,8 +35,8 @@ class parssingOfBody
         void handle_post(client &obj);
         void handling_chunked_data(client &obj);
         void handling_form_data(client &obj);
-        void putDataTofile(std::string  data, std::string & bodyofRequest);
-        void  create_file_and_put_content(std::string & bodyofRequest,std::string & headerOfRequest);
+        void putDataTofile(std::string  data, std::string & bodyofRequest, int &created);
+        void  create_file_and_put_content(std::string & bodyofRequest,std::string & headerOfRequest, int&created);
 
         ~parssingOfBody();
 };
@@ -57,6 +57,8 @@ class response
 		std::string contentlength;
 		std::string contenttype;
 		int content;
+		int created;
+		int ready;
 		
         response(/* args */);
 		void generate_response();

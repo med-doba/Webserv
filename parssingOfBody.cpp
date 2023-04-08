@@ -37,7 +37,7 @@ char *ft_substr_(char const *s, unsigned int start, size_t len)
 	return (str);
 }
 
-void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string & headerOfRequest)
+void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string & headerOfRequest, int &created)
 {
     int rtn;
 
@@ -59,12 +59,14 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
         fd = open((char*)(file.append(exetention).data()),O_CREAT | O_RDWR , 0777);
     
     int i = write(fd,(void*)(bodyofRequest.data()),bodyofRequest.size());
+    if (i == (int)bodyofRequest.size())
+        created = 1;
 	std::cout << "write i == " << i << std::endl;
 	std::cout << "buffer size == " << bodyofRequest.size() << std::endl;
     close(fd);
 }
 
-void parssingOfBody::putDataTofile(string  data, string & bodyofRequest)
+void parssingOfBody::putDataTofile(string  data, string & bodyofRequest, int &created)
 {
 
     int pos = data.find("filename=\"");
@@ -86,7 +88,9 @@ void parssingOfBody::putDataTofile(string  data, string & bodyofRequest)
             bodyofRequest.push_back(data[pos]);
             pos++;
         }
-        write(fd,(void*)(bodyofRequest.data()),bodyofRequest.size());
+        int i = write(fd,(void*)(bodyofRequest.data()),bodyofRequest.size());
+        if (i == (int)bodyofRequest.size())
+            created = 1;
         file.clear();
         bodyofRequest.clear();
         close(fd);
@@ -144,8 +148,8 @@ void parssingOfBody::handling_form_data(client &obj)
         { 
             // std::cout << "lolloop" << std::endl;
             if(!it->empty())
-                cout << *it << endl;
-                putDataTofile(*it,obj.bodyofRequest);
+                putDataTofile(*it,obj.bodyofRequest, obj.respond.created);
+                // cout << *it << endl;
             it++;
         }
         // std::cout << "here2 " << obj.boundary << std::endl;
@@ -199,7 +203,7 @@ void  parssingOfBody::handling_chunked_data(client &obj)
                 return ;
             }
             if (!obj.bodyofRequest.empty())
-                create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest);
+                create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.created);
             
             obj.flag_ = 10;
         } 
@@ -222,7 +226,7 @@ void parssingOfBody::handle_post(client &obj)
 		std::cout << "buffer23 size == " << obj.buffer.size()<< std::endl;
         obj.bodyofRequest = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
         if (!obj.bodyofRequest.empty())
-            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest);
+            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.created);
     }
 }
 
