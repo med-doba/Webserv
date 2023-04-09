@@ -30,6 +30,13 @@ to the request method (pending ...)
 => handle boundary contentLength == 0 (done)
 
 
+=>	415 Unsupported Media Type
+This response means that the server was unable to process the request because the content type
+specified in the Content-Type header is not supported by the server. (pending ...)
+
+
+
+
 Sure, here are some headers that should not be included in certain HTTP methods:
 
 Content-Length: This header should not be included in GET requests, as GET requests do not have a request body. If a GET request includes a Content-Length header, you should respond with a "400 Bad Request" error.

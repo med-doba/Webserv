@@ -205,12 +205,12 @@ void server::receive(int pfds_index, int index)
 	// std::cout << "here tmp -- " << clients[index].tmp << std::endl;
 	// std::cout << clients[index].headerOfRequest << std::endl;
 	// std::cout << rtn << std::endl;
-    if(rtn == -2)
+	if(rtn == -2)
 	{
 		// cout << "r2 == " << rtn << endl;
-        return ;
+		return ;
 	}
-    if(clients[index].flag == NONCHUNKED) // if has content lenght
+	if(clients[index].flag == NONCHUNKED) // if has content lenght
 	{
 		std::cout << "post handle" << std::endl;
 		// string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].ContentLength);
@@ -238,9 +238,9 @@ void server::receive(int pfds_index, int index)
 		}
 		// clients[index].bodyParss.handle_post(clients[index]);
 	}
-   
-    else if(clients[index].flag == GET)
-    {
+
+	else if(clients[index].flag == GET)
+	{
 		// std::cout << "get method " << clients[index].client_socket << std::endl;
 		// std::cout << clients[index].headerOfRequest << std::endl;
 		// string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].buffer.size() - clients[index].headerOfRequest.size() + 3);
@@ -260,9 +260,9 @@ void server::receive(int pfds_index, int index)
 		clients[index].check();
 		pfds[pfds_index].revents &= ~POLLIN;
 		return ;
-        // without budy => GET method
-    }
-    else if(clients[index].flag == CHUNKED)// // handle chunked data when resend request
+		// without budy => GET method
+	}
+	else if(clients[index].flag == CHUNKED)// // handle chunked data when resend request
 	{
 		std::cout << "chunked handle" << std::endl;
 		int pos = clients[index].buffer.find("\r\n0\r\n\r\n");
@@ -272,7 +272,7 @@ void server::receive(int pfds_index, int index)
 			pfds[pfds_index].revents &= ~POLLIN;
 		}
 	}
-    else if(clients[index].flag == FORM)
+	else if(clients[index].flag == FORM)
 	{
 		// std::cout << "form handle" << std::endl;
 		if(clients[index].total_bytes_received < clients[index].ContentLength)// finish recivng
