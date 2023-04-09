@@ -233,10 +233,6 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response
     // std::cout << "method == " << tmp << std::endl;
     if( strcmp(temp,"GET") != 0 && strcmp(temp,"POST") != 0 && strcmp(temp,"DELETE") != 0)
     {
-        std::cout << "herrererrereree\n";
-        std::cout << "temp == " << temp << std::endl;
-        std::cout << headerOfRequest << std::endl;
-        // std::cout << "size == " << temp << std::endl;
         free(temp);
         respond.type = 1;
         respond.status_code = 405;

@@ -231,8 +231,8 @@ int client::checkHeaderOfreq()
                     {
                         flag = FORM;
                         ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
-                        if(ContentLength == 0)
-                            return -2;
+                        // if(ContentLength == 0)
+                        //     return -2;
 						 
                         i = headerOfRequest.size() + 3;// after herder
                         bytes_read -= i;
@@ -241,7 +241,7 @@ int client::checkHeaderOfreq()
                         _tmp = 0;
                         while (temp[_tmp] != '\r' && temp[_tmp] != '\n' && temp[_tmp + 1] != '\n')
                             _tmp++;
-                        boundary.append("--").append(ft_substr(temp,0,tmp));// free boundry and temp?
+                        boundary.append("--").append(ft_substr(temp,0,_tmp));// free boundry and temp?
                         std::cout << "=> " <<  boundary << std::endl;
                         return 1;
                     }
@@ -336,6 +336,13 @@ int client::pushToBuffer()
     return this->bytes_read;
 }
 
+int client::deleteMethod(struct pollfd &pfds)
+{
+	std::cout << "hello from delete"  << std::endl;
+	this->clear();
+	pfds.revents &= ~POLLOUT;
+	return (0);
+}
 
 int client::postMethod(struct pollfd &pfds)
 {
@@ -370,11 +377,11 @@ int client::postMethod(struct pollfd &pfds)
 		}
 		if (this->respond.flagResponse == EMPTY)
 		{
-			this->respond.status_code = 200;
-			this->respond.phrase = "OK";
+			this->respond.status_code = 204;
+			this->respond.phrase = "No Content";
 			this->respond.type = 1;
-			this->respond.content = 1;
-			this->respond.body = "No Body Found";
+			// this->respond.content = 1;
+			// this->respond.body = "No Body Found";
 		}
 		if (this->respond.flagResponse == EXIST)
 		{
@@ -383,14 +390,6 @@ int client::postMethod(struct pollfd &pfds)
 			this->respond.type = 1;
 			this->respond.content = 1;
 			this->respond.body = "Resource Already Exist";
-		}
-		if (this->respond.flagResponse == UPDATED)
-		{
-			this->respond.status_code = 204;
-			this->respond.phrase = "No Content";
-			this->respond.type = 1;
-			// this->respond.content = 1;
-			// this->respond.body = "Resource Already Exist";
 		}
 		this->respond.generate_response();
 		int i = this->respond.send_response(*this ,pfds);

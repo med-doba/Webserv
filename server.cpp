@@ -101,7 +101,7 @@ void server::monitor()
 				{
 					if (pfds[i].fd == clients[j].client_socket)
 					{
-						std::cout << "ready to recv " << clients[j].client_socket << std::endl;
+						// std::cout << "ready to recv " << clients[j].client_socket << std::endl;
 						this->receive(i, j);
 						break ;
 					}
@@ -156,58 +156,28 @@ void server::response(struct pollfd &pfds, int index)
 {
 	if (clients[index].flag == ERROR)
 	{
-		// clients[index].respond.defineContentType();
-		std::cout << clients[index].headerOfRequest << std::endl;
+		std::cout << "ERROR" << std::endl;
 		clients[index].respond.generate_response();
 		if (clients[index].respond.send_response(clients[index], pfds) == 1)
 			this->disconnect(index);
 	}
-	if (clients[index].tmp == POST)
+	else if (clients[index].tmp == POST)
 	{
-		std::cout << "post method" << std::endl;
+		std::cout << "POST method" << std::endl;
 		if (clients[index].postMethod(pfds) == CLOSE)
 			this->disconnect(index);
 	}
-	// else if(clients[index].flag == NONCHUNKED) // if has content length
-	// {
-	// 	std::cout << "post handle1" << std::endl;
-	// 	clients[index].bodyParss.handle_post(clients[index]);
-	// 	clients[index].respond.ready = 1;
-	// }
-	// else if(clients[index].flag == CHUNKED)// // handle chunked data when resend request
-	// {
-	// 	std::cout << "chunked handle1" << std::endl;
-	// 	clients[index].bodyParss.handling_chunked_data(clients[index]);
-	// 	clients[index].respond.ready = 1;
-	// }
-	// else if(clients[index].flag == FORM)
-	// {
-	// 	std::cout << "form handle1" << std::endl;
-	// 	clients[index].bodyParss.handling_form_data(clients[index]);
-	// 	clients[index].respond.ready = 1;
-	// }
-	// if (clients[index].respond.ready == 1)
-	// {
-	// 	if (clients[index].respond.created == 1)
-	// 	{
-	// 		clients[index].respond.status_code = 201;
-	// 		clients[index].respond.phrase = "created";
-	// 		clients[index].respond.type = 1;
-	// 		clients[index].respond.content = 1;
-	// 		clients[index].respond.body = "successfully uploaded";
-	// 		clients[index].respond.generate_response();
-	// 		clients[index].respond.send_response(clients[index], pfds);
-	// 	}
-	// 	clients[index].clear();
-	// 	pfds.revents &= ~POLLOUT;
-	// }
-	else
+	else if (clients[index].tmp == DELETE)
+	{
+		std::cout << "DELETE method" << std::endl;
+		if (clients[index].deleteMethod(pfds) == CLOSE)
+			this->disconnect(index);
+	}
+	else if (clients[index].tmp == GET)
+	{
+		std::cout << "GEt method" << std::endl;
 		clients[index].normal_response(pfds);
-	// else if (clients[index].response(pfds_index, pfds) == 1)
-	// {
-	// 	this->disconnect(index);
-	// 	return ;
-	// }
+	}
 }
 
 void server::receive(int pfds_index, int index)
@@ -232,7 +202,7 @@ void server::receive(int pfds_index, int index)
         return ;
 	}
     rtn = clients[index].checkHeaderOfreq();
-	std::cout << "here tmp -- " << clients[index].tmp << std::endl;
+	// std::cout << "here tmp -- " << clients[index].tmp << std::endl;
 	// std::cout << clients[index].headerOfRequest << std::endl;
 	// std::cout << rtn << std::endl;
     if(rtn == -2)
@@ -304,7 +274,7 @@ void server::receive(int pfds_index, int index)
 	}
     else if(clients[index].flag == FORM)
 	{
-		std::cout << "form handle" << std::endl;
+		// std::cout << "form handle" << std::endl;
 		if(clients[index].total_bytes_received < clients[index].ContentLength)// finish recivng
 			clients[index].total_bytes_received += clients[index].bytes_read;
 		if (clients[index].total_bytes_received >= clients[index].ContentLength)
@@ -319,7 +289,7 @@ void server::receive(int pfds_index, int index)
 		pfds[pfds_index].revents &= ~POLLIN;
 	}
         
-        
+    // std::cout << "out of recv" << std::endl;
     // return 1;
 }
 

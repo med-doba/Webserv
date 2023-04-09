@@ -27,7 +27,7 @@ to the request method (pending ...)
 
 => handle delete required headers (pending ...)
 
-=> handle boundary contentLength == 0
+=> handle boundary contentLength == 0 (done)
 
 
 Sure, here are some headers that should not be included in certain HTTP methods:

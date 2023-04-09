@@ -57,6 +57,7 @@ void response::generate_response()
 		if (!body.empty())
 			response_req += body;
 		type = 0;
+		flagResponse = -1;
 		std::cout << response_req << std::endl;
 	}
 }

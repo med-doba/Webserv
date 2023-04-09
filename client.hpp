@@ -145,6 +145,7 @@ class client
 	void check(void);
 	int normal_response(struct pollfd &pfds);
 	int postMethod(struct pollfd &pfds);
+	int deleteMethod(struct pollfd &pfds);
 	client();
 	client(const client &obj);
 	client& operator=(const client& obj);
