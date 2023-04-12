@@ -170,6 +170,7 @@ void server::response(struct pollfd &pfds, int index)
 	else if (clients[index].tmp == DELETE)
 	{
 		std::cout << "DELETE method" << std::endl;
+		std::cout << clients[index].headerOfRequest << std::endl;
 		if (clients[index].deleteMethod(pfds) == CLOSE)
 			this->disconnect(index);
 	}
@@ -202,6 +203,7 @@ void server::receive(int pfds_index, int index)
         return ;
 	}
     rtn = clients[index].checkHeaderOfreq();
+	std::cout << "flag == " << clients[index].flag << std::endl;
 	// std::cout << "here tmp -- " << clients[index].tmp << std::endl;
 	// std::cout << clients[index].headerOfRequest << std::endl;
 	// std::cout << rtn << std::endl;
@@ -212,7 +214,7 @@ void server::receive(int pfds_index, int index)
 	}
 	if(clients[index].flag == NONCHUNKED) // if has content lenght
 	{
-		std::cout << "post handle" << std::endl;
+		// std::cout << "post handle" << std::endl;
 		// string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].ContentLength);
 		string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].buffer.size() - clients[index].headerOfRequest.size() + 3);
 		// std::cout << "header" << std::endl;
@@ -264,7 +266,7 @@ void server::receive(int pfds_index, int index)
 	}
 	else if(clients[index].flag == CHUNKED)// // handle chunked data when resend request
 	{
-		std::cout << "chunked handle" << std::endl;
+		// std::cout << "chunked handle" << std::endl;
 		int pos = clients[index].buffer.find("\r\n0\r\n\r\n");
 		if (pos != -1)
 		{

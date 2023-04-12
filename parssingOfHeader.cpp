@@ -54,7 +54,7 @@ long long	parssingOfHeader::ft_atoi(const char *str)
 }
 
 
-int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& respond)
+int parssingOfHeader::checkHeaders(client &obj)
 {
      
     // when add char after \r\n will add in first of the second line
@@ -62,126 +62,153 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
     string str = "";
     i = 0; 
       
-    while (i < (int)headerOfRequest.size())// sometimes in content has '\0' , dont loop
+    while (i < (int)obj.headerOfRequest.size())// sometimes in content has '\0' , dont loop
     {
-        str.push_back(headerOfRequest[i]);
+        str.push_back(obj.headerOfRequest[i]);
         i++;
     }
 
 	i = str.find("Host: ");
 	if(i == -1)
 	{
-		respond.status_code = 400;
-		respond.phrase = "Bad Request";
-		respond.type = 1;
-		respond.body = "No Host Header Found";
-		respond.close = CLOSE;
-        respond.content = 1;
+		obj.respond.status_code = 400;
+		obj.respond.phrase = "Bad Request";
+		obj.respond.type = 1;
+		obj.respond.body = "No Host Header Found";
+		obj.respond.close = CLOSE;
+        obj.respond.content = 1;
 		return -4;
 	}
-    if(tmp == POST)// when upload to to server sould present this headers
+    if(obj.tmp == POST)// when upload to to server sould present this headers
     {
         i = str.find("Content-Length: ");
         if(i == -1)
         {
-            respond.type = 1;
-            respond.status_code = 411;
-            respond.phrase = "Length Required";
-            respond.content = 1;
-            respond.body = "No Content-Length Header Found";
-            respond.close = CLOSE;
+           obj.respond.type = 1;
+           obj.respond.status_code = 411;
+           obj.respond.phrase = "Length Required";
+           obj.respond.content = 1;
+           obj.respond.body = "No Content-Length Header Found";
+           obj.respond.close = CLOSE;
             return -5;
         }
         i = str.find("Content-Type: ");
         if(i == -1)
         {
-            respond.type = 1;
-            respond.status_code = 400;
-            respond.phrase = "Bad Request";
-            respond.content = 1;
-            respond.body = "No Content-Type Header Found";
-            respond.close = CLOSE;
+            obj.respond.type = 1;
+            obj.respond.status_code = 400;
+            obj.respond.phrase = "Bad Request";
+            obj.respond.content = 1;
+            obj.respond.body = "No Content-Type Header Found";
+            obj.respond.close = CLOSE;
             return -6;
         }
         i = str.find("If-Modified-Since: ");
         if(i != -1)
         {
-            respond.type = 1;
-            respond.status_code = 405;
-            respond.phrase = "Requested Range Not Satisfiable";
-            respond.content = 1;
-            respond.body = "The request has a malformed header";
-            respond.close = CLOSE;
+           obj.respond.type = 1;
+           obj.respond.status_code = 405;
+           obj.respond.phrase = "Requested Range Not Satisfiable";
+           obj.respond.content = 1;
+           obj.respond.body = "The request has a malformed header";
+           obj.respond.close = CLOSE;
             return -7;
         }
         i = str.find("Range: ");
         if(i != -1)
         {
-            respond.type = 1;
-            respond.status_code = 416;
-            respond.phrase = "Bad Request";
-            respond.content = 1;
-            respond.body = "The request has a malformed header";
-            respond.close = CLOSE;
+           obj.respond.type = 1;
+           obj.respond.status_code = 416;
+           obj.respond.phrase = "Bad Request";
+           obj.respond.content = 1;
+           obj.respond.body = "The request has a malformed header";
+           obj.respond.close = CLOSE;
             return -8;
         }
     }
-    else if(tmp == GET)//get method
+    else if(obj.tmp == GET)//get method
     {
         i = str.find("Content-Length: ");
         if(i != -1)
 		{
-			int ContentLength = ft_atoi(headerOfRequest.substr(i + 16,headerOfRequest.size()).c_str());
+			int ContentLength = ft_atoi(obj.headerOfRequest.substr(i + 16,obj.headerOfRequest.size()).c_str());
 			if (ContentLength > 0)
             {
-                respond.type = 1;
-                respond.status_code = 400;
-                respond.phrase = "Bad Request";
-                respond.content = 1;
-                respond.body = "The request has a malformed header";
-                respond.close = CLOSE;
+                obj.respond.type = 1;
+                obj.respond.status_code = 400;
+                obj.respond.phrase = "Bad Request";
+                obj.respond.content = 1;
+                obj.respond.body = "The request has a malformed header";
+                obj.respond.close = CLOSE;
 				return -9;
             }
 		}
         i = str.find("Transfer-Encoding: ");
 		if (i != -1)
         {
-            respond.type = 1;
-            respond.status_code = 400;
-            respond.phrase = "Bad Request";
-            respond.content = 1;
-            respond.body = "Invalid request: GET requests must not have a body with Transfer-Encoding.";
-            respond.close = CLOSE;
+            obj.respond.type = 1;
+            obj.respond.status_code = 400;
+            obj.respond.phrase = "Bad Request";
+            obj.respond.content = 1;
+            obj.respond.body = "Invalid request: GET requests must not have a body with Transfer-Encoding.";
+            obj.respond.close = CLOSE;
 			return (-10);
         }
         i = str.find("Content-Type: ");
         if(i != -1)
         {
-            respond.type = 1;
-            respond.status_code = 400;
-            respond.phrase = "Bad Request";
-            respond.content = 1;
-            respond.body = "The request contained a Content-Type header, but it should not be included in a GET request.";
-            respond.close = CLOSE;
+            obj.respond.type = 1;
+            obj.respond.status_code = 400;
+            obj.respond.phrase = "Bad Request";
+            obj.respond.content = 1;
+            obj.respond.body = "The request contained a Content-Type header, but it should not be included in a GET request.";
+            obj.respond.close = CLOSE;
             return -11;
         }
     }
-    else if(tmp == DELETE)//delete method
+    else if(obj.tmp == DELETE)//delete method
     {
         i = str.find("If-Modified-Since: ");
         if(i != -1)
         {
-            respond.type = 1;
-            respond.status_code = 405;
-            respond.phrase = "Method Not Allowed";
-            respond.content = 1;
-            respond.body = "The request has a malformed header";
-            respond.close = CLOSE;
+			obj.respond.type = 1;
+			obj.respond.status_code = 405;
+			obj.respond.phrase = "Method Not Allowed";
+			obj.respond.content = 1;
+			obj.respond.body = "The request has a malformed header";
+			obj.respond.close = CLOSE;
             return -12;
         }
-        i = str.find("Range: ");
+        i = str.find("Content-Type: ");
         if(i != -1)
-            return -13;
+        {
+            obj.respond.type = 1;
+            obj.respond.status_code = 400;
+            obj.respond.phrase = "Bad Request";
+            obj.respond.content = 1;
+            obj.respond.body = "Content-Type Header Found";
+            obj.respond.close = CLOSE;
+            return -6;
+        }
+  //       i = str.find("Content-Length: ");
+  //       if(i != -1)
+		// {
+		// 	int ContentLength = ft_atoi(obj.headerOfRequest.substr(i + 16,obj.headerOfRequest.size()).c_str());
+		// 	std::cout << "content == "<< ContentLength<< std::endl;
+		// 	if (ContentLength > 0)
+  //           {
+  //               obj.respond.type = 1;
+  //               obj.respond.status_code = 400;
+  //               obj.respond.phrase = "Bad Request";
+  //               obj.respond.content = 1;
+  //               obj.respond.body = "The request has a malformed header";
+  //               obj.respond.close = CLOSE;
+		// 		return -9;
+  //           }
+		// }
+        // i = str.find("Range: ");
+        // if(i != -1)
+        //     return -13;
     }
     
     i = 0;
@@ -197,47 +224,45 @@ int parssingOfHeader::checkHeaders(string headerOfRequest, int & tmp, response& 
             return -2;
         if(str[i] != '\r' && str[i] != '\n' && str[i + 1] == '\n')// if line dont end by '\r'
         {
-            respond.type = 1;
-            respond.status_code = 400;
-            respond.phrase = "Bad Request";
-            respond.content = 1;
-            respond.body = "The request is invalid or malformed.";
-            respond.close = 1;
+            obj.respond.type = 1;
+            obj.respond.status_code = 400;
+            obj.respond.phrase = "Bad Request";
+            obj.respond.content = 1;
+            obj.respond.body = "The request is invalid or malformed.";
+            obj.respond.close = 1;
             return -2;
         }
         i++;
     }
-    
     return 1;
 }
 
 
-int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response& respond, std::string &URI)
+int parssingOfHeader::checkHeaderLine(client &obj)
 {
     int i = 0;
     int j = 0;
     char *temp;
-	(void)respond;
 
 
     j = i;
-    while (headerOfRequest[i] && headerOfRequest[i] != ' ')
+    while (obj.headerOfRequest[i] && obj.headerOfRequest[i] != ' ')
         i++;
-    temp = ft_substr(headerOfRequest.data(),j,i);
+    temp = ft_substr(obj.headerOfRequest.data(),j,i);
     if(strcmp(temp,"POST") == 0)
-        tmp = POST;
+        obj.tmp = POST;
     if(strcmp(temp,"GET") == 0)
-        tmp = GET;
+        obj.tmp = GET;
     if(strcmp(temp,"DELETE") == 0)
-        tmp = DELETE;
+        obj.tmp = DELETE;
     // std::cout << "method == " << tmp << std::endl;
     if( strcmp(temp,"GET") != 0 && strcmp(temp,"POST") != 0 && strcmp(temp,"DELETE") != 0)
     {
         free(temp);
-        respond.type = 1;
-        respond.status_code = 405;
-        respond.phrase = "Method Not Allowed";
-        respond.headers.push_back("Allow: GET, POST, DELETE");
+        obj.respond.type = 1;
+        obj.respond.status_code = 405;
+        obj.respond.phrase = "Method Not Allowed";
+        obj.respond.headers.push_back("Allow: GET, POST, DELETE");
         // respond.body = "No Host Header Found";
         // respond.close = CLOSE;
         return -1;
@@ -246,30 +271,30 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response
 
     i++;
     j = i;
-    while (headerOfRequest[i] && headerOfRequest[i] != ' ')
+    while (obj.headerOfRequest[i] && obj.headerOfRequest[i] != ' ')
         i++;
-    temp = ft_substr(headerOfRequest.data(),j,i);
+    temp = ft_substr(obj.headerOfRequest.data(),j,i);
     if(temp[0] != '/')
     {
         free(temp);
         return -2;
     }
-    URI.assign(temp);
+    obj.URI.assign(&temp[1]);
     free(temp);
-    std::cout << "URI == " << URI << std::endl;
+    // std::cout << "URI == " << URI << std::endl;
 
     i++;
     j = i;
-    while (headerOfRequest[i] &&  headerOfRequest[i] != '\r' && headerOfRequest[i] != '\n'  && headerOfRequest[i + 1] != '\n' )
+    while (obj.headerOfRequest[i] && obj.headerOfRequest[i] != '\r' && obj.headerOfRequest[i] != '\n'  && obj.headerOfRequest[i + 1] != '\n' )
         i++;
-    temp = ft_substr(headerOfRequest.data(),j,i + 2); 
+    temp = ft_substr(obj.headerOfRequest.data(),j,i + 2); 
      
     if( strcmp(temp,"HTTP/1.1\r\n") != 0 && strcmp(temp,"HTTP/1.1\n\n") != 0)
     {
         free(temp);
-        respond.type = 1;
-        respond.status_code = 505;
-        respond.phrase = "HTTP Version Not Supported";
+        obj.respond.type = 1;
+        obj.respond.status_code = 505;
+        obj.respond.phrase = "HTTP Version Not Supported";
         // respond.body = "No Host Header Found";
         // respond.close = CLOSE;
         return -3;
@@ -280,15 +305,15 @@ int parssingOfHeader::checkHeaderLine(string headerOfRequest, int &tmp, response
 }
  
 
-int parssingOfHeader::checkHeaderOfreq_(string &headerOfRequest, int & tmp, response& respond, std::string& URI)
+int parssingOfHeader::checkHeaderOfreq_(client &obj)
 {
-    int rtn = checkHeaderLine(headerOfRequest, tmp, respond, URI);
+    int rtn = checkHeaderLine(obj);
 
 	if(rtn < 0)
 		return rtn;
 
-	headerOfRequest = &headerOfRequest[rtn];
-    rtn = checkHeaders(headerOfRequest,tmp, respond);
+	obj.headerOfRequest = &obj.headerOfRequest[rtn];
+    rtn = checkHeaders(obj);
     
     return rtn;
 }

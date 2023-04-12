@@ -28,7 +28,10 @@ enum {
 	CREATED,
 	CLOSE,
 	EXIST,
-	UPDATED
+	UPDATED,
+	DELETED,
+	NOTFOUND,
+	FORBIDEN
 };
 
 using std::string;
@@ -52,6 +55,7 @@ class parssingOfBody
         void handling_form_data(client &obj);
 		void putDataTofile(string  data, client & obj);
         void  create_file_and_put_content(std::string & bodyofRequest,std::string & headerOfRequest, int&created);
+		void clear();
 
         ~parssingOfBody();
 };
@@ -96,9 +100,9 @@ class parssingOfHeader
 
         long long	ft_atoi(const char *str);
 
-        int checkHeaderOfreq_(std::string&, int &, response& respond, std::string & URI);
-        int checkHeaderLine(std::string, int &,response & respond, std::string &URI);
-        int checkHeaders(std::string, int &, response& respond);
+        int checkHeaderOfreq_(client &obj);
+        int checkHeaderLine(client &obj);
+        int checkHeaders(client &obj);
         ~parssingOfHeader();
 };
 

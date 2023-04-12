@@ -1,6 +1,5 @@
 #include "client.hpp"
-using std::cout;
-using std::endl;
+
 // void client::normal_response(struct pollfd &pfds)
 // {
 // 	if (response_header.empty())
@@ -131,11 +130,16 @@ void client::check(void)
 void client::clear()
 {
 	headerOfRequest.clear();
+	bodyParss.clear();
+	boundary.clear();
+	bodyofRequest.clear();
 	buffer.clear();
 	ready = 0;
+	total_bytes_received = 0;
 	respond.clear();
 	flag = 0;
 	tmp = 0;
+	flag_ = 0;
 	input.close();
 }
 
@@ -202,7 +206,7 @@ int client::checkHeaderOfreq()
             {
                 headerOfRequest = buffer.substr(0,pos - 1);// not include \r\n
 				std::string copyheader = headerOfRequest;
-				this->flag_res = headerParss.checkHeaderOfreq_(copyheader, tmp, respond, URI);
+				this->flag_res = headerParss.checkHeaderOfreq_(*this);
 				if (this->flag_res < 0)
 				{
 					flag = ERROR;
@@ -210,7 +214,7 @@ int client::checkHeaderOfreq()
 				}
                 // if(headerParss.checkHeaderOfreq_(headerOfRequest,tmp) == -2)
                 //     return -2;
-                
+				
                 i = copyheader.find("Transfer-Encoding: chunked");   // find way to check if boundry
                 if(i != -1)
                 { 
@@ -219,6 +223,10 @@ int client::checkHeaderOfreq()
                     i = pos  + 2;
 					
                     // len -= i;
+					pos = copyheader.find("Content-Length");  
+					std::cout << copyheader<< std::endl;
+					if(pos != -1)
+						ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
 					
                     flag = CHUNKED;
                     return 1;
@@ -242,7 +250,7 @@ int client::checkHeaderOfreq()
                         while (temp[_tmp] != '\r' && temp[_tmp] != '\n' && temp[_tmp + 1] != '\n')
                             _tmp++;
                         boundary.append("--").append(ft_substr(temp,0,_tmp));// free boundry and temp?
-                        std::cout << "=> " <<  boundary << std::endl;
+                        // std::cout << "=> " <<  boundary << std::endl;
                         return 1;
                     }
                     ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
@@ -339,8 +347,65 @@ int client::pushToBuffer()
 int client::deleteMethod(struct pollfd &pfds)
 {
 	std::cout << "hello from delete"  << std::endl;
-	this->clear();
-	pfds.revents &= ~POLLOUT;
+	std::cout << "URI -- " << URI << std::endl;
+	std::string str;
+	for (int i = 0; i < 7; i++)
+		str.push_back(URI[i]);
+	if (str.compare("upload/") == 0)
+	{
+		int i = remove((char *)URI.data());
+		if (i  == 0)
+		{
+			std::cout << "removed successfully" << std::endl;
+			this->respond.flagResponse = DELETED;
+		}
+		else
+		{
+			std::cout << "error on remove" << std::endl;
+			this->respond.flagResponse = NOTFOUND;
+		}
+	}
+	else
+	{
+		this->respond.flagResponse = FORBIDEN;
+	}
+	this->respond.ready = 1;
+	if (this->respond.ready == 1)
+	{
+		if (this->respond.flagResponse == DELETED)
+		{
+			this->respond.status_code = 204;
+			this->respond.phrase = "No Content";
+			this->respond.type = 1;
+			// this->respond.content = 1;
+			// this->respond.body = "Resource Already Exist";
+		}
+		if (this->respond.flagResponse == NOTFOUND)
+		{
+			this->respond.status_code = 404;
+			this->respond.phrase = "Not Found";
+			this->respond.type = 1;
+			this->respond.content = 1;
+			this->respond.body = "Resource Doesn't Exist";
+		}
+		if (this->respond.flagResponse == FORBIDEN)
+		{
+			this->respond.status_code = 403;
+			this->respond.phrase = "Forbidden";
+			this->respond.type = 1;
+			this->respond.content = 1;
+			this->respond.body = "You Don't Have Permession To Do That";
+		}
+		this->respond.generate_response();
+		int i = this->respond.send_response(*this ,pfds);
+		if (i == 0)
+		{
+			this->clear();
+			pfds.revents &= ~POLLOUT;
+		}
+		else if (i == CLOSE)
+			return (CLOSE);
+	}
 	return (0);
 }
 
@@ -391,6 +456,7 @@ int client::postMethod(struct pollfd &pfds)
 			this->respond.content = 1;
 			this->respond.body = "Resource Already Exist";
 		}
+		std::cout << "this one" << std::endl;
 		this->respond.generate_response();
 		int i = this->respond.send_response(*this ,pfds);
 		if (i == 0)

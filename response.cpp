@@ -12,23 +12,22 @@ response::response()
 	flagResponse = -1;
 	ready = 0;
 	contentlength = "Content-Length: ";
-	contenttype = "Content-Type: ";
 }
 
 void response::defineContentType()
 {
 	if (content == 1)
-		contenttype += "text/plain";
+		contenttype += "Content-Type: text/plain";
 	else if (content == 2)
-		contenttype += "application/pdf";
+		contenttype += "Content-Type: application/pdf";
 	else if (content == 3)
-		contenttype += "image/png";
+		contenttype += "Content-Type: image/png";
 	else if (content == 4)
-		contenttype += "image/jpg";
+		contenttype += "Content-Type: image/jpg";
 	else if (content == 5)
-		contenttype += "text/html";
+		contenttype += "Content-Type: text/html";
 	else if (content == 6)
-		contenttype += "video/mp4";
+		contenttype += "Content-Type: video/mp4";
 }
 
 void response::generate_response()
@@ -67,6 +66,7 @@ void response::clear()
 	response_req.clear();
 	status_code = 0;
 	type = 0;
+	contenttype.clear();
 	phrase.clear();
 	headers.clear();
 	body.clear();
