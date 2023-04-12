@@ -32,7 +32,6 @@ void response::defineContentType()
 
 void response::generate_response()
 {
-	std::cout << "enter here" << std::endl;
 	std::cout << "type == " << type << std::endl;
 	if (type == 1)
 	{

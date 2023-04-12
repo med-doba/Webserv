@@ -34,9 +34,9 @@ to the request method (pending ...)
 This response means that the server was unable to process the request because the content type
 specified in the Content-Type header is not supported by the server. (pending ...)
 
-=> handle that it goes into nonchunked when it's a delete method (pending ...)
+=> handle that it goes into nonchunked when it's a delete method (done)
 
-
+=> ask mustapha if he handled nothing but space between the elements of the request line (pending ...)
 
 
 Sure, here are some headers that should not be included in certain HTTP methods:

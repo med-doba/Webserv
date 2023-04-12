@@ -129,33 +129,29 @@ void parssingOfBody::handling_form_data(client &obj)
         obj.bodyofRequest.clear();
          
     }
-    // else
-    //     obj.total_bytes_received += obj.bytes_read;
     if(obj.total_bytes_received >= obj.ContentLength)
     { 
         size_t start_idx = obj.i;
         string separator = obj.boundary;
-		std::cout << obj.boundary << std::endl;
         vector<string> substrings; // clear ?
         while (true) 
         {
             size_t end_idx = obj.buffer.find(separator, start_idx);
             if (end_idx == string::npos) 
             {
-                // std::cout << obj.buffer.substr(start_idx) << std::endl;
                 substrings.push_back(obj.buffer.substr(start_idx));
                 break;
             }
-            // std::cout << obj.buffer.substr(start_idx, end_idx - start_idx) << std::endl;
             substrings.push_back(obj.buffer.substr(start_idx, end_idx - start_idx));
             start_idx = end_idx + separator.length();
         }
-        // std::cout << obj.buffer << std::endl;
         int size = obj.buffer.size() - (obj.headerOfRequest.size() + 3);
-        // std::cout << substrings[0] << std::endl;
+        std::cout << obj.buffer.size() << std::endl;
+        std::cout << obj.headerOfRequest << std::endl;
         if (size > obj.ContentLength)
         {
-			std::cout << "contentLength " << obj.ContentLength << std::endl;
+            std::cout << "size == " << size << std::endl;
+            std::cout << "content == " << obj.ContentLength << std::endl;
             obj.respond.status_code = 400;
             obj.respond.phrase = "Bad Request";
             obj.respond.type = 1;
@@ -165,39 +161,24 @@ void parssingOfBody::handling_form_data(client &obj)
             return ;
         }
         substrings.erase(substrings.end() - 1);// remove "--" after last boundr
-        // std::cout << substrings[0] << std::endl;
         vector<string>::iterator it = substrings.begin();
-        // std::cout << "here " << obj.boundary << std::endl;
         while (it != substrings.end())
-        { 
-            // std::cout << "here" << std::endl;
-            // std::cout << "lolloop" << std::endl;
+        {
             if(!it->empty())
-            {
-				// std::cout << *it << std::endl;
-                // cout << *it << endl;
-                // cout << "content size == "<< it->size() << endl;
-                // std::cout << "contentLength == " << obj.ContentLength << std::endl;
                 putDataTofile(*it,obj);
-            }
             it++;
         }
-        // std::cout << "here2 " << obj.boundary << std::endl;
     }
 }
 
 
 
 
-// void  parssingOfBody::handling_chunked_data(string &buffer,string &headerOfRequest, string &boundary,string &bodyofRequest, int & total_bytes_received, int & ContentLength, int & i, int & bytes_received,int & flag_)
 void  parssingOfBody::handling_chunked_data(client &obj)
 {
     int pos = obj.buffer.find("\r\n0\r\n\r\n");
     if(pos != -1 )
     {
-		std::cout << "in here" << std::endl;
-		// std::cout << "obj.i == "<< obj.i << std::endl;
-		// std::cout << "obj.buffer == "<< obj.buffer.size() << std::endl;
         while (obj.i < (int)obj.buffer.size())
         {
             if(isalnum(obj.buffer[obj.i]) || isalpha(obj.buffer[obj.i]))
@@ -221,7 +202,6 @@ void  parssingOfBody::handling_chunked_data(client &obj)
                 obj.i+=2;
             }
         }
-		std::cout << "out of loop" << std::endl;
         if(obj.flag_ == 0)
         {
             int dec = obj.headerOfRequest.find("boundary");
@@ -235,8 +215,6 @@ void  parssingOfBody::handling_chunked_data(client &obj)
             }
             if (!obj.bodyofRequest.empty())
 			{
-				std::cout << "contentLength == " << obj.ContentLength << std::endl;
-				std::cout << "size == " << obj.bodyofRequest.size() << std::endl;
 				if (obj.ContentLength < (int)obj.bodyofRequest.size())
 				{
 					obj.respond.status_code = 400;
@@ -247,14 +225,10 @@ void  parssingOfBody::handling_chunked_data(client &obj)
 					obj.respond.content = 1;
 					return;
 				}
-				std::cout << "create file " << std::endl;
 				create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse);
 			}
             else
-			{
 				obj.respond.flagResponse = EMPTY;
-				std::cout << "body empty " << std::endl;
-			}
             
             obj.flag_ = 10;
         } 
@@ -265,11 +239,6 @@ void  parssingOfBody::handling_chunked_data(client &obj)
 void parssingOfBody::handle_post(client &obj)
 {
 	string test = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
-    // obj.i += obj.len;
-	std::cout << "test size == "<< test.size() << std::endl;
-    // obj.i += BUFFER;
-	// if(obj.i >= (int)obj.ContentLength)// finish recivng
-	// if(obj.buffer.size() >= obj.ContentLength)// finish recivng
 	if((int)test.size() >= obj.ContentLength)// finish recivng
     { 
 		std::cout << "i == " << obj.i << std::endl;

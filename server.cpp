@@ -203,7 +203,6 @@ void server::receive(int pfds_index, int index)
         return ;
 	}
     rtn = clients[index].checkHeaderOfreq();
-	std::cout << "flag == " << clients[index].flag << std::endl;
 	// std::cout << "here tmp -- " << clients[index].tmp << std::endl;
 	// std::cout << clients[index].headerOfRequest << std::endl;
 	// std::cout << rtn << std::endl;
@@ -263,6 +262,13 @@ void server::receive(int pfds_index, int index)
 		pfds[pfds_index].revents &= ~POLLIN;
 		return ;
 		// without budy => GET method
+	}
+	else if(clients[index].flag == DELETE)
+	{
+		clients[index].check();
+		pfds[pfds_index].revents &= ~POLLIN;
+		return ;
+		// without budy => DELETE method
 	}
 	else if(clients[index].flag == CHUNKED)// // handle chunked data when resend request
 	{

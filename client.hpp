@@ -100,9 +100,9 @@ class parssingOfHeader
 
         long long	ft_atoi(const char *str);
 
-        int checkHeaderOfreq_(client &obj);
+        int checkHeaderOfreq_(client &obj, std::string copy);
         int checkHeaderLine(client &obj);
-        int checkHeaders(client &obj);
+        int checkHeaders(client &obj, std::string copy);
         ~parssingOfHeader();
 };
 

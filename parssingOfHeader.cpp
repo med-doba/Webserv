@@ -54,7 +54,7 @@ long long	parssingOfHeader::ft_atoi(const char *str)
 }
 
 
-int parssingOfHeader::checkHeaders(client &obj)
+int parssingOfHeader::checkHeaders(client &obj, std::string copy)
 {
      
     // when add char after \r\n will add in first of the second line
@@ -62,9 +62,9 @@ int parssingOfHeader::checkHeaders(client &obj)
     string str = "";
     i = 0; 
       
-    while (i < (int)obj.headerOfRequest.size())// sometimes in content has '\0' , dont loop
+    while (i < (int)copy.size())// sometimes in content has '\0' , dont loop
     {
-        str.push_back(obj.headerOfRequest[i]);
+        str.push_back(copy[i]);
         i++;
     }
 
@@ -131,7 +131,7 @@ int parssingOfHeader::checkHeaders(client &obj)
         i = str.find("Content-Length: ");
         if(i != -1)
 		{
-			int ContentLength = ft_atoi(obj.headerOfRequest.substr(i + 16,obj.headerOfRequest.size()).c_str());
+			int ContentLength = ft_atoi(copy.substr(i + 16,copy.size()).c_str());
 			if (ContentLength > 0)
             {
                 obj.respond.type = 1;
@@ -190,25 +190,22 @@ int parssingOfHeader::checkHeaders(client &obj)
             obj.respond.close = CLOSE;
             return -6;
         }
-  //       i = str.find("Content-Length: ");
-  //       if(i != -1)
-		// {
-		// 	int ContentLength = ft_atoi(obj.headerOfRequest.substr(i + 16,obj.headerOfRequest.size()).c_str());
-		// 	std::cout << "content == "<< ContentLength<< std::endl;
-		// 	if (ContentLength > 0)
-  //           {
-  //               obj.respond.type = 1;
-  //               obj.respond.status_code = 400;
-  //               obj.respond.phrase = "Bad Request";
-  //               obj.respond.content = 1;
-  //               obj.respond.body = "The request has a malformed header";
-  //               obj.respond.close = CLOSE;
-		// 		return -9;
-  //           }
-		// }
-        // i = str.find("Range: ");
-        // if(i != -1)
-        //     return -13;
+        i = str.find("Content-Length: ");
+        if(i != -1)
+		{
+			int ContentLength = ft_atoi(copy.substr(i + 16,copy.size()).c_str());
+			std::cout << "content == "<< ContentLength<< std::endl;
+			if (ContentLength > 0)
+            {
+                obj.respond.type = 1;
+                obj.respond.status_code = 400;
+                obj.respond.phrase = "Bad Request";
+                obj.respond.content = 1;
+                obj.respond.body = "The request has a malformed header";
+                obj.respond.close = CLOSE;
+				return -9;
+            }
+		}
     }
     
     i = 0;
@@ -277,6 +274,7 @@ int parssingOfHeader::checkHeaderLine(client &obj)
     if(temp[0] != '/')
     {
         free(temp);
+        std::cout << "here\n";
         return -2;
     }
     obj.URI.assign(&temp[1]);
@@ -305,15 +303,15 @@ int parssingOfHeader::checkHeaderLine(client &obj)
 }
  
 
-int parssingOfHeader::checkHeaderOfreq_(client &obj)
+int parssingOfHeader::checkHeaderOfreq_(client &obj, std::string copy)
 {
     int rtn = checkHeaderLine(obj);
 
 	if(rtn < 0)
 		return rtn;
 
-	obj.headerOfRequest = &obj.headerOfRequest[rtn];
-    rtn = checkHeaders(obj);
+	copy = &copy[rtn];
+    rtn = checkHeaders(obj, copy);
     
     return rtn;
 }

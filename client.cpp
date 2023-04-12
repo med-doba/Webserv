@@ -206,7 +206,7 @@ int client::checkHeaderOfreq()
             {
                 headerOfRequest = buffer.substr(0,pos - 1);// not include \r\n
 				std::string copyheader = headerOfRequest;
-				this->flag_res = headerParss.checkHeaderOfreq_(*this);
+				this->flag_res = headerParss.checkHeaderOfreq_(*this, copyheader);
 				if (this->flag_res < 0)
 				{
 					flag = ERROR;
@@ -214,65 +214,74 @@ int client::checkHeaderOfreq()
 				}
                 // if(headerParss.checkHeaderOfreq_(headerOfRequest,tmp) == -2)
                 //     return -2;
-				
-                i = copyheader.find("Transfer-Encoding: chunked");   // find way to check if boundry
-                if(i != -1)
-                { 
-					std::cout << "lol" << std::endl;
-                    // buffer.erase(buffer.begin(),buffer.begin() + pos + 2);
-                    i = pos  + 2;
-					
-                    // len -= i;
+				if (this->tmp == POST)
+				{
+					i = copyheader.find("Transfer-Encoding: chunked");   // find way to check if boundry
+					if(i != -1)
+					{ 
+						std::cout << "lol" << std::endl;
+						i = pos  + 2;
+						pos = copyheader.find("Content-Length");  
+						std::cout << copyheader<< std::endl;
+						if(pos != -1)
+							ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
+						
+						flag = CHUNKED;
+						return 1;
+					}
 					pos = copyheader.find("Content-Length");  
-					std::cout << copyheader<< std::endl;
 					if(pos != -1)
+					{
+						j = copyheader.find("boundary");
+						if(j != -1)
+						{
+							flag = FORM;
+							ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
+							// if(ContentLength == 0)
+							//     return -2;
+							
+							i = headerOfRequest.size() + 3;// after herder
+							bytes_read -= i;
+							_tmp = j + 9;
+							char *temp = (char*)copyheader.data() + _tmp;// because string() dont handle '\r'
+							_tmp = 0;
+							while (temp[_tmp] != '\r' && temp[_tmp] != '\n' && temp[_tmp + 1] != '\n')
+								_tmp++;
+							boundary.append("--").append(ft_substr(temp,0,_tmp));// free boundry and temp?
+							// std::cout << "=> " <<  boundary << std::endl;
+							return 1;
+						}
 						ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
-					
-                    flag = CHUNKED;
-                    return 1;
-                }
-                pos = copyheader.find("Content-Length");  
-                if(pos != -1)
-                {
-                    j = copyheader.find("boundary");
-                    if(j != -1)
-                    {
-                        flag = FORM;
-                        ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
-                        // if(ContentLength == 0)
-                        //     return -2;
-						 
-                        i = headerOfRequest.size() + 3;// after herder
-                        bytes_read -= i;
-                        _tmp = j + 9;
-                        char *temp = (char*)copyheader.data() + _tmp;// because string() dont handle '\r'
-                        _tmp = 0;
-                        while (temp[_tmp] != '\r' && temp[_tmp] != '\n' && temp[_tmp + 1] != '\n')
-                            _tmp++;
-                        boundary.append("--").append(ft_substr(temp,0,_tmp));// free boundry and temp?
-                        // std::cout << "=> " <<  boundary << std::endl;
-                        return 1;
-                    }
-                    ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
-                    // if(ContentLength == 0)
-                    //     return -2;
-                    flag = NONCHUNKED;
-                    i = headerOfRequest.size();
-                    return  1;
-                }
-                else
-                {
-                    // without body
-                    flag = GET;
-                    return 1;
-                }
+						// if(ContentLength == 0)
+						//     return -2;
+						flag = NONCHUNKED;
+						i = headerOfRequest.size();
+						return  1;
+					}
+				}
+				else if (this->tmp == GET)
+				{
+					flag = GET;
+					return (1);
+				}
+				else if (this->tmp == DELETE)
+				{
+					flag = DELETE;
+					return (1);
+				}
+                // else
+                // {
+                //     // without body
+                //     flag = GET;
+                //     return 1;
+                // }
             }
             --pos;
         }
         pos++;
     }
     // in entring second times
-    if(flag == GET || flag == CHUNKED || flag == NONCHUNKED || flag == FORM || flag == ERROR)
+    if(flag == GET || flag == CHUNKED || flag == NONCHUNKED || flag == FORM || flag == ERROR || flag == DELETE)
         return 1;
     else
         return -2;
@@ -349,25 +358,28 @@ int client::deleteMethod(struct pollfd &pfds)
 	std::cout << "hello from delete"  << std::endl;
 	std::cout << "URI -- " << URI << std::endl;
 	std::string str;
-	for (int i = 0; i < 7; i++)
-		str.push_back(URI[i]);
-	if (str.compare("upload/") == 0)
-	{
-		int i = remove((char *)URI.data());
-		if (i  == 0)
-		{
-			std::cout << "removed successfully" << std::endl;
-			this->respond.flagResponse = DELETED;
-		}
-		else
-		{
-			std::cout << "error on remove" << std::endl;
-			this->respond.flagResponse = NOTFOUND;
-		}
-	}
+	if (URI.size() <= 7)
+		respond.flagResponse = FORBIDEN;
 	else
 	{
-		this->respond.flagResponse = FORBIDEN;
+		for (int i = 0; i < 7; i++)
+			str.push_back(URI[i]);
+		if (str.compare("upload/") == 0)
+		{
+			int i = remove((char *)URI.data());
+			if (i  == 0)
+			{
+				std::cout << "removed successfully" << std::endl;
+				this->respond.flagResponse = DELETED;
+			}
+			else
+			{
+				std::cout << "error on remove" << std::endl;
+				this->respond.flagResponse = NOTFOUND;
+			}
+		}
+		else
+			respond.flagResponse = FORBIDEN;
 	}
 	this->respond.ready = 1;
 	if (this->respond.ready == 1)
@@ -456,7 +468,6 @@ int client::postMethod(struct pollfd &pfds)
 			this->respond.content = 1;
 			this->respond.body = "Resource Already Exist";
 		}
-		std::cout << "this one" << std::endl;
 		this->respond.generate_response();
 		int i = this->respond.send_response(*this ,pfds);
 		if (i == 0)
