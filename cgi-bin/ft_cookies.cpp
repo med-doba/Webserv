@@ -1,21 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   ft_cookies.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/03/05 11:29:45 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/02 14:45:31 by med-doba         ###   ########.fr       */
+/*   Created: 2023/03/28 08:45:51 by med-doba          #+#    #+#             */
+/*   Updated: 2023/03/28 08:48:04 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "server.hpp"
-#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <unistd.h>
+#include <vector>
+#include <fcntl.h>
 
-
-int	main(void)
-{
-	ft_parse_conf("configuration.conf");
-	return 0;
-}
+typedef struct session{
+	
+}session;

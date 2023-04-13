@@ -7,6 +7,8 @@
 #include <vector>
 #include "location.hpp"
 
+
+
 class location;
 class server
 {
@@ -36,6 +38,9 @@ class server
 		std::vector<std::string>	ft_parse_cmbsize(std::string &lines);
 		void	ft_clearvectorserv(server &classconfig);
 		void	ft_clearvectorlocation_test(std::vector<location> &location_);
+		//get
+		std::vector<std::string>	get_listen();
+		std::vector<std::string>	get_host();
 		//utils
 		void	ft_ft(std::string str);
 		void	ft_trim(std::string &str);
@@ -62,5 +67,19 @@ class server
 		bool	host_find;
 		bool	location_find;
 };
+
+std::vector<server>		ft_parse_conf(std::string fileConf);
+void	ft_delete_comment(std::string	&str);
+void	ft_setDirective2False(server &classconfig, location &location_, int n);
+void	ft_check_cmbsize(server &classconfig, std::string &lines, location &location_, int n);
+void	ft_check_index(server &classconfig, std::string &lines, location &location_, int n);
+void	ft_check_root(server &classconfig, std::string &lines, location &location_, int n);
+void	ft_check_errorpage(server &classconfig, std::string &lines);
+void	ft_check_server_name(server &classconfig, std::string &lines);
+void	ft_check_host(server &classconfig, std::string &lines);
+void	ft_check_listen(server	&classconfig, std::string	&lines);
+void	ft_check_allow_methods(server &classconfig, std::string &lines, location &location_);
+void	ft_check_autoindex(server &classconfig, std::string &lines, location &location_);
+void	ft_check_cgi(server &classconfig, std::string &lines, location &location_);
 
 #endif
