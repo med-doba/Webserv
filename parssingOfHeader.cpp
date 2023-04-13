@@ -257,7 +257,9 @@ int parssingOfHeader::checkHeaderLine(client &obj)
     {
         free(temp);
         obj.respond.type = 1;
-        obj.respond.status_code = 405;
+        // obj.respond.status_code = 501;
+        // obj.respond.phrase = "Not Implemented";
+		obj.respond.status_code = 405;
         obj.respond.phrase = "Method Not Allowed";
         obj.respond.headers.push_back("Allow: GET, POST, DELETE");
         // respond.body = "No Host Header Found";
