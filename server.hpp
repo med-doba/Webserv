@@ -21,7 +21,8 @@ class server
 		//
 		std::vector<location>		obj_location;
 		std::vector<std::string>	listen;
-		std::vector<std::string>	host;
+		// std::vector<std::string>	host;
+		std::string					host;
 		std::vector<std::string>	root;
 		std::vector<std::string>	server_name;
 		std::vector<std::string>	index;
@@ -40,7 +41,7 @@ class server
 		void	ft_clearvectorlocation_test(std::vector<location> &location_);
 		//get
 		std::vector<std::string>	get_listen();
-		std::vector<std::string>	get_host();
+		std::string					get_host();
 		//utils
 		void	ft_ft(std::string str);
 		void	ft_trim(std::string &str);

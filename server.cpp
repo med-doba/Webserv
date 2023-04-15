@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/13 17:06:05 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/15 02:07:53 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ std::vector<std::string>	server::get_listen()
 	return this->listen;
 }
 
-std::vector<std::string>	server::get_host()
+std::string	server::get_host()
 {
 	return this->host;
 }
@@ -309,9 +309,9 @@ void	server::ft_show(std::vector<server> &block)
 		std::vector<std::string>::iterator it6;
 		for (it6 = block[i].listen.begin(); it6 != block[i].listen.end(); it6++)
 			std::cout << *it6 << std::endl;
-		std::vector<std::string>::iterator it8;
-		for (it8 = block[i].host.begin(); it8 != block[i].host.end(); it8++)
-			std::cout << *it8 << std::endl;
+		// std::vector<std::string>::iterator it8;
+		// for (it8 = block[i].host.begin(); it8 != block[i].host.end(); it8++)
+		// 	std::cout << *it8 << std::endl;
 		std::vector<std::string>::iterator it4;
 		for (it4 = block[i].server_name.begin(); it4 != block[i].server_name.end(); it4++)
 			std::cout << *it4 << std::endl;
@@ -378,8 +378,6 @@ void	ft_check_autoindex(server &classconfig, std::string &lines, location &locat
 	if (!location_.autoindex_)
 	{
 		location_.autoindex = classconfig.ft_split(lines, " \t");
-		if (location_.autoindex.begin()->compare("autoindex"))
-			classconfig.ft_error("error: invalid directives");
 		if (location_.autoindex.size() != 2)
 			classconfig.ft_error("location_ autoindex: error autoindex1");
 		std::vector<std::string>::iterator	it;
@@ -397,14 +395,12 @@ void	ft_check_allow_methods(server &classconfig, std::string &lines, location &l
 	if (!location_.allow_methods_)
 	{
 		location_.allow_methods = classconfig.ft_split(lines, " \t");
-		if (location_.allow_methods.begin()->compare("allow_methods"))
-			classconfig.ft_error("error: invalid directives");
 		if (!location_.ft_check_allow_methodsed(location_.allow_methods))
-			classconfig.ft_error("location_ allow_methods: error allow_methods");
+			classconfig.ft_error("Error: in location allow_methods");
 		location_.allow_methods_ = true;
 	}
 	else
-		classconfig.ft_error("2error: Duplicate directives");
+		classconfig.ft_error("Error: in location duplicate directives");
 }
 
 void	ft_check_listen(server	&classconfig, std::string	&lines)
@@ -423,8 +419,6 @@ void	ft_check_listen(server	&classconfig, std::string	&lines)
 		tmp_listen.back().pop_back();
 		classconfig.listen.insert(classconfig.listen.end(), (tmp_listen.begin() + 1), tmp_listen.end());
 	}
-	if (classconfig.listen.begin()->compare("listen"))
-		classconfig.ft_error("error: invalid directives");
 	std::vector<std::string>::iterator	it;
 	for (it = (classconfig.listen.begin() + 1); it != classconfig.listen.end(); it++)
 	{
@@ -436,17 +430,24 @@ void	ft_check_listen(server	&classconfig, std::string	&lines)
 
 void	ft_check_host(server &classconfig, std::string &lines)
 {
-	classconfig.host_find = true;
-	classconfig.host = classconfig.ft_split(lines, " \t");
-	if (classconfig.host.begin()->compare("host"))
-		classconfig.ft_error("error: invalid directives");
-	classconfig.host.back().pop_back();
-	std::vector<std::string>::iterator it;
-	for (it = classconfig.host.begin() + 1; it != classconfig.host.end(); it++)
+	if (!classconfig.host_find)
 	{
-		if (!classconfig.ft_checkRang_nbr(*(it)))
-			classconfig.ft_error("host: error rang");
+		classconfig.host_find = true;
+		std::vector<std::string>	tmp_host;
+		tmp_host = classconfig.ft_split(lines, " \t");
+		if (tmp_host.size() != 2)
+			classconfig.ft_error("Error: Only one host accepted");
+		tmp_host.back().pop_back();
+		std::vector<std::string>::iterator it;
+		for (it = tmp_host.begin() + 1; it != tmp_host.end(); it++)
+		{
+			if (!classconfig.ft_checkRang_nbr(*(it)))
+				classconfig.ft_error("host: error rang");
+		}
+		classconfig.host = *(tmp_host.begin() + 1);
 	}
+	else
+		classconfig.ft_error("9Error: Duplicate directives");
 }
 
 void	ft_check_server_name(server &classconfig, std::string &lines)
@@ -454,8 +455,6 @@ void	ft_check_server_name(server &classconfig, std::string &lines)
 	if (!classconfig.server_name_)
 	{
 		classconfig.server_name = classconfig.ft_split(lines, " \t");
-		if (classconfig.server_name.begin()->compare("server_name"))
-			classconfig.ft_error("error: invalid directives");
 		classconfig.server_name.back().pop_back();
 		classconfig.server_name_ = true;
 	}
@@ -469,8 +468,6 @@ void	ft_check_errorpage(server &classconfig, std::string &lines)
 	{
 		classconfig.error_page_find = true;
 		classconfig.error_page =  classconfig.ft_parse_errorpage(lines);
-		if (classconfig.error_page.begin()->compare("error_page"))
-			classconfig.ft_error("error: invalid directives");
 		classconfig.error_page.back().pop_back();
 		classconfig.error_page_ = true;
 	}
@@ -478,8 +475,6 @@ void	ft_check_errorpage(server &classconfig, std::string &lines)
 	{
 		std::vector<std::string>	tmp_error_page;
 		tmp_error_page = classconfig.ft_parse_errorpage(lines);
-		if (classconfig.error_page.begin()->compare("error_page"))
-			classconfig.ft_error("error: invalid directives");
 		tmp_error_page.back().pop_back();
 		classconfig.error_page.insert(classconfig.error_page.end(), (tmp_error_page.begin() + 1), tmp_error_page.end());
 	}
@@ -493,8 +488,6 @@ void	ft_check_root(server &classconfig, std::string &lines, location &location_,
 		if (!classconfig.root_)
 		{
 			classconfig.root = classconfig.ft_parse_root(lines);
-			if (classconfig.root.begin()->compare("root"))
-				classconfig.ft_error("error: invalid directives");
 			classconfig.root.back().pop_back();
 			classconfig.root_ = true;
 		}
@@ -504,8 +497,6 @@ void	ft_check_root(server &classconfig, std::string &lines, location &location_,
 		if (!location_.root_)
 		{
 			location_.root = classconfig.ft_parse_root(lines);
-			if (location_.root.begin()->compare("root"))
-				classconfig.ft_error("error: invalid directives");
 			location_.root_ = true;
 		}
 	}
@@ -521,8 +512,6 @@ void	ft_check_index(server &classconfig, std::string &lines, location &location_
 		{
 			lines.pop_back();
 			classconfig.index = classconfig.ft_parse_index(lines);
-			if (classconfig.index.begin()->compare("index"))
-				classconfig.ft_error("error: invalid directives");
 			classconfig.index_ = true;
 		}
 	}
@@ -531,8 +520,6 @@ void	ft_check_index(server &classconfig, std::string &lines, location &location_
 		if (!location_.index_)
 		{
 			location_.index = classconfig.ft_parse_index(lines);
-			if (location_.index.begin()->compare("index"))
-				classconfig.ft_error("error in location: invalid directives");
 			location_.index_ = true;
 		}
 	}
@@ -548,8 +535,6 @@ void	ft_check_cmbsize(server &classconfig, std::string &lines, location &locatio
 		{
 			lines.pop_back();
 			classconfig.client_max_body_size = classconfig.ft_parse_cmbsize(lines);
-			if (classconfig.client_max_body_size.begin()->compare("client_max_body_size"))
-				classconfig.ft_error("error: invalid directives");
 			classconfig.client_max_body_size_ = true;
 		}
 	}
@@ -558,13 +543,11 @@ void	ft_check_cmbsize(server &classconfig, std::string &lines, location &locatio
 		if (!location_.client_max_body_size_)
 		{
 			location_.client_max_body_size = classconfig.ft_parse_cmbsize(lines);
-			if (location_.client_max_body_size.begin()->compare("client_max_body_size"))
-				classconfig.ft_error("error in location: invalid directives");
 			location_.client_max_body_size_ = true;
 		}
 	}
 	else
-		classconfig.ft_error("cmbsize error: Duplicate directives");
+		classconfig.ft_error("7Error: Duplicate directives");
 }
 
 void	ft_setDirective2False(server &classconfig, location &location_, int n)
@@ -577,6 +560,7 @@ void	ft_setDirective2False(server &classconfig, location &location_, int n)
 		classconfig.root_ = false;
 		classconfig.index_ = false;
 		classconfig.server_name_ = false;
+		classconfig.host_find = false;
 	}
 	else if (n == 2)
 	{
@@ -597,5 +581,5 @@ void	ft_check_cgi(server &classconfig, std::string &lines, location &location_)
 		location_.cgi_ = true;
 	}
 	else
-			classconfig.ft_error("cgi error: Duplicate directives");
+		classconfig.ft_error("2Error: Duplicate directives");
 }
