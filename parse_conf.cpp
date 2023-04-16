@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/15 02:10:17 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/16 02:30:15 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,12 @@
 #include "server.hpp"
 #include <stdlib.h>
 #include <map>
+
+typedef	struct bind_info
+{
+	std::string		host;
+	std::stack<int>	ports;
+}bind_info;
 
 typedef std::map<std::string, std::vector<std::string> > MapType;
 
@@ -31,17 +37,19 @@ void printMap(const MapType& myMap)
 	}
 }
 
-std::map<std::string, std::vector<std::string> >	ft_2bind(server &my_server)
+void	ft_2bind(server &my_server, MapType	&my_map)
 {
-	std::map<std::string, std::vector<std::string> >	bind_;
-	std::vector<std::string>	tmp = my_server.get_listen();
+	std::vector<std::string>	tmp;
+
+	tmp = my_server.get_listen();
 	tmp.erase(tmp.begin());
-	bind_[my_server.get_host()] = tmp;
-	return bind_;
+	// if (my_server.get_host().compare())
+	my_map[my_server.get_host()] = tmp;
 }
 
 std::vector<server>	ft_parse_conf(std::string fileConf)
 {
+	MapType	bind_map;
 	server	classconfig;
 	std::vector<std::string>	classconfig_tmp;
 	location	location_;
@@ -136,7 +144,10 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 				if (InTheServerBlock && !InTheLocationBlock)
 				{
 					InTheServerBlock = false;
-					printMap(ft_2bind(classconfig));
+		// puts("lolo");
+					// bind_map.insert(ft_2bind(classconfig).begin(), ft_2bind(classconfig).end());
+					// bind_map[classconfig.get_host()] = classconfig.get_listen();
+					ft_2bind(classconfig, bind_map);
 					block.push_back(classconfig);
 					classconfig.ft_clearvectorlocation_test(classconfig.obj_location);
 					classconfig.ft_clearvectorserv(classconfig);
@@ -159,6 +170,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 		file_conf.close();
 		if (!(classconfig.root_find && classconfig.error_page_find && classconfig.location_find && classconfig.listen_find))
 			classconfig.ft_error("error: Missing required directives");
+		printMap(bind_map);
 		// classconfig.ft_show(block);
 	}
 	return block;
