@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/15 02:07:53 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/17 11:37:12 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -410,6 +410,11 @@ void	ft_check_listen(server	&classconfig, std::string	&lines)
 		classconfig.listen_find = true;
 		classconfig.listen = classconfig.ft_split(lines, " \t");
 		classconfig.listen.back().pop_back();
+		// std::vector<std::string>::iterator	trim;
+		// for (trim = classconfig.listen.begin(); trim != classconfig.listen.end(); trim++)
+		// {
+		// 	classconfig.ft_trim(*trim);
+		// }
 		classconfig.listen_ = true;
 	}
 	else
@@ -417,7 +422,12 @@ void	ft_check_listen(server	&classconfig, std::string	&lines)
 		std::vector<std::string>	tmp_listen;
 		tmp_listen = classconfig.ft_split(lines, " \t");
 		tmp_listen.back().pop_back();
-		classconfig.listen.insert(classconfig.listen.end(), (tmp_listen.begin() + 1), tmp_listen.end());
+		// std::vector<std::string>::iterator	trim;
+		// for (trim = classconfig.listen.begin(); trim != classconfig.listen.end(); trim++)
+		// {
+		// 	classconfig.ft_trim(*trim);
+		// }
+		// classconfig.listen.insert(classconfig.listen.end(), (tmp_listen.begin() + 1), tmp_listen.end());
 	}
 	std::vector<std::string>::iterator	it;
 	for (it = (classconfig.listen.begin() + 1); it != classconfig.listen.end(); it++)

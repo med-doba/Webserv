@@ -6,45 +6,105 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/16 02:30:15 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/17 11:50:06 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "location.hpp"
+#include <algorithm>
 #include "server.hpp"
 #include <stdlib.h>
 #include <map>
 
+
 typedef	struct bind_info
 {
-	std::string		host;
-	std::stack<int>	ports;
-}bind_info;
+	std::vector<std::string>	ports;
+	std::string					host;
+}	bind_info;
 
-typedef std::map<std::string, std::vector<std::string> > MapType;
+typedef	std::vector<bind_info>	MapType;
 
-void printMap(const MapType& myMap)
+void print_vector_of_structs(MapType& v)
 {
-	MapType::const_iterator itr;
-	for (itr = myMap.begin(); itr != myMap.end(); itr++) {
-		std::cout << "Key: " << itr->first << std::endl;
-		std::cout << "Values: ";
-		std::vector<std::string>::const_iterator vecItr;
-		for (vecItr = itr->second.begin(); vecItr != itr->second.end(); vecItr++) {
-			std::cout << *vecItr << " ";
+	for (MapType::iterator it = v.begin(); it != v.end(); ++it)
+	{
+		bind_info& s = *it;
+		std::cout << "host: " << s.host << std::endl;
+		std::cout << "ports: ";
+		for (std::vector<std::string>::iterator str_it = s.ports.begin(); str_it != s.ports.end(); ++str_it)
+		{
+			const std::string& str = *str_it;
+			std::cout << str << " | ";
 		}
 		std::cout << std::endl;
 	}
 }
 
+void	ft_rm_double_ports(std::vector<std::string>	&ports)
+{
+	int	count;
+	std::vector<std::string>			tmp;
+	std::vector<std::string>::iterator	it1;
+	std::vector<std::string>::iterator	it2;
+
+	for (it1 = ports.begin(); it1 != ports.end(); it1++)
+	{
+		count = 0;
+		for (it2 = ports.begin(); it2 != ports.end(); it2++)
+		{
+			if (it1->compare(*it2) == 0)
+			{
+				count++;
+				if (count > 1)
+					it2->erase();
+			}
+		}
+	}
+	it1 = ports.begin();
+	for (size_t i = 0; i < ports.size(); i++)
+	{
+		if (!it1->empty())
+			tmp.push_back(*it1);
+		it1++;
+	}
+	ports.clear();
+	ports = tmp;
+}
+
+bool	ft_handle_same_host(MapType &info, std::string	to_find, std::vector<std::string> &tr)
+{
+	MapType::iterator	it;
+
+	for (it = info.begin(); it != info.end(); it++)
+	{
+		if (it->host.compare(to_find) == 0)
+		{
+			it->ports.insert(it->ports.end(), tr.begin() , tr.end());
+			ft_rm_double_ports(it->ports);
+			return true;
+		}
+	}
+	return false;
+}
+
 void	ft_2bind(server &my_server, MapType	&my_map)
 {
 	std::vector<std::string>	tmp;
+	bind_info	collect;
 
 	tmp = my_server.get_listen();
 	tmp.erase(tmp.begin());
-	// if (my_server.get_host().compare())
-	my_map[my_server.get_host()] = tmp;
+	collect.ports = tmp;
+
+	if (ft_handle_same_host(my_map, my_server.get_host(), collect.ports))
+		return ;
+	else
+	{
+		collect.host = my_server.get_host();
+		my_map.push_back(collect);
+	}
+
 }
 
 std::vector<server>	ft_parse_conf(std::string fileConf)
@@ -95,6 +155,13 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 				if (classconfig.ft_occurrences_of_char(lines, ';') == -1)
 					classconfig.ft_error("error: occurrences_of_char");
 				classconfig_tmp = classconfig.ft_split(lines, " \t");
+				// classconfig_tmp.back().pop_back();
+				// std::cout << "size = " << classconfig_tmp.size() << std::endl;
+				// std::cout << "str = |" << *(classconfig_tmp.begin() + 1) << "|" << std::endl;
+				// if (classconfig_tmp.size() < 2 || (classconfig_tmp.begin() + 1)->compare(" ") == 0 || (classconfig_tmp.begin() + 1)->compare("\t") == 0)
+				// {
+				// 	classconfig.ft_error("error: invalid directives");
+				// }
 				if (!classconfig_tmp.begin()->compare("listen"))
 					ft_check_listen(classconfig, lines);
 				else if (!classconfig_tmp.begin()->compare("host"))
@@ -144,9 +211,6 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 				if (InTheServerBlock && !InTheLocationBlock)
 				{
 					InTheServerBlock = false;
-		// puts("lolo");
-					// bind_map.insert(ft_2bind(classconfig).begin(), ft_2bind(classconfig).end());
-					// bind_map[classconfig.get_host()] = classconfig.get_listen();
 					ft_2bind(classconfig, bind_map);
 					block.push_back(classconfig);
 					classconfig.ft_clearvectorlocation_test(classconfig.obj_location);
@@ -170,7 +234,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 		file_conf.close();
 		if (!(classconfig.root_find && classconfig.error_page_find && classconfig.location_find && classconfig.listen_find))
 			classconfig.ft_error("error: Missing required directives");
-		printMap(bind_map);
+		print_vector_of_structs(bind_map);
 		// classconfig.ft_show(block);
 	}
 	return block;
