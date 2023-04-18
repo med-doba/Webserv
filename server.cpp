@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/18 00:56:59 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/18 04:55:25 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,10 +104,8 @@ bool	server::ft_checkRang_nbr(std::string str)
 	if (ft_occurrences_of_char_v2(str, '.') != 3)
 		return false;
 	array = ft_split(str, ".");
-	// puts("dddd");
 	if (array.size() != 4)
 		return false;
-	// trim spaces
 	for (it = array.begin(); it != array.end(); it++)
 	{
 		if (it->size() <= 0)
@@ -435,31 +433,15 @@ void	ft_check_listen(server	&classconfig, std::string	&lines)
 	if (!classconfig.listen_)
 	{
 		classconfig.listen_find = true;
-		classconfig.listen = classconfig.ft_split(lines, " \t");
+		classconfig.listen = classconfig.ft_split(lines, " \t;");
 		classconfig.listen.back().pop_back();
-		// if (classconfig.listen.back()[0] == '\0')
-		// {
-		// 	std::cout << "lol\n";
-		// 	classconfig.listen.back().erase();
-		// }
-		// std::vector<std::string>::iterator	trim;
-		// for (trim = classconfig.listen.begin(); trim != classconfig.listen.end(); trim++)
-		// {
-		// 	classconfig.ft_trim(*trim);
-		// }
 		classconfig.listen_ = true;
 	}
 	else
 	{
 		std::vector<std::string>	tmp_listen;
-		tmp_listen = classconfig.ft_split(lines, " \t");
+		tmp_listen = classconfig.ft_split(lines, " \t;");
 		tmp_listen.back().pop_back();
-		// std::vector<std::string>::iterator	trim;
-		// for (trim = classconfig.listen.begin(); trim != classconfig.listen.end(); trim++)
-		// {
-		// 	classconfig.ft_trim(*trim);
-		// }
-		// classconfig.listen.insert(classconfig.listen.end(), (tmp_listen.begin() + 1), tmp_listen.end());
 	}
 	std::vector<std::string>::iterator	it;
 	for (it = (classconfig.listen.begin() + 1); it != classconfig.listen.end(); it++)
