@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/17 11:50:06 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/18 00:05:44 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ void	ft_2bind(server &my_server, MapType	&my_map)
 
 std::vector<server>	ft_parse_conf(std::string fileConf)
 {
-	MapType	bind_map;
+	MapType	bind_info;
 	server	classconfig;
 	std::vector<std::string>	classconfig_tmp;
 	location	location_;
@@ -154,11 +154,11 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 					classconfig.ft_error("error: missing or misplaced commas");
 				if (classconfig.ft_occurrences_of_char(lines, ';') == -1)
 					classconfig.ft_error("error: occurrences_of_char");
-				classconfig_tmp = classconfig.ft_split(lines, " \t");
-				// classconfig_tmp.back().pop_back();
-				// std::cout << "size = " << classconfig_tmp.size() << std::endl;
-				// std::cout << "str = |" << *(classconfig_tmp.begin() + 1) << "|" << std::endl;
-				// if (classconfig_tmp.size() < 2 || (classconfig_tmp.begin() + 1)->compare(" ") == 0 || (classconfig_tmp.begin() + 1)->compare("\t") == 0)
+				classconfig_tmp = classconfig.ft_split(lines, " \t;");
+				//
+				std::cout << "size = " << classconfig_tmp.size() << std::endl;
+				//
+				// if (classconfig_tmp.size() < 2)
 				// {
 				// 	classconfig.ft_error("error: invalid directives");
 				// }
@@ -211,7 +211,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 				if (InTheServerBlock && !InTheLocationBlock)
 				{
 					InTheServerBlock = false;
-					ft_2bind(classconfig, bind_map);
+					// ft_2bind(classconfig, bind_info);
 					block.push_back(classconfig);
 					classconfig.ft_clearvectorlocation_test(classconfig.obj_location);
 					classconfig.ft_clearvectorserv(classconfig);
@@ -234,7 +234,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 		file_conf.close();
 		if (!(classconfig.root_find && classconfig.error_page_find && classconfig.location_find && classconfig.listen_find))
 			classconfig.ft_error("error: Missing required directives");
-		print_vector_of_structs(bind_map);
+		print_vector_of_structs(bind_info);
 		// classconfig.ft_show(block);
 	}
 	return block;

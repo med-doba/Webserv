@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <vector>
 #include "location.hpp"

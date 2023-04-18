@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/17 11:37:12 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/18 00:05:28 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,7 @@ bool	server::ft_checkRang_nbr(std::string str)
 	if (ft_occurrences_of_char_v2(str, '.') != 3)
 		return false;
 	array = ft_split(str, ".");
+	puts("dddd");
 	if (array.size() != 4)
 		return false;
 	// trim spaces
@@ -184,9 +185,12 @@ bool	server::ft_check_rangeofports(std::string &str)
 {
 	int	nbr;
 
-	nbr = std::stoi(str);
-	if (nbr >= 1 && nbr <= 65535)
-		return true;
+	if (!str.empty())
+	{
+		nbr = std::stoi(str);
+		if (nbr >= 1 && nbr <= 65535)
+			return true;
+	}
 	return false;
 }
 
@@ -265,22 +269,47 @@ int	server::ft_occurrences_of_char_v2(std::string &line, char c)
 	return count;
 }
 
-std::vector<std::string>	server::ft_split(const std::string str, std::string split)
+std::vector<std::string>	server::ft_split(std::string str, std::string split)
 {
-	std::vector<std::string> rtn;
-	size_t	i = 0,j = 0;
+	(void)split;
+	std::vector<std::string>	tmp;
 
-	for (i = 0; str.find_first_of(split, i) != std::string::npos; i++)
+	std::istringstream iss(str);
+	std::vector<std::string> tokens1;
+	std::vector<std::string> tokens2;
+	std::string token;
+
+	for (size_t i = 0; i < split.size(); i++)
 	{
-		j = str.find_first_of(split, i);
-		if (j == std::string::npos)
-			break;
-		rtn.push_back(str.substr(i, (j - i)));
-		i = j;
+		if (i == 0)
+		{
+			while (std::getline(iss, token, split[i]))
+			{
+				if (!token.empty())
+					tokens2.push_back(token);
+			}
+		}
+		else
+		{
+			for (size_t index = 0; index < tokens2.size(); index++)
+			{
+				std::istringstream iss(tokens2[index]);
+				while (std::getline(iss, token, split[i]))
+				{
+					if (!token.empty())
+						tokens1.push_back(token);
+				}
+			}
+			tokens2 = tokens1;
+			tokens1.clear();
+		}
 	}
-	if (i < str.length())
-		rtn.push_back(str.substr(i));
-	return rtn;
+
+	for (size_t i = 0; i < tokens2.size(); i++)
+	{
+		std::cout << "str == |" << tokens2[i] << "|"<< std::endl;
+	}
+	return tokens2;
 }
 
 bool	server::ft_isDigit(std::string &str)
@@ -309,9 +338,7 @@ void	server::ft_show(std::vector<server> &block)
 		std::vector<std::string>::iterator it6;
 		for (it6 = block[i].listen.begin(); it6 != block[i].listen.end(); it6++)
 			std::cout << *it6 << std::endl;
-		// std::vector<std::string>::iterator it8;
-		// for (it8 = block[i].host.begin(); it8 != block[i].host.end(); it8++)
-		// 	std::cout << *it8 << std::endl;
+			std::cout << block[i].get_host() << std::endl;
 		std::vector<std::string>::iterator it4;
 		for (it4 = block[i].server_name.begin(); it4 != block[i].server_name.end(); it4++)
 			std::cout << *it4 << std::endl;
@@ -410,6 +437,11 @@ void	ft_check_listen(server	&classconfig, std::string	&lines)
 		classconfig.listen_find = true;
 		classconfig.listen = classconfig.ft_split(lines, " \t");
 		classconfig.listen.back().pop_back();
+		// if (classconfig.listen.back()[0] == '\0')
+		// {
+		// 	std::cout << "lol\n";
+		// 	classconfig.listen.back().erase();
+		// }
 		// std::vector<std::string>::iterator	trim;
 		// for (trim = classconfig.listen.begin(); trim != classconfig.listen.end(); trim++)
 		// {
