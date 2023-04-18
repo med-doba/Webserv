@@ -59,6 +59,10 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
         fd = open((char*)(file.append(exetention).append(".png").data()),O_CREAT | O_RDWR , 0777);
     else if((rtn = headerOfRequest.find("pdf")) != -1)
         fd = open((char*)(file.append(exetention).append(".pdf").data()),O_CREAT | O_RDWR , 0777);
+    else if((rtn = headerOfRequest.find("html")) != -1)
+        fd = open((char*)(file.append(exetention).append(".html").data()),O_CREAT | O_RDWR , 0777);
+    else if((rtn = headerOfRequest.find("css")) != -1)
+        fd = open((char*)(file.append(exetention).append(".css").data()),O_CREAT | O_RDWR , 0777);
     else // is a text file such as html ..
         fd = open((char*)(file.append(exetention).data()),O_CREAT | O_RDWR , 0777);
     

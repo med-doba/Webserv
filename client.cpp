@@ -192,6 +192,27 @@ client::~client()
 {
 }
 
+void client::check_media()
+{
+	std::string media_handled[8] = {"image/png", "image/jpeg", "image/jpg" ,"application/pdf" , "text/plain" , "text/html" , "text/css", "video/mp4"};
+	std::string media;
+	int pos = headerOfRequest.find("Content-Type: ");
+	media = headerOfRequest.substr(pos + 14);
+	media.pop_back();
+	for (int i = 0; i < 8; i++)
+	{
+		if (media.compare(media_handled[i]) == 0)
+			return ;
+	}
+	respond.status_code = 415;
+	respond.phrase = "Unsupported Media Type";
+	respond.type = 1;
+	respond.body = "Unsupported media type. Please use a supported type.";
+	respond.close = CLOSE;
+	respond.content = 1;
+	flag = ERROR;
+}
+
 int client::checkHeaderOfreq()
 {
     int pos = 0;

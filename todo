@@ -21,22 +21,22 @@ handling i should incoprate this in the normal response as well
 
 
 => handle if a header doesn't have a value only if that header is nessecary
-to the request method (pending ...)
+to the request method (pending ...) (mustapha will do it)
 
 => handle chanked transfer if size of buffer bigger than the contentlength in the headers (done)
 
-=> handle delete required headers (pending ...)
+=> handle delete required headers (done)
 
 => handle boundary contentLength == 0 (done)
 
 
 =>	415 Unsupported Media Type
 This response means that the server was unable to process the request because the content type
-specified in the Content-Type header is not supported by the server. (pending ...)
+specified in the Content-Type header is not supported by the server. (pending ...) (done)
 
 => handle that it goes into nonchunked when it's a delete method (done)
 
-=> ask mustapha if he handled nothing but space between the elements of the request line (pending ...)
+=> ask mustapha if he handled nothing but space between the elements of the request line (done)
 
 
 Sure, here are some headers that should not be included in certain HTTP methods:

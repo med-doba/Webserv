@@ -218,7 +218,15 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy)
         while (str[i] && str[i] != '\r' && str[i] != '\n'  && str[i + 1] != '\n')  
             i++;
         if(str.substr(k,i - k).size() == 0)// if has empty value
+        {
+            obj.respond.type = 1;
+            obj.respond.status_code = 400;
+            obj.respond.phrase = "Bad Request";
+            obj.respond.content = 1;
+            obj.respond.body = "The request is invalid or malformed.";
+            obj.respond.close = 1;
             return -2;
+        }
         if(str[i] != '\r' && str[i] != '\n' && str[i + 1] == '\n')// if line dont end by '\r'
         {
             obj.respond.type = 1;
@@ -276,7 +284,12 @@ int parssingOfHeader::checkHeaderLine(client &obj)
     if(temp[0] != '/')
     {
         free(temp);
-        std::cout << "here\n";
+        obj.respond.type = 1;
+        obj.respond.status_code = 400;
+        obj.respond.phrase = "Bad Request";
+        obj.respond.content = 1;
+        obj.respond.body = "The request has a malformed header";
+        obj.respond.close = CLOSE;
         return -2;
     }
     obj.URI.assign(&temp[1]);
