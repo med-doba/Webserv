@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/18 00:57:49 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/18 11:12:52 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ void print_vector_of_structs(MapType& v)
 {
 	for (MapType::iterator it = v.begin(); it != v.end(); ++it)
 	{
+		puts("does enyer inside the block");
 		bind_info& s = *it;
 		std::cout << "host: " << s.host << std::endl;
 		std::cout << "ports: ";
@@ -128,10 +129,10 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 			// if (lines.empty())
 			// 	continue;
 			classconfig.ft_trim(lines);
-			if (lines.empty())
+			if (lines.empty() || lines[0] == '#')
 				continue;
-			if (lines[0] == '#')
-				continue;
+			// if (lines[0] == '#')
+			// 	continue;
 			ft_delete_comment(lines);
 			if (!lines.empty() && lines.back() == '{')
 			{
@@ -142,7 +143,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 					InTheLocationBlock = true;
 					classconfig.location_find = true;
 					if (classconfig.ft_split(lines, " \t").begin()->compare("location"))
-						classconfig.ft_error("error: invalid directives");
+						classconfig.ft_error("Error: invalid directives");
 					location_.path = *(classconfig.ft_split(lines, " \t").begin() + 1);
 				}
 				continue;
@@ -155,13 +156,8 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 				if (classconfig.ft_occurrences_of_char(lines, ';') == -1)
 					classconfig.ft_error("error: occurrences_of_char");
 				classconfig_tmp = classconfig.ft_split(lines, " \t;");
-				//
-				std::cout << "size = " << classconfig_tmp.size() << std::endl;
-				//
 				if (classconfig_tmp.size() < 2)
-				{
-					classconfig.ft_error("error: invalid directives");
-				}
+					classconfig.ft_error("Error: invalid value for a directives");
 				else if (!classconfig_tmp.begin()->compare("listen"))
 					ft_check_listen(classconfig, lines);
 				else if (!classconfig_tmp.begin()->compare("host"))
@@ -182,8 +178,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 
 			else if (InTheLocationBlock && lines != "}")
 			{
-				lines.pop_back();
-				classconfig_tmp = classconfig.ft_split(lines, " \t");
+				classconfig_tmp = classconfig.ft_split(lines, " \t;");
 				if(!classconfig_tmp.begin()->compare("root"))
 					ft_check_root(classconfig, lines, location_, 2);
 				else if (!classconfig_tmp.begin()->compare("index"))
@@ -193,7 +188,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 				else if (!classconfig_tmp.begin()->compare("client_max_body_size"))
 					ft_check_cmbsize(classconfig, lines, location_, 2);
 				else if (!classconfig_tmp.begin()->compare("return"))
-					location_.rtn = classconfig.ft_split(lines, " \t");
+					location_.rtn = classconfig.ft_split(lines, " \t;");
 				else if (!classconfig_tmp.begin()->compare("allow_methods"))
 					ft_check_allow_methods(classconfig, lines, location_);
 				else if (!classconfig_tmp.begin()->compare("autoindex"))
@@ -211,7 +206,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 				if (InTheServerBlock && !InTheLocationBlock)
 				{
 					InTheServerBlock = false;
-					// ft_2bind(classconfig, bind_info);
+					ft_2bind(classconfig, bind_info);
 					block.push_back(classconfig);
 					classconfig.ft_clearvectorlocation_test(classconfig.obj_location);
 					classconfig.ft_clearvectorserv(classconfig);
@@ -235,7 +230,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 		if (!(classconfig.root_find && classconfig.error_page_find && classconfig.location_find && classconfig.listen_find))
 			classconfig.ft_error("error: Missing required directives");
 		print_vector_of_structs(bind_info);
-		// classconfig.ft_show(block);
+		classconfig.ft_show(block);
 	}
 	return block;
 }

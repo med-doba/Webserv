@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/18 04:55:25 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/18 11:01:10 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ std::vector<std::string>	server::ft_parse_root(std::string &lines)
 {
 	std::vector<std::string>	tmp;
 
-	tmp = ft_split(lines, " \t");
+	tmp = ft_split(lines, " \t;");
 
 	if (tmp.size() != 2)
 		ft_error("root: error root");
@@ -132,7 +132,7 @@ std::vector<std::string>	server::ft_parse_index(std::string &lines)
 	std::vector<std::string>	tmp;
 	std::vector<std::string>::iterator it;
 
-	tmp = ft_split(lines, " \t");
+	tmp = ft_split(lines, " \t;");
 	for (it = tmp.begin() + 1 ; it != tmp.end(); it++)
 	{
 		if (ft_check_extention(*it) == false)
@@ -145,9 +145,9 @@ std::vector<std::string>	server::ft_parse_errorpage(std::string &lines)
 {
 	std::vector<std::string>	tmp;
 
-	tmp = ft_split(lines, " \t");
+	tmp = ft_split(lines, " \t;");
 	if (tmp.size() != 3)
-		ft_error("error_page: error in error page");
+		ft_error("Error: in error page");
 	return tmp;
 }
 
@@ -155,7 +155,7 @@ std::vector<std::string>	server::ft_parse_cmbsize(std::string &lines)
 {
 	std::vector<std::string>	tmp;
 
-	tmp = ft_split(lines, " \t");
+	tmp = ft_split(lines, " \t;");
 	if (tmp.size() > 2)
 		ft_error("ClMaxBodySize: error is didgit");
 	if (!ft_check_cmbsize(tmp[1]))
@@ -269,9 +269,6 @@ int	server::ft_occurrences_of_char_v2(std::string &line, char c)
 
 std::vector<std::string>	server::ft_split(std::string str, std::string split)
 {
-	(void)split;
-	std::vector<std::string>	tmp;
-
 	std::istringstream iss(str);
 	std::vector<std::string> tokens1;
 	std::vector<std::string> tokens2;
@@ -302,11 +299,6 @@ std::vector<std::string>	server::ft_split(std::string str, std::string split)
 			tokens1.clear();
 		}
 	}
-
-	// for (size_t i = 0; i < tokens2.size(); i++)
-	// {
-	// 	std::cout << "str == |" << tokens2[i] << "|"<< std::endl;
-	// }
 	return tokens2;
 }
 
@@ -336,7 +328,7 @@ void	server::ft_show(std::vector<server> &block)
 		std::vector<std::string>::iterator it6;
 		for (it6 = block[i].listen.begin(); it6 != block[i].listen.end(); it6++)
 			std::cout << *it6 << std::endl;
-			std::cout << block[i].get_host() << std::endl;
+		std::cout << block[i].get_host() << std::endl;
 		std::vector<std::string>::iterator it4;
 		for (it4 = block[i].server_name.begin(); it4 != block[i].server_name.end(); it4++)
 			std::cout << *it4 << std::endl;
@@ -402,24 +394,24 @@ void	ft_check_autoindex(server &classconfig, std::string &lines, location &locat
 {
 	if (!location_.autoindex_)
 	{
-		location_.autoindex = classconfig.ft_split(lines, " \t");
+		location_.autoindex = classconfig.ft_split(lines, " \t;");
 		if (location_.autoindex.size() != 2)
-			classconfig.ft_error("location_ autoindex: error autoindex1");
+			classconfig.ft_error("Error: error autoindex1");
 		std::vector<std::string>::iterator	it;
 		it = (location_.autoindex.begin() + 1);
 		if (!location_.ft_check_autoindex(*it))
-			classconfig.ft_error("location_ autoindex: error autoindex2");
+			classconfig.ft_error("Error: error autoindex2");
 		location_.autoindex_ = true;
 	}
 	else
-		classconfig.ft_error("1error: Duplicate directives");
+		classconfig.ft_error("Error: Duplicate directives");
 }
 
 void	ft_check_allow_methods(server &classconfig, std::string &lines, location &location_)
 {
 	if (!location_.allow_methods_)
 	{
-		location_.allow_methods = classconfig.ft_split(lines, " \t");
+		location_.allow_methods = classconfig.ft_split(lines, " \t;");
 		if (!location_.ft_check_allow_methodsed(location_.allow_methods))
 			classconfig.ft_error("Error: in location allow_methods");
 		location_.allow_methods_ = true;
@@ -434,14 +426,12 @@ void	ft_check_listen(server	&classconfig, std::string	&lines)
 	{
 		classconfig.listen_find = true;
 		classconfig.listen = classconfig.ft_split(lines, " \t;");
-		classconfig.listen.back().pop_back();
 		classconfig.listen_ = true;
 	}
 	else
 	{
 		std::vector<std::string>	tmp_listen;
 		tmp_listen = classconfig.ft_split(lines, " \t;");
-		tmp_listen.back().pop_back();
 	}
 	std::vector<std::string>::iterator	it;
 	for (it = (classconfig.listen.begin() + 1); it != classconfig.listen.end(); it++)
@@ -458,10 +448,9 @@ void	ft_check_host(server &classconfig, std::string &lines)
 	{
 		classconfig.host_find = true;
 		std::vector<std::string>	tmp_host;
-		tmp_host = classconfig.ft_split(lines, " \t");
+		tmp_host = classconfig.ft_split(lines, " \t;");
 		if (tmp_host.size() != 2)
 			classconfig.ft_error("Error: Only one host accepted");
-		tmp_host.back().pop_back();
 		std::vector<std::string>::iterator it;
 		for (it = tmp_host.begin() + 1; it != tmp_host.end(); it++)
 		{
@@ -478,8 +467,7 @@ void	ft_check_server_name(server &classconfig, std::string &lines)
 {
 	if (!classconfig.server_name_)
 	{
-		classconfig.server_name = classconfig.ft_split(lines, " \t");
-		classconfig.server_name.back().pop_back();
+		classconfig.server_name = classconfig.ft_split(lines, " \t;");
 		classconfig.server_name_ = true;
 	}
 	else
@@ -492,14 +480,12 @@ void	ft_check_errorpage(server &classconfig, std::string &lines)
 	{
 		classconfig.error_page_find = true;
 		classconfig.error_page =  classconfig.ft_parse_errorpage(lines);
-		classconfig.error_page.back().pop_back();
 		classconfig.error_page_ = true;
 	}
 	else
 	{
 		std::vector<std::string>	tmp_error_page;
 		tmp_error_page = classconfig.ft_parse_errorpage(lines);
-		tmp_error_page.back().pop_back();
 		classconfig.error_page.insert(classconfig.error_page.end(), (tmp_error_page.begin() + 1), tmp_error_page.end());
 	}
 }
@@ -512,7 +498,6 @@ void	ft_check_root(server &classconfig, std::string &lines, location &location_,
 		if (!classconfig.root_)
 		{
 			classconfig.root = classconfig.ft_parse_root(lines);
-			classconfig.root.back().pop_back();
 			classconfig.root_ = true;
 		}
 	}
@@ -534,7 +519,6 @@ void	ft_check_index(server &classconfig, std::string &lines, location &location_
 	{
 		if (!classconfig.index_)
 		{
-			lines.pop_back();
 			classconfig.index = classconfig.ft_parse_index(lines);
 			classconfig.index_ = true;
 		}
@@ -557,7 +541,6 @@ void	ft_check_cmbsize(server &classconfig, std::string &lines, location &locatio
 	{
 		if (!classconfig.client_max_body_size_)
 		{
-			lines.pop_back();
 			classconfig.client_max_body_size = classconfig.ft_parse_cmbsize(lines);
 			classconfig.client_max_body_size_ = true;
 		}
@@ -601,9 +584,9 @@ void	ft_check_cgi(server &classconfig, std::string &lines, location &location_)
 {
 	if (!location_.cgi_)
 	{
-		location_.cgi = classconfig.ft_split(lines, " \t");
+		location_.cgi = classconfig.ft_split(lines, " \t;");
 		location_.cgi_ = true;
 	}
 	else
-		classconfig.ft_error("2Error: Duplicate directives");
+		classconfig.ft_error("Error: Duplicate directives");
 }
