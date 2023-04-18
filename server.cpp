@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/18 00:05:28 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/18 00:56:59 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ bool	server::ft_checkRang_nbr(std::string str)
 	if (ft_occurrences_of_char_v2(str, '.') != 3)
 		return false;
 	array = ft_split(str, ".");
-	puts("dddd");
+	// puts("dddd");
 	if (array.size() != 4)
 		return false;
 	// trim spaces
@@ -305,10 +305,10 @@ std::vector<std::string>	server::ft_split(std::string str, std::string split)
 		}
 	}
 
-	for (size_t i = 0; i < tokens2.size(); i++)
-	{
-		std::cout << "str == |" << tokens2[i] << "|"<< std::endl;
-	}
+	// for (size_t i = 0; i < tokens2.size(); i++)
+	// {
+	// 	std::cout << "str == |" << tokens2[i] << "|"<< std::endl;
+	// }
 	return tokens2;
 }
 

@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/18 00:05:44 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/18 00:57:49 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,11 +158,11 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 				//
 				std::cout << "size = " << classconfig_tmp.size() << std::endl;
 				//
-				// if (classconfig_tmp.size() < 2)
-				// {
-				// 	classconfig.ft_error("error: invalid directives");
-				// }
-				if (!classconfig_tmp.begin()->compare("listen"))
+				if (classconfig_tmp.size() < 2)
+				{
+					classconfig.ft_error("error: invalid directives");
+				}
+				else if (!classconfig_tmp.begin()->compare("listen"))
 					ft_check_listen(classconfig, lines);
 				else if (!classconfig_tmp.begin()->compare("host"))
 					ft_check_host(classconfig, lines);
