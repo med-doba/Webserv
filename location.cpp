@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:49:40 by med-doba          #+#    #+#             */
-/*   Updated: 2023/03/24 15:44:16 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/19 05:04:54 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ location	&location::operator=(const location &obj)
 bool	location::ft_check_allow_methodsed(std::vector<std::string> &allow_methodsed)
 {
 	std::vector<std::string>::iterator	it;
+	
 	for (it = allow_methodsed.begin() + 1 ; it != allow_methodsed.end(); it++)
 	{
 		if (*it != "POST" && *it != "GET" && *it != "DELETE" && *it != "ALL")

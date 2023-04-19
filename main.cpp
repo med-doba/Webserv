@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:29:45 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/02 14:45:31 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/19 19:06:19 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 
 int	main(void)
 {
-	ft_parse_conf("configuration.conf");
+	MapType	bind_info;
+	
+	ft_parse_conf("configuration.conf", bind_info);
 	return 0;
 }

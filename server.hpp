@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include "location.hpp"
 
 
@@ -22,7 +23,6 @@ class server
 		//
 		std::vector<location>		obj_location;
 		std::vector<std::string>	listen;
-		// std::vector<std::string>	host;
 		std::string					host;
 		std::vector<std::string>	root;
 		std::vector<std::string>	server_name;
@@ -41,18 +41,16 @@ class server
 		void	ft_clearvectorserv(server &classconfig);
 		void	ft_clearvectorlocation_test(std::vector<location> &location_);
 		//get
-		std::vector<std::string>	get_listen();
 		std::string					get_host();
+		std::vector<std::string>	get_listen();
 		//utils
+		int		ft_occurrences_of_char(std::string &line, char c);
 		void	ft_ft(std::string str);
 		void	ft_trim(std::string &str);
 		void	ft_error(std::string msg);
 		void	ft_check_double(std::vector<std::string> &container);
-		int		ft_occurrences_of_char(std::string &line, char c);
-		int		ft_occurrences_of_char_v2(std::string &line, char c);
-		void	ft_count(void);
-		std::vector<std::string>	ft_split(const std::string str, std::string split);
 		bool	ft_isDigit(std::string &str);
+		std::vector<std::string>	ft_split(const std::string str, std::string split);
 		//show
 		void	ft_show(std::vector<server>  &block);
 		//
@@ -70,7 +68,6 @@ class server
 		bool	location_find;
 };
 
-std::vector<server>		ft_parse_conf(std::string fileConf);
 void	ft_delete_comment(std::string	&str);
 void	ft_setDirective2False(server &classconfig, location &location_, int n);
 void	ft_check_cmbsize(server &classconfig, std::string &lines, location &location_, int n);
@@ -83,5 +80,18 @@ void	ft_check_listen(server	&classconfig, std::string	&lines);
 void	ft_check_allow_methods(server &classconfig, std::string &lines, location &location_);
 void	ft_check_autoindex(server &classconfig, std::string &lines, location &location_);
 void	ft_check_cgi(server &classconfig, std::string &lines, location &location_);
+//
+typedef	struct bind_info
+{
+	std::vector<std::string>	ports;
+	std::string					host;
+}	bind_info;
+
+typedef	std::vector<bind_info>	MapType;
+std::vector<server>		ft_parse_conf(std::string fileConf, MapType	bind_info);
+
+void	print_vector_of_structs(MapType& v);
+void	ft_rm_double_ports(std::vector<std::string>	&ports);
+void	ft_2bind(server &my_server, MapType	&my_map);
 
 #endif

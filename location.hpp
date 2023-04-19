@@ -39,7 +39,5 @@ class location
 		bool	allow_methods_;
 		//
 };
-// class server;
-// std::vector<server>	ft_parse_conf(std::string fileConf);
 
 #endif

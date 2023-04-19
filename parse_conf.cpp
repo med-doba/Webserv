@@ -6,118 +6,20 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/18 11:12:52 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/19 19:08:15 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "location.hpp"
-#include <algorithm>
 #include "server.hpp"
-#include <stdlib.h>
-#include <map>
 
-
-typedef	struct bind_info
+std::vector<server>	ft_parse_conf(std::string fileConf, MapType bind_info)
 {
-	std::vector<std::string>	ports;
-	std::string					host;
-}	bind_info;
-
-typedef	std::vector<bind_info>	MapType;
-
-void print_vector_of_structs(MapType& v)
-{
-	for (MapType::iterator it = v.begin(); it != v.end(); ++it)
-	{
-		puts("does enyer inside the block");
-		bind_info& s = *it;
-		std::cout << "host: " << s.host << std::endl;
-		std::cout << "ports: ";
-		for (std::vector<std::string>::iterator str_it = s.ports.begin(); str_it != s.ports.end(); ++str_it)
-		{
-			const std::string& str = *str_it;
-			std::cout << str << " | ";
-		}
-		std::cout << std::endl;
-	}
-}
-
-void	ft_rm_double_ports(std::vector<std::string>	&ports)
-{
-	int	count;
-	std::vector<std::string>			tmp;
-	std::vector<std::string>::iterator	it1;
-	std::vector<std::string>::iterator	it2;
-
-	for (it1 = ports.begin(); it1 != ports.end(); it1++)
-	{
-		count = 0;
-		for (it2 = ports.begin(); it2 != ports.end(); it2++)
-		{
-			if (it1->compare(*it2) == 0)
-			{
-				count++;
-				if (count > 1)
-					it2->erase();
-			}
-		}
-	}
-	it1 = ports.begin();
-	for (size_t i = 0; i < ports.size(); i++)
-	{
-		if (!it1->empty())
-			tmp.push_back(*it1);
-		it1++;
-	}
-	ports.clear();
-	ports = tmp;
-}
-
-bool	ft_handle_same_host(MapType &info, std::string	to_find, std::vector<std::string> &tr)
-{
-	MapType::iterator	it;
-
-	for (it = info.begin(); it != info.end(); it++)
-	{
-		if (it->host.compare(to_find) == 0)
-		{
-			it->ports.insert(it->ports.end(), tr.begin() , tr.end());
-			ft_rm_double_ports(it->ports);
-			return true;
-		}
-	}
-	return false;
-}
-
-void	ft_2bind(server &my_server, MapType	&my_map)
-{
-	std::vector<std::string>	tmp;
-	bind_info	collect;
-
-	tmp = my_server.get_listen();
-	tmp.erase(tmp.begin());
-	collect.ports = tmp;
-
-	if (ft_handle_same_host(my_map, my_server.get_host(), collect.ports))
-		return ;
-	else
-	{
-		collect.host = my_server.get_host();
-		my_map.push_back(collect);
-	}
-
-}
-
-std::vector<server>	ft_parse_conf(std::string fileConf)
-{
-	MapType	bind_info;
-	server	classconfig;
+	server						classconfig;
+	location					location_;
+	std::string					lines;
+	std::ifstream				file_conf(fileConf);
+	std::vector<server>			block;
 	std::vector<std::string>	classconfig_tmp;
-	location	location_;
-	std::vector<server>	block;
-	std::string		lines;
-	std::ifstream	file_conf(fileConf);
-
 
 	bool	InTheServerBlock = false;
 	bool	InTheLocationBlock = false;
@@ -126,14 +28,12 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 	{
 		while(std::getline(file_conf, lines))
 		{
-			// if (lines.empty())
-			// 	continue;
 			classconfig.ft_trim(lines);
 			if (lines.empty() || lines[0] == '#')
 				continue;
-			// if (lines[0] == '#')
-			// 	continue;
 			ft_delete_comment(lines);
+			classconfig.ft_trim(lines);
+
 			if (!lines.empty() && lines.back() == '{')
 			{
 				if (lines.find("server") != std::string::npos)
@@ -144,20 +44,18 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 					classconfig.location_find = true;
 					if (classconfig.ft_split(lines, " \t").begin()->compare("location"))
 						classconfig.ft_error("Error: invalid directives");
-					location_.path = *(classconfig.ft_split(lines, " \t").begin() + 1);
+					location_.path = *(classconfig.ft_split(lines, " \t{").begin() + 1);
 				}
 				continue;
 			}
 
-			if(InTheServerBlock && InTheLocationBlock == false && lines != "}")
+			else if(InTheServerBlock && !InTheLocationBlock && lines != "}")
 			{
-				if (lines.back() != ';')
-					classconfig.ft_error("error: missing or misplaced commas");
-				if (classconfig.ft_occurrences_of_char(lines, ';') == -1)
-					classconfig.ft_error("error: occurrences_of_char");
+				if (lines.back() != ';' || classconfig.ft_occurrences_of_char(lines, ';') >= 2)
+					classconfig.ft_error("Error: missing or misplaced commas");
 				classconfig_tmp = classconfig.ft_split(lines, " \t;");
 				if (classconfig_tmp.size() < 2)
-					classconfig.ft_error("Error: invalid value for a directives");
+					classconfig.ft_error("Error: empty value for a directives");
 				else if (!classconfig_tmp.begin()->compare("listen"))
 					ft_check_listen(classconfig, lines);
 				else if (!classconfig_tmp.begin()->compare("host"))
@@ -176,7 +74,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 					classconfig.ft_error("error: invalid directives");
 			}
 
-			else if (InTheLocationBlock && lines != "}")
+			else if (InTheLocationBlock && InTheServerBlock && lines != "}")
 			{
 				classconfig_tmp = classconfig.ft_split(lines, " \t;");
 				if(!classconfig_tmp.begin()->compare("root"))
@@ -196,7 +94,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 				else if (!classconfig_tmp.begin()->compare("cgi_pass"))
 					ft_check_cgi(classconfig, lines, location_);
 				else if (!classconfig_tmp.begin()->compare("client_body_temp_path"))
-					location_.client_body_temp_path = classconfig.ft_split(lines, " \t");
+					location_.client_body_temp_path = classconfig.ft_split(lines, " \t;");
 				else
 					classconfig.ft_error("Error: invalid directives");
 			}
@@ -220,15 +118,15 @@ std::vector<server>	ft_parse_conf(std::string fileConf)
 					ft_setDirective2False(classconfig, location_, 2);
 				}
 				else
-					classconfig.ft_error("error: missing or mismatched brackets");
+					classconfig.ft_error("Error: missing or mismatched brackets");
 			}
 
 			else
-				classconfig.ft_error("error: missing or mismatched brackets");
+				classconfig.ft_error("Error: missing or mismatched brackets");
 		}
 		file_conf.close();
 		if (!(classconfig.root_find && classconfig.error_page_find && classconfig.location_find && classconfig.listen_find))
-			classconfig.ft_error("error: Missing required directives");
+			classconfig.ft_error("Error: Missing required directives");
 		print_vector_of_structs(bind_info);
 		classconfig.ft_show(block);
 	}
