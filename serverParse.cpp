@@ -1,17 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.cpp                                         :+:      :+:    :+:   */
+/*   serverParse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/19 18:57:45 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/23 19:49:53 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "server.hpp"
-#include "location.hpp"
+#include "serverParse.hpp"
 
 server::server()
 {
@@ -207,33 +206,8 @@ void	server::ft_error(std::string msg)
 
 void	server::ft_trim(std::string &str)
 {
-	// int	i,j;
-
-	// i = 0;
-	// while (str[i] == ' ' || str[i] == '\t')
-	// 	i++;
-	// if (i > 0)
-	// 	str.erase(0, i);
-	// i = str.length();
-	// std::cout << "c '" << (int)str[11] << "'" << std::endl;
-	// j = 0;
-	// // if (str[i] == '\t' || str[i] == ' ')
-
-	// while (str[i] == ' ' || str[i] == '\t')
-	// {
-	// 	puts("kol");
-	// 	j++;
-	// 	i--;
-	// }
-	// std::cout << "i = " << i << std::endl;
-	// std::cout << "j = " << j << std::endl;
-	// str.erase(i, j);
-
-	// Trim leading spaces and tabs
-    str.erase(str.begin(), std::find_if(str.begin(), str.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-
-    // Trim trailing spaces and tabs
-    str.erase(std::find_if(str.rbegin(), str.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), str.end());
+	str.erase(str.begin(), std::find_if(str.begin(), str.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+	str.erase(std::find_if(str.rbegin(), str.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), str.end());
 }
 
 void	server::ft_check_double(std::vector<std::string> &container)
@@ -318,53 +292,59 @@ void	server::ft_show(std::vector<server> &block)
 		std::cout << "-----------server block-----------------\n";
 		std::vector<std::string>::iterator it6;
 		for (it6 = block[i].listen.begin(); it6 != block[i].listen.end(); it6++)
-			std::cout << *it6 << std::endl;
+			std::cout << *it6 << " ";
+		std::cout << "\n";
 		std::cout << block[i].get_host() << std::endl;
 		std::vector<std::string>::iterator it4;
 		for (it4 = block[i].server_name.begin(); it4 != block[i].server_name.end(); it4++)
-			std::cout << *it4 << std::endl;
+			std::cout << *it4 << " ";
+		std::cout << "\n";
 		std::vector<std::string>::iterator it3;
 		for (it3 = block[i].root.begin(); it3 != block[i].root.end(); it3++)
-			std::cout << *it3 << std::endl;
+			std::cout << *it3 << " ";
+		std::cout << "\n";
 		std::vector<std::string>::iterator it1;
 		for (it1 = block[i].error_page.begin(); it1 != block[i].error_page.end(); it1++)
-			std::cout << *it1 << std::endl;
+			std::cout << *it1 << " ";
+		std::cout << "\n";
 		std::vector<std::string>::iterator it2;
 		for (it2 = block[i].index.begin(); it2 != block[i].index.end(); it2++)
-			std::cout << *it2 << std::endl;
+			std::cout << *it2 << " ";
+		std::cout << "\n";
 		std::vector<std::string>::iterator it5;
 		for (it5 = block[i].client_max_body_size.begin(); it5 != block[i].client_max_body_size.end(); it5++)
-			std::cout << *it5 << std::endl;
+			std::cout << *it5 << " ";
+		std::cout << "\n";
 		for (size_t j = 0; j < block[i].obj_location.size(); j++)
 		{
 			std::cout << "-----------location block-----------------\n";
 			std::cout << "-----------path-----------------\n";
-			std::cout << "path = " << block[i].obj_location[j].path << "\n";
-			std::cout << "-----------path-----------------\n";
+			std::cout << "path = " << block[i].obj_location[j].path << " >>> ";
 			std::vector<std::string>::iterator it7;
 			for (it7 = block[i].obj_location[j].error_page.begin(); it7 != block[i].obj_location[j].error_page.end(); it7++)
-				std::cout << *it7 << std::endl;
+				std::cout << *it7 << " ";
 			std::vector<std::string>::iterator it00;
 			for (it00 = block[i].obj_location[j].root.begin(); it00 != block[i].obj_location[j].root.end(); it00++)
-				std::cout << *it00 << std::endl;
+				std::cout << *it00 << " ";
 			std::vector<std::string>::iterator it11;
 			for (it11 = block[i].obj_location[j].index.begin(); it11 != block[i].obj_location[j].index.end(); it11++)
-				std::cout << *it11 << std::endl;
+				std::cout << *it11 << " ";
 			std::vector<std::string>::iterator it17;
 			for (it17 = block[i].obj_location[j].client_max_body_size.begin(); it17 != block[i].obj_location[j].client_max_body_size.end(); it17++)
-				std::cout << *it17 << std::endl;
+				std::cout << *it17 << " ";
 			std::vector<std::string>::iterator it9;
 			for (it9 = block[i].obj_location[j].allow_methods.begin(); it9 != block[i].obj_location[j].allow_methods.end(); it9++)
-				std::cout << *it9 << std::endl;
+				std::cout << *it9 << " ";
 			std::vector<std::string>::iterator it10;
 			for (it10 = block[i].obj_location[j].autoindex.begin(); it10 != block[i].obj_location[j].autoindex.end(); it10++)
-				std::cout << *it10 << std::endl;
+				std::cout << *it10 << " ";
 			std::vector<std::string>::iterator it111;
 			for (it111 = block[i].obj_location[j].cgi.begin(); it111 != block[i].obj_location[j].cgi.end(); it111++)
-				std::cout << *it111 << std::endl;
+				std::cout << *it111 << " ";
 			std::vector<std::string>::iterator it12;
 			for (it12 = block[i].obj_location[j].rtn.begin(); it12 != block[i].obj_location[j].rtn.end(); it12++)
-				std::cout << *it12 << std::endl;
+				std::cout << *it12 << " ";
+			std::cout << "\n";
 		}
 		std::cout << "\n-----------next server-----------------\n\n";
 	}

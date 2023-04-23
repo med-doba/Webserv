@@ -1,5 +1,5 @@
-#ifndef SERVER_HPP
-#define SERVER_HPP
+#ifndef SERVERPARSE_HPP
+#define SERVERPARSE_HPP
 
 #include <fstream>
 #include <string>
@@ -7,8 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include "location.hpp"
-
+#include "locationParse.hpp"
 
 
 class location;

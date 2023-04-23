@@ -1,5 +1,5 @@
-#ifndef LOCATION_HPP
-#define LOCATION_HPP
+#ifndef LOCATIONPARSE_HPP
+#define LOCATIONPARSE_HPP
 
 #include <fstream>
 #include <string>
