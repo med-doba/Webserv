@@ -29,6 +29,9 @@ to the request method (pending ...) (mustapha will do it)
 
 => handle boundary contentLength == 0 (done)
 
+=> extension random generation doesn't work test case : run server then send a file then rerun server and notice the file doesn't get created (pending ...)
+
+=> check if no /r is found when looking for the chunked encoding 
 
 =>	415 Unsupported Media Type
 This response means that the server was unable to process the request because the content type
@@ -37,6 +40,8 @@ specified in the Content-Type header is not supported by the server. (pending ..
 => handle that it goes into nonchunked when it's a delete method (done)
 
 => ask mustapha if he handled nothing but space between the elements of the request line (done)
+
+=> handle if the URI has any spaces (pending ...)
 
 
 Sure, here are some headers that should not be included in certain HTTP methods:

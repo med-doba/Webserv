@@ -102,6 +102,7 @@ class parssingOfHeader
 
         int checkHeaderOfreq_(client &obj, std::string copy);
         int checkHeaderLine(client &obj);
+		int check_media(client &obj);
         int checkHeaders(client &obj, std::string copy);
         ~parssingOfHeader();
 };
@@ -147,7 +148,6 @@ class client
 	long long	ft_atoi(const char *str);
 	char *ft_substr(char const *s, unsigned int start, size_t len);
 	void check(void);
-	void check_media(void);
 	int normal_response(struct pollfd &pfds);
 	int postMethod(struct pollfd &pfds);
 	int deleteMethod(struct pollfd &pfds);

@@ -222,7 +222,6 @@ void server::receive(int pfds_index, int index)
 		// std::cout << clients[index].buffer << std::endl;
 		if((int)test.size() == clients[index].ContentLength)// finish recivng
 		{
-			clients[index].check_media();
 			clients[index].check();
 			pfds[pfds_index].revents &= ~POLLIN;
 		}
@@ -277,7 +276,6 @@ void server::receive(int pfds_index, int index)
 		int pos = clients[index].buffer.find("\r\n0\r\n\r\n");
 		if (pos != -1)
 		{
-			clients[index].check_media();
 			clients[index].check();
 			pfds[pfds_index].revents &= ~POLLIN;
 		}
@@ -289,7 +287,6 @@ void server::receive(int pfds_index, int index)
 			clients[index].total_bytes_received += clients[index].bytes_read;
 		if (clients[index].total_bytes_received >= clients[index].ContentLength)
 		{
-			clients[index].check_media();
 			clients[index].check();
 			pfds[pfds_index].revents &= ~POLLIN;
 		}

@@ -53,6 +53,36 @@ long long	parssingOfHeader::ft_atoi(const char *str)
 	return (res * negative);
 }
 
+int parssingOfHeader::check_media(client &obj)
+{
+	std::string media_handled[8] = {"image/png", "image/jpeg", "image/jpg" ,"application/pdf" , "text/plain" , "text/html" , "text/css", "video/mp4"};
+	std::string media;
+	int pos = obj.headerOfRequest.find("Content-Type: ");
+	if (pos != -1)
+	{
+        int i = obj.headerOfRequest.find(';', pos);
+        std::string check = obj.headerOfRequest.substr(pos + 14 , i - pos - 14);
+        std::cout << "check == " << check << std::endl;
+        if (check.compare("multipart/form-data") == 0)
+            return (0);
+		media = obj.headerOfRequest.substr(pos + 14, obj.headerOfRequest.find('\r', pos));
+        std::cout << "media == " << media << std::endl;
+        std::cout << "asdhaksdka" << std::endl;
+		for (int i = 0; i < 8; i++)
+		{
+			if (media.compare(media_handled[i]) == 0)
+				return (0);
+		}
+		obj.respond.status_code = 415;
+		obj.respond.phrase = "Unsupported Media Type";
+		obj.respond.type = 1;
+		obj.respond.body = "Unsupported media type. Please use a supported type.";
+		obj.respond.close = CLOSE;
+		obj.respond.content = 1;
+		obj.flag = ERROR;
+	}
+	return (-1);
+}
 
 int parssingOfHeader::checkHeaders(client &obj, std::string copy)
 {
@@ -103,6 +133,11 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy)
             obj.respond.close = CLOSE;
             return -6;
         }
+        else
+        {
+            if (check_media(obj) == -1)
+                return (-1);
+        }
         i = str.find("If-Modified-Since: ");
         if(i != -1)
         {
@@ -124,6 +159,21 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy)
            obj.respond.body = "The request has a malformed header";
            obj.respond.close = CLOSE;
             return -8;
+        }
+        i = str.find("Transfer-Encoding: ");
+        if (i != -1)
+        {
+            std::string type = str.substr(i + 19, str.find('\r', i) - (i + 19));
+            if (type.compare("chunked") != 0)
+            {
+                obj.respond.status_code = 501;
+                obj.respond.phrase = "Not Implemented";
+                obj.respond.type = 1;
+                obj.respond.body = "Server Only Handles Chunked Encoding";
+                obj.respond.close = CLOSE;
+                obj.respond.content = 1;
+                return (-1);
+            }
         }
     }
     else if(obj.tmp == GET)//get method
@@ -206,6 +256,17 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy)
 				return -9;
             }
 		}
+        i = str.find("Transfer-Encoding: ");
+		if (i != -1)
+        {
+            obj.respond.type = 1;
+            obj.respond.status_code = 400;
+            obj.respond.phrase = "Bad Request";
+            obj.respond.content = 1;
+            obj.respond.body = "Invalid request: Delete requests must not have a body with Transfer-Encoding.";
+            obj.respond.close = CLOSE;
+			return (-10);
+        }
     }
     
     i = 0;
@@ -292,10 +353,34 @@ int parssingOfHeader::checkHeaderLine(client &obj)
         obj.respond.close = CLOSE;
         return -2;
     }
-    obj.URI.assign(&temp[1]);
+    obj.URI.assign(&temp[0]);
     free(temp);
-    // std::cout << "URI == " << URI << std::endl;
-
+    std::cout << "URI == " << obj.URI.size() << std::endl;
+    if (obj.URI.size() > 2048)
+    {
+        obj.respond.type = 1;
+        obj.respond.status_code = 414;
+        obj.respond.phrase = "Request-URI Too Long";
+        obj.respond.content = 1;
+        obj.respond.body = "Request-URI is bigger than 2048";
+        obj.respond.close = CLOSE;
+        return -2;
+    }
+    // check for all kinds of spaces
+    // for (size_t i = 0; i < obj.URI.size(); i++)
+    // {
+    //     if (isspace(obj.URI[i]) != 0)
+    //     {
+    //         obj.respond.type = 1;
+    //         obj.respond.status_code = 400;
+    //         obj.respond.phrase = "Bad Request";
+    //         obj.respond.content = 1;
+    //         obj.respond.body = "The request has a malformed header1";
+    //         obj.respond.close = CLOSE;
+    //         return -2;
+    //     }
+    // }
+    
     i++;
     j = i;
     while (obj.headerOfRequest[i] && obj.headerOfRequest[i] != '\r' && obj.headerOfRequest[i] != '\n'  && obj.headerOfRequest[i + 1] != '\n' )
