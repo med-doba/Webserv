@@ -6,24 +6,23 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/23 19:15:17 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/29 07:37:13 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "serverParse.hpp"
 
-std::vector<server>	ft_parse_conf(std::string fileConf, MapType bind_info)
+std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType bind_info)
 {
-	server						classconfig;
-	location					location_;
+	serverParse						classconfig;
+	locationParse					location_;
 	std::string					lines;
 	std::ifstream				file_conf(fileConf);
-	std::vector<server>			block;
+	std::vector<serverParse>			block;
 	std::vector<std::string>	classconfig_tmp;
 
-	bool	InTheServerBlock = false;
+	bool	InTheserverParseBlock = false;
 	bool	InTheLocationBlock = false;
-
 	if (file_conf.is_open())
 	{
 		try
@@ -38,9 +37,9 @@ std::vector<server>	ft_parse_conf(std::string fileConf, MapType bind_info)
 
 				if (!lines.empty() && lines.back() == '{')
 				{
-					if (lines.find("server") != std::string::npos)
-						InTheServerBlock = true;
-					else if (InTheServerBlock && (lines.find("location") != std::string::npos))
+					if (lines.find("serverParse") != std::string::npos)
+						InTheserverParseBlock = true;
+					else if (InTheserverParseBlock && (lines.find("location") != std::string::npos))
 					{
 						InTheLocationBlock = true;
 						classconfig.location_find = true;
@@ -51,7 +50,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf, MapType bind_info)
 					continue;
 				}
 
-				else if(InTheServerBlock && !InTheLocationBlock && lines != "}")
+				else if(InTheserverParseBlock && !InTheLocationBlock && lines != "}")
 				{
 					if (lines.back() != ';' || classconfig.ft_occurrences_of_char(lines, ';') >= 2)
 						classconfig.ft_error("missing or misplaced commas");
@@ -62,8 +61,8 @@ std::vector<server>	ft_parse_conf(std::string fileConf, MapType bind_info)
 						ft_check_listen(classconfig, lines);
 					else if (!classconfig_tmp.begin()->compare("host"))
 						ft_check_host(classconfig, lines);
-					else if (!classconfig_tmp.begin()->compare("server_name"))
-						ft_check_server_name(classconfig, lines);
+					else if (!classconfig_tmp.begin()->compare("serverParse_name"))
+						ft_check_serverParse_name(classconfig, lines);
 					else if(!classconfig_tmp.begin()->compare("root"))
 						ft_check_root(classconfig, lines, location_, 1);
 					else if (!classconfig_tmp.begin()->compare("index"))
@@ -76,7 +75,7 @@ std::vector<server>	ft_parse_conf(std::string fileConf, MapType bind_info)
 						classconfig.ft_error("error: invalid directives");
 				}
 
-				else if (InTheLocationBlock && InTheServerBlock && lines != "}")
+				else if (InTheLocationBlock && InTheserverParseBlock && lines != "}")
 				{
 					classconfig_tmp = classconfig.ft_split(lines, " \t;");
 					if(!classconfig_tmp.begin()->compare("root"))
@@ -103,16 +102,16 @@ std::vector<server>	ft_parse_conf(std::string fileConf, MapType bind_info)
 
 				else if (lines == "}")
 				{
-					if (InTheServerBlock && !InTheLocationBlock)
+					if (InTheserverParseBlock && !InTheLocationBlock)
 					{
-						InTheServerBlock = false;
+						InTheserverParseBlock = false;
 						ft_2bind(classconfig, bind_info);
 						block.push_back(classconfig);
 						classconfig.ft_clearvectorlocation_test(classconfig.obj_location);
 						classconfig.ft_clearvectorserv(classconfig);
 						ft_setDirective2False(classconfig, location_, 1);
 					}
-					else if (InTheServerBlock && InTheLocationBlock)
+					else if (InTheserverParseBlock && InTheLocationBlock)
 					{
 						classconfig.obj_location.push_back(location_);
 						location_.ft_clearclasslocation(location_);

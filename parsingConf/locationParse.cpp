@@ -6,13 +6,13 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:49:40 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/21 07:23:26 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/29 07:15:47 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "locationParse.hpp"
 
-location::location()
+locationParse::locationParse()
 {
 	client_max_body_size_ = false;
 	index_ = false;
@@ -22,16 +22,16 @@ location::location()
 	allow_methods_ = false;
 }
 
-location::~location()
+locationParse::~locationParse()
 {
 }
 
-location::location(const location &obj)
+locationParse::locationParse(const locationParse &obj)
 {
 	*this = obj;
 }
 
-location	&location::operator=(const location &obj)
+locationParse	&locationParse::operator=(const locationParse &obj)
 {
 	if (this != &obj)
 	{
@@ -53,7 +53,7 @@ location	&location::operator=(const location &obj)
 
 //
 
-bool	location::ft_check_allow_methodsed(std::vector<std::string> &allow_methodsed)
+bool	locationParse::ft_check_allow_methodsed(std::vector<std::string> &allow_methodsed)
 {
 	std::vector<std::string>::iterator	it;
 
@@ -65,14 +65,14 @@ bool	location::ft_check_allow_methodsed(std::vector<std::string> &allow_methodse
 	return true;
 }
 
-bool	location::ft_check_autoindex(std::string &str)
+bool	locationParse::ft_check_autoindex(std::string &str)
 {
 	if (str == "on" || str == "off")
 		return true;
 	return false;
 }
 
-void	location::ft_clearclasslocation(location &location_)
+void	locationParse::ft_clearclasslocation(locationParse &location_)
 {
 	location_.path.clear();
 	location_.client_max_body_size.clear();

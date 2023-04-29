@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 14:17:23 by med-doba          #+#    #+#             */
-/*   Updated: 2023/03/28 08:45:32 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/04/23 22:20:58 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,10 @@ char**	ft_enviroment(void)
 	// rtn[] = strdup("REQUEST_METHOD=POST");
 	rtn[2] = strdup("CONTENT_TYPE=text/html");
 	rtn[3] = strdup("SCRIPT_NAME=file.py");//php/py
-	rtn[4] = strdup("SERVER_PROTOCOL=http");
+	rtn[4] = strdup("serverParse_PROTOCOL=http");
 	// rtn[] = strdup("QUERY_STRING=");//php/py
 	// rtn[] = strdup("CONTENT_LENGTH=");
-	// rtn[] =  strdup("SERVER_NAME=text/html");
+	// rtn[] =  strdup("serverParse_NAME=text/html");
 	// rtn[] =  strdup("REQUEST_URI=");//php/py
 	// rtn[] =  strdup("HTTP_COOKIE=");//php/py
 	// rtn[] =  strdup("REMOTE_ADDR=");//php/py
@@ -127,13 +127,13 @@ int	main(int ac, char	**av)
     SCRIPT_NAME: The name of the script, such as index.php.
     REQUEST_URI: The full URL used to access the script, including the query string and any fragment identifier,
 	such as /index.php?id=123#top.
-    DOCUMENT_ROOT: The root directory of the web server, such as /var/www/html/.
+    DOCUMENT_ROOT: The root directory of the web serverParse, such as /var/www/html/.
     HTTP_COOKIE: A string containing one or more cookies, such as user=John; session_id=abcd1234.
     HTTP_USER_AGENT: A string containing information about the client's browser and operating system,
 	such as Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 	(KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134.
     REMOTE_ADDR: The IP address of the client making the request, such as 192.168.0.1.
 
-Note that the values of these environment variables can vary depending on the web server and configuration,
+Note that the values of these environment variables can vary depending on the web serverParse and configuration,
 and may also be affected by the client making the request.
 */

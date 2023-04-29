@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   serverParse.cpp                                    :+:      :+:    :+:   */
+/*   serverParseParse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -12,11 +12,11 @@
 
 #include "serverParse.hpp"
 
-server::server()
+serverParse::serverParse()
 {
 	listen_ = false;
 	root_ = false;
-	server_name_ = false;
+	serverParse_name_ = false;
 	index_ = false;
 	client_max_body_size_ = false;
 	error_page_ = false;
@@ -26,16 +26,16 @@ server::server()
 	error_page_find = false;
 }
 
-server::~server()
+serverParse::~serverParse()
 {
 }
 
-server::server(const server &obj)
+serverParse::serverParse(const serverParse &obj)
 {
 	*this = obj;
 }
 
-server	&server::operator=(const server &obj)
+serverParse	&serverParse::operator=(const serverParse &obj)
 {
 	if (this != &obj)
 	{
@@ -43,7 +43,7 @@ server	&server::operator=(const server &obj)
 		this->listen = obj.listen;
 		this->host = obj.host;
 		this->root = obj.root;
-		this->server_name = obj.server_name;
+		this->serverParse_name = obj.serverParse_name;
 		this->index = obj.index;
 		this->error_page = obj.error_page;
 		this->client_max_body_size = obj.client_max_body_size;
@@ -51,17 +51,17 @@ server	&server::operator=(const server &obj)
 	return *this;
 }
 
-std::vector<std::string>	server::get_listen()
+std::vector<std::string>	serverParse::get_listen()
 {
 	return this->listen;
 }
 
-std::string	server::get_host()
+std::string	serverParse::get_host()
 {
 	return this->host;
 }
 
-bool	server::ft_check_extention(std::string str)
+bool	serverParse::ft_check_extention(std::string str)
 {
 	std::string	sub;
 	int	i = -1;
@@ -77,7 +77,7 @@ bool	server::ft_check_extention(std::string str)
 	return false;
 }
 
-bool	server::ft_check_cmbsize(std::string &str)
+bool	serverParse::ft_check_cmbsize(std::string &str)
 {
 	std::string	tmp = str;
 
@@ -95,7 +95,7 @@ bool	server::ft_check_cmbsize(std::string &str)
 	return false;
 }
 
-bool	server::ft_checkRang_nbr(std::string str)
+bool	serverParse::ft_checkRang_nbr(std::string str)
 {
 	std::vector<std::string>	array;
 	std::vector<std::string>::iterator	it;
@@ -115,7 +115,7 @@ bool	server::ft_checkRang_nbr(std::string str)
 	return true;
 }
 
-std::vector<std::string>	server::ft_parse_root(std::string &lines)
+std::vector<std::string>	serverParse::ft_parse_root(std::string &lines)
 {
 	std::vector<std::string>	tmp;
 
@@ -126,7 +126,7 @@ std::vector<std::string>	server::ft_parse_root(std::string &lines)
 	return tmp;
 }
 
-std::vector<std::string>	server::ft_parse_index(std::string &lines)
+std::vector<std::string>	serverParse::ft_parse_index(std::string &lines)
 {
 	std::vector<std::string>	tmp;
 	std::vector<std::string>::iterator it;
@@ -140,7 +140,7 @@ std::vector<std::string>	server::ft_parse_index(std::string &lines)
 	return tmp;
 }
 
-std::vector<std::string>	server::ft_parse_errorpage(std::string &lines)
+std::vector<std::string>	serverParse::ft_parse_errorpage(std::string &lines)
 {
 	std::vector<std::string>	tmp;
 
@@ -150,7 +150,7 @@ std::vector<std::string>	server::ft_parse_errorpage(std::string &lines)
 	return tmp;
 }
 
-std::vector<std::string>	server::ft_parse_cmbsize(std::string &lines)
+std::vector<std::string>	serverParse::ft_parse_cmbsize(std::string &lines)
 {
 	std::vector<std::string>	tmp;
 
@@ -162,7 +162,7 @@ std::vector<std::string>	server::ft_parse_cmbsize(std::string &lines)
 	return tmp;
 }
 
-void	server::ft_clearvectorserv(server &classconfig)
+void	serverParse::ft_clearvectorserv(serverParse &classconfig)
 {
 	classconfig.client_max_body_size.clear();
 	classconfig.error_page.clear();
@@ -170,15 +170,15 @@ void	server::ft_clearvectorserv(server &classconfig)
 	classconfig.index.clear();
 	classconfig.listen.clear();
 	classconfig.root.clear();
-	classconfig.server_name.clear();
+	classconfig.serverParse_name.clear();
 }
 
-void	server::ft_clearvectorlocation_test(std::vector<location> &location_)
+void	serverParse::ft_clearvectorlocation_test(std::vector<locationParse> &location_)
 {
 	location_.clear();
 }
 
-bool	server::ft_check_rangeofports(std::string &str)
+bool	serverParse::ft_check_rangeofports(std::string &str)
 {
 	int	nbr;
 
@@ -193,24 +193,24 @@ bool	server::ft_check_rangeofports(std::string &str)
 
 //--------**-------**----------**-----------**---------//
 
-void	server::ft_ft(std::string str)
+void	serverParse::ft_ft(std::string str)
 {
 	std::cout << str << std::endl;
 }
 
-void	server::ft_error(std::string msg)
+void	serverParse::ft_error(std::string msg)
 {
 	std::cerr << msg << std::endl;
 	exit(1);
 }
 
-void	server::ft_trim(std::string &str)
+void	serverParse::ft_trim(std::string &str)
 {
 	str.erase(str.begin(), std::find_if(str.begin(), str.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 	str.erase(std::find_if(str.rbegin(), str.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), str.end());
 }
 
-void	server::ft_check_double(std::vector<std::string> &container)
+void	serverParse::ft_check_double(std::vector<std::string> &container)
 {
 	std::vector<std::string>::iterator	it1, it2;
 	int	count;
@@ -228,7 +228,7 @@ void	server::ft_check_double(std::vector<std::string> &container)
 	}
 }
 
-int	server::ft_occurrences_of_char(std::string &line, char c)
+int	serverParse::ft_occurrences_of_char(std::string &line, char c)
 {
 	int	count = 0;
 
@@ -240,7 +240,7 @@ int	server::ft_occurrences_of_char(std::string &line, char c)
 	return count;
 }
 
-std::vector<std::string>	server::ft_split(std::string str, std::string split)
+std::vector<std::string>	serverParse::ft_split(std::string str, std::string split)
 {
 	std::istringstream iss(str);
 	std::vector<std::string> tokens1;
@@ -275,7 +275,7 @@ std::vector<std::string>	server::ft_split(std::string str, std::string split)
 	return tokens2;
 }
 
-bool	server::ft_isDigit(std::string &str)
+bool	serverParse::ft_isDigit(std::string &str)
 {
 	size_t	i = -1;
 
@@ -285,18 +285,18 @@ bool	server::ft_isDigit(std::string &str)
 	return true;
 }
 
-void	server::ft_show(std::vector<server> &block)
+void	serverParse::ft_show(std::vector<serverParse> &block)
 {
 	for (size_t i = 0; i <  block.size(); i++)
 	{
-		std::cout << "-----------server block-----------------\n";
+		std::cout << "-----------serverParse block-----------------\n";
 		std::vector<std::string>::iterator it6;
 		for (it6 = block[i].listen.begin(); it6 != block[i].listen.end(); it6++)
 			std::cout << *it6 << " ";
 		std::cout << "\n";
 		std::cout << block[i].get_host() << std::endl;
 		std::vector<std::string>::iterator it4;
-		for (it4 = block[i].server_name.begin(); it4 != block[i].server_name.end(); it4++)
+		for (it4 = block[i].serverParse_name.begin(); it4 != block[i].serverParse_name.end(); it4++)
 			std::cout << *it4 << " ";
 		std::cout << "\n";
 		std::vector<std::string>::iterator it3;
@@ -346,7 +346,7 @@ void	server::ft_show(std::vector<server> &block)
 				std::cout << *it12 << " ";
 			std::cout << "\n";
 		}
-		std::cout << "\n-----------next server-----------------\n\n";
+		std::cout << "\n-----------next serverParse-----------------\n\n";
 	}
 }
 
@@ -362,7 +362,7 @@ void	ft_delete_comment(std::string	&str)
 		str.erase(pos, (str.length() - pos));
 }
 
-void	ft_check_autoindex(server &classconfig, std::string &lines, location &location_)
+void	ft_check_autoindex(serverParse &classconfig, std::string &lines, locationParse &location_)
 {
 	std::vector<std::string>::iterator	it;
 
@@ -380,7 +380,7 @@ void	ft_check_autoindex(server &classconfig, std::string &lines, location &locat
 		classconfig.ft_error("Error: Duplicate directives > autoindex");
 }
 
-void	ft_check_allow_methods(server &classconfig, std::string &lines, location &location_)
+void	ft_check_allow_methods(serverParse &classconfig, std::string &lines, locationParse &location_)
 {
 	if (!location_.allow_methods_)
 	{
@@ -393,7 +393,7 @@ void	ft_check_allow_methods(server &classconfig, std::string &lines, location &l
 		classconfig.ft_error("Error: duplicate directives > allow_methods");
 }
 
-void	ft_check_listen(server	&classconfig, std::string	&lines)
+void	ft_check_listen(serverParse	&classconfig, std::string	&lines)
 {
 	std::vector<std::string>			tmp_listen;
 	std::vector<std::string>::iterator	it;
@@ -417,7 +417,7 @@ void	ft_check_listen(server	&classconfig, std::string	&lines)
 	classconfig.ft_check_double(classconfig.listen);
 }
 
-void	ft_check_host(server &classconfig, std::string &lines)
+void	ft_check_host(serverParse &classconfig, std::string &lines)
 {
 	std::vector<std::string>			tmp_host;
 	std::vector<std::string>::iterator	it;
@@ -439,18 +439,18 @@ void	ft_check_host(server &classconfig, std::string &lines)
 		classconfig.ft_error("Error: Duplicate directives > host");
 }
 
-void	ft_check_server_name(server &classconfig, std::string &lines)
+void	ft_check_serverParse_name(serverParse &classconfig, std::string &lines)
 {
-	if (!classconfig.server_name_)
+	if (!classconfig.serverParse_name_)
 	{
-		classconfig.server_name = classconfig.ft_split(lines, " \t;");
-		classconfig.server_name_ = true;
+		classconfig.serverParse_name = classconfig.ft_split(lines, " \t;");
+		classconfig.serverParse_name_ = true;
 	}
 	else
-		classconfig.ft_error("Error: Duplicate directives > server_name");
+		classconfig.ft_error("Error: Duplicate directives > serverParse_name");
 }
 
-void	ft_check_errorpage(server &classconfig, std::string &lines)
+void	ft_check_errorpage(serverParse &classconfig, std::string &lines)
 {
 	std::vector<std::string>	tmp_error_page;
 
@@ -467,7 +467,7 @@ void	ft_check_errorpage(server &classconfig, std::string &lines)
 	}
 }
 
-void	ft_check_root(server &classconfig, std::string &lines, location &location_, int n)
+void	ft_check_root(serverParse &classconfig, std::string &lines, locationParse &location_, int n)
 {
 	if (n == 1 && !classconfig.root_)
 	{
@@ -484,7 +484,7 @@ void	ft_check_root(server &classconfig, std::string &lines, location &location_,
 		classconfig.ft_error("Error: Duplicate directives > root");
 }
 
-void	ft_check_index(server &classconfig, std::string &lines, location &location_, int n)
+void	ft_check_index(serverParse &classconfig, std::string &lines, locationParse &location_, int n)
 {
 	if (n == 1 && !classconfig.index_)
 	{
@@ -500,7 +500,7 @@ void	ft_check_index(server &classconfig, std::string &lines, location &location_
 		classconfig.ft_error("Error: Duplicate directives > index");
 }
 
-void	ft_check_cmbsize(server &classconfig, std::string &lines, location &location_, int n)
+void	ft_check_cmbsize(serverParse &classconfig, std::string &lines, locationParse &location_, int n)
 {
 	if (n == 1 && !classconfig.client_max_body_size_)
 	{
@@ -516,7 +516,7 @@ void	ft_check_cmbsize(server &classconfig, std::string &lines, location &locatio
 		classconfig.ft_error("Error: Duplicate directives > cmbsize");
 }
 
-void	ft_setDirective2False(server &classconfig, location &location_, int n)
+void	ft_setDirective2False(serverParse &classconfig, locationParse &location_, int n)
 {
 	if (n == 1)
 	{
@@ -525,7 +525,7 @@ void	ft_setDirective2False(server &classconfig, location &location_, int n)
 		classconfig.client_max_body_size_ = false;
 		classconfig.root_ = false;
 		classconfig.index_ = false;
-		classconfig.server_name_ = false;
+		classconfig.serverParse_name_ = false;
 		classconfig.host_find = false;
 	}
 	else if (n == 2)
@@ -539,7 +539,7 @@ void	ft_setDirective2False(server &classconfig, location &location_, int n)
 	}
 }
 
-void	ft_check_cgi(server &classconfig, std::string &lines, location &location_)
+void	ft_check_cgi(serverParse &classconfig, std::string &lines, locationParse &location_)
 {
 	if (!location_.cgi_)
 	{
@@ -615,20 +615,20 @@ bool	ft_handle_same_host(MapType &info, std::string	to_find, std::vector<std::st
 	return false;
 }
 
-void	ft_2bind(server &my_server, MapType	&my_map)
+void	ft_2bind(serverParse &my_serverParse, MapType	&my_map)
 {
 	std::vector<std::string>	tmp;
 	bind_info	collect;
 
-	tmp = my_server.get_listen();
+	tmp = my_serverParse.get_listen();
 	tmp.erase(tmp.begin());
 	collect.ports = tmp;
 
-	if (ft_handle_same_host(my_map, my_server.get_host(), collect.ports))
+	if (ft_handle_same_host(my_map, my_serverParse.get_host(), collect.ports))
 		return ;
 	else
 	{
-		collect.host = my_server.get_host();
+		collect.host = my_serverParse.get_host();
 		my_map.push_back(collect);
 	}
 }

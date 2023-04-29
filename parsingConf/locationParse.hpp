@@ -7,13 +7,13 @@
 #include <vector>
 
 
-class location
+class locationParse
 {
 	public:
-		location();
-		location(const location &obj);
-		location	&operator=(const location &obj);
-		~location();
+		locationParse();
+		locationParse(const locationParse &obj);
+		locationParse	&operator=(const locationParse &obj);
+		~locationParse();
 		std::string	path;
 		std::vector<std::string>	allow_methods;
 		std::vector<std::string>	autoindex;
@@ -28,7 +28,7 @@ class location
 		std::vector<std::string>	client_body_temp_path;
 		//
 		bool	ft_check_autoindex(std::string &str);
-		void	ft_clearclasslocation(location &location_);
+		void	ft_clearclasslocation(locationParse &location_);
 		bool	ft_check_allow_methodsed(std::vector<std::string> &allow_methodsed);
 		//
 		bool	client_max_body_size_;

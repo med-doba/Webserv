@@ -1,5 +1,5 @@
-#ifndef SERVERPARSE_HPP
-#define SERVERPARSE_HPP
+#ifndef serverParsePARSE_HPP
+#define serverParsePARSE_HPP
 
 #include <fstream>
 #include <string>
@@ -10,21 +10,21 @@
 #include "locationParse.hpp"
 
 
-class location;
-class server
+class locationParse;
+class serverParse
 {
 	public:
 		//
-		server();
-		server(const server &obj);
-		server	&operator=(const server &obj);
-		~server();
+		serverParse();
+		serverParse(const serverParse &obj);
+		serverParse	&operator=(const serverParse &obj);
+		~serverParse();
 		//
-		std::vector<location>		obj_location;
+		std::vector<locationParse>		obj_location;
 		std::vector<std::string>	listen;
 		std::string					host;
 		std::vector<std::string>	root;
-		std::vector<std::string>	server_name;
+		std::vector<std::string>	serverParse_name;
 		std::vector<std::string>	index;
 		std::vector<std::string>	error_page;
 		std::vector<std::string>	client_max_body_size;
@@ -37,8 +37,8 @@ class server
 		std::vector<std::string>	ft_parse_index(std::string &lines);
 		std::vector<std::string>	ft_parse_errorpage(std::string &lines);
 		std::vector<std::string>	ft_parse_cmbsize(std::string &lines);
-		void	ft_clearvectorserv(server &classconfig);
-		void	ft_clearvectorlocation_test(std::vector<location> &location_);
+		void	ft_clearvectorserv(serverParse &classconfig);
+		void	ft_clearvectorlocation_test(std::vector<locationParse> &location_);
 		//get
 		std::string					get_host();
 		std::vector<std::string>	get_listen();
@@ -51,10 +51,10 @@ class server
 		bool	ft_isDigit(std::string &str);
 		std::vector<std::string>	ft_split(const std::string str, std::string split);
 		//show
-		void	ft_show(std::vector<server>  &block);
+		void	ft_show(std::vector<serverParse>  &block);
 		//
 		bool	listen_;
-		bool	server_name_;
+		bool	serverParse_name_;
 		bool	client_max_body_size_;
 		bool	index_;
 		bool	root_;
@@ -68,17 +68,17 @@ class server
 };
 
 void	ft_delete_comment(std::string	&str);
-void	ft_setDirective2False(server &classconfig, location &location_, int n);
-void	ft_check_cmbsize(server &classconfig, std::string &lines, location &location_, int n);
-void	ft_check_index(server &classconfig, std::string &lines, location &location_, int n);
-void	ft_check_root(server &classconfig, std::string &lines, location &location_, int n);
-void	ft_check_errorpage(server &classconfig, std::string &lines);
-void	ft_check_server_name(server &classconfig, std::string &lines);
-void	ft_check_host(server &classconfig, std::string &lines);
-void	ft_check_listen(server	&classconfig, std::string	&lines);
-void	ft_check_allow_methods(server &classconfig, std::string &lines, location &location_);
-void	ft_check_autoindex(server &classconfig, std::string &lines, location &location_);
-void	ft_check_cgi(server &classconfig, std::string &lines, location &location_);
+void	ft_setDirective2False(serverParse &classconfig, locationParse &location_, int n);
+void	ft_check_cmbsize(serverParse &classconfig, std::string &lines, locationParse &location_, int n);
+void	ft_check_index(serverParse &classconfig, std::string &lines, locationParse &location_, int n);
+void	ft_check_root(serverParse &classconfig, std::string &lines, locationParse &location_, int n);
+void	ft_check_errorpage(serverParse &classconfig, std::string &lines);
+void	ft_check_serverParse_name(serverParse &classconfig, std::string &lines);
+void	ft_check_host(serverParse &classconfig, std::string &lines);
+void	ft_check_listen(serverParse	&classconfig, std::string	&lines);
+void	ft_check_allow_methods(serverParse &classconfig, std::string &lines, locationParse &location_);
+void	ft_check_autoindex(serverParse &classconfig, std::string &lines, locationParse &location_);
+void	ft_check_cgi(serverParse &classconfig, std::string &lines, locationParse &location_);
 //
 typedef	struct bind_info
 {
@@ -87,10 +87,10 @@ typedef	struct bind_info
 }	bind_info;
 
 typedef	std::vector<bind_info>	MapType;
-std::vector<server>		ft_parse_conf(std::string fileConf, MapType	bind_info);
+std::vector<serverParse>		ft_parse_conf(std::string fileConf, MapType	bind_info);
 
 void	print_vector_of_structs(MapType& v);
 void	ft_rm_double_ports(std::vector<std::string>	&ports);
-void	ft_2bind(server &my_server, MapType	&my_map);
+void	ft_2bind(serverParse &my_serverParse, MapType	&my_map);
 
 #endif
