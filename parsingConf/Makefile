@@ -1,25 +1,25 @@
-NAME = parseConf
+NAME = parseConf.a
 
-SRC = main.cpp locationParse.cpp parse_conf.cpp serverParse.cpp
+SRC = locationParse.cpp parse_conf.cpp serverParse.cpp
 
 OBJ = $(SRC:%.cpp=%.o)
 
 HDR = locationParse.hpp serverParse.hpp
 
-FLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address
+FLAGS = -Wall -Wextra -Werror #-std=c++98 -fsanitize=address
 
 all: $(NAME)
 
 $(NAME): $(OBJ) $(HDR)
-	@c++ $(FLAGS) $(SRC) -o $(NAME)
+	@ar -rc $(NAME) $(OBJ)
 
 %.o: %.cpp $(HDR)
 	@c++ $(FLAGS) -c $< -o $@
 
 clean:
-	@rm $(OBJ)
+	@rm -rf $(OBJ)
 
 fclean: clean
-	@rm $(NAME)
+	@rm -rf $(NAME)
 
 re: fclean all

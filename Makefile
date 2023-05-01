@@ -2,7 +2,7 @@
 
 CC = c++
 
-CFLAGS = -Wall -Werror -Wextra -g -fsanitize=address,undefined#,integer -std=c++98
+CFLAGS = -Wall -Werror -Wextra #-g -fsanitize=address,undefined#,integer -std=c++98
 
 CFILES = main.cpp\
 		client.cpp\
@@ -15,29 +15,38 @@ CFILES = main.cpp\
 
 OFILES = $(addprefix $(OBJ_DIR)/,$(CFILES:.cpp=.o))
 
-OBJ_DIR = ./OBJ
+OBJ_DIR = ./server/OBJ
 
-SRC_DIR = .
+SRC_DIR = ./server
 
-INC = *.hpp
+LIB = parsingConf/parseConf.a
+
+INC = server/*.hpp
 
 NAME = webserv
 
-$(NAME) : $(OBJ_DIR) $(OFILES)
-	@$(CC) $(CFLAGS) $(OFILES) -o $(NAME)
+$(NAME) : $(LIB) $(OBJ_DIR) $(OFILES)
+	@$(CC) $(CFLAGS) $(OFILES) $(LIB) -o $(NAME)
 	@echo "done for webserv"
 
 $(OBJ_DIR):
-	@mkdir OBJ
+	@mkdir $(OBJ_DIR)
+
+$(LIB) : force
+	make -C parsingConf
 
 $(OFILES): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp $(INC)
 	@$(CC) -c $(CFLAGS) $< -o $@
 
 clean :
+	make clean -C parsingConf
 	@rm -rf $(OBJ_DIR)
 
 fclean : clean
+	make fclean -C parsingConf
 	@rm -rf $(NAME)
+
+force:
 
 re : fclean all
 

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   serverParseParse.cpp                                    :+:      :+:    :+:   */
+/*   serverParse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/23 19:49:53 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/01 01:41:23 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ serverParse::serverParse()
 {
 	listen_ = false;
 	root_ = false;
-	serverParse_name_ = false;
+	server_name_ = false;
 	index_ = false;
 	client_max_body_size_ = false;
 	error_page_ = false;
@@ -43,7 +43,7 @@ serverParse	&serverParse::operator=(const serverParse &obj)
 		this->listen = obj.listen;
 		this->host = obj.host;
 		this->root = obj.root;
-		this->serverParse_name = obj.serverParse_name;
+		this->server_name = obj.server_name;
 		this->index = obj.index;
 		this->error_page = obj.error_page;
 		this->client_max_body_size = obj.client_max_body_size;
@@ -170,7 +170,7 @@ void	serverParse::ft_clearvectorserv(serverParse &classconfig)
 	classconfig.index.clear();
 	classconfig.listen.clear();
 	classconfig.root.clear();
-	classconfig.serverParse_name.clear();
+	classconfig.server_name.clear();
 }
 
 void	serverParse::ft_clearvectorlocation_test(std::vector<locationParse> &location_)
@@ -296,7 +296,7 @@ void	serverParse::ft_show(std::vector<serverParse> &block)
 		std::cout << "\n";
 		std::cout << block[i].get_host() << std::endl;
 		std::vector<std::string>::iterator it4;
-		for (it4 = block[i].serverParse_name.begin(); it4 != block[i].serverParse_name.end(); it4++)
+		for (it4 = block[i].server_name.begin(); it4 != block[i].server_name.end(); it4++)
 			std::cout << *it4 << " ";
 		std::cout << "\n";
 		std::vector<std::string>::iterator it3;
@@ -439,15 +439,15 @@ void	ft_check_host(serverParse &classconfig, std::string &lines)
 		classconfig.ft_error("Error: Duplicate directives > host");
 }
 
-void	ft_check_serverParse_name(serverParse &classconfig, std::string &lines)
+void	ft_check_server_name(serverParse &classconfig, std::string &lines)
 {
-	if (!classconfig.serverParse_name_)
+	if (!classconfig.server_name_)
 	{
-		classconfig.serverParse_name = classconfig.ft_split(lines, " \t;");
-		classconfig.serverParse_name_ = true;
+		classconfig.server_name = classconfig.ft_split(lines, " \t;");
+		classconfig.server_name_ = true;
 	}
 	else
-		classconfig.ft_error("Error: Duplicate directives > serverParse_name");
+		classconfig.ft_error("Error: Duplicate directives > server_name");
 }
 
 void	ft_check_errorpage(serverParse &classconfig, std::string &lines)
@@ -525,7 +525,7 @@ void	ft_setDirective2False(serverParse &classconfig, locationParse &location_, i
 		classconfig.client_max_body_size_ = false;
 		classconfig.root_ = false;
 		classconfig.index_ = false;
-		classconfig.serverParse_name_ = false;
+		classconfig.server_name_ = false;
 		classconfig.host_find = false;
 	}
 	else if (n == 2)

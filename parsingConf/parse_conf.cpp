@@ -6,13 +6,13 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/29 07:37:13 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/01 01:33:33 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "serverParse.hpp"
 
-std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType bind_info)
+std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 {
 	serverParse						classconfig;
 	locationParse					location_;
@@ -21,7 +21,7 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType bind_info)
 	std::vector<serverParse>			block;
 	std::vector<std::string>	classconfig_tmp;
 
-	bool	InTheserverParseBlock = false;
+	bool	InTheserverBlock = false;
 	bool	InTheLocationBlock = false;
 	if (file_conf.is_open())
 	{
@@ -37,9 +37,9 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType bind_info)
 
 				if (!lines.empty() && lines.back() == '{')
 				{
-					if (lines.find("serverParse") != std::string::npos)
-						InTheserverParseBlock = true;
-					else if (InTheserverParseBlock && (lines.find("location") != std::string::npos))
+					if (lines.find("server") != std::string::npos)
+						InTheserverBlock = true;
+					else if (InTheserverBlock && (lines.find("location") != std::string::npos))
 					{
 						InTheLocationBlock = true;
 						classconfig.location_find = true;
@@ -50,7 +50,7 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType bind_info)
 					continue;
 				}
 
-				else if(InTheserverParseBlock && !InTheLocationBlock && lines != "}")
+				else if(InTheserverBlock && !InTheLocationBlock && lines != "}")
 				{
 					if (lines.back() != ';' || classconfig.ft_occurrences_of_char(lines, ';') >= 2)
 						classconfig.ft_error("missing or misplaced commas");
@@ -61,8 +61,8 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType bind_info)
 						ft_check_listen(classconfig, lines);
 					else if (!classconfig_tmp.begin()->compare("host"))
 						ft_check_host(classconfig, lines);
-					else if (!classconfig_tmp.begin()->compare("serverParse_name"))
-						ft_check_serverParse_name(classconfig, lines);
+					else if (!classconfig_tmp.begin()->compare("server_name"))
+						ft_check_server_name(classconfig, lines);
 					else if(!classconfig_tmp.begin()->compare("root"))
 						ft_check_root(classconfig, lines, location_, 1);
 					else if (!classconfig_tmp.begin()->compare("index"))
@@ -75,7 +75,7 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType bind_info)
 						classconfig.ft_error("error: invalid directives");
 				}
 
-				else if (InTheLocationBlock && InTheserverParseBlock && lines != "}")
+				else if (InTheLocationBlock && InTheserverBlock && lines != "}")
 				{
 					classconfig_tmp = classconfig.ft_split(lines, " \t;");
 					if(!classconfig_tmp.begin()->compare("root"))
@@ -102,16 +102,16 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType bind_info)
 
 				else if (lines == "}")
 				{
-					if (InTheserverParseBlock && !InTheLocationBlock)
+					if (InTheserverBlock && !InTheLocationBlock)
 					{
-						InTheserverParseBlock = false;
+						InTheserverBlock = false;
 						ft_2bind(classconfig, bind_info);
 						block.push_back(classconfig);
 						classconfig.ft_clearvectorlocation_test(classconfig.obj_location);
 						classconfig.ft_clearvectorserv(classconfig);
 						ft_setDirective2False(classconfig, location_, 1);
 					}
-					else if (InTheserverParseBlock && InTheLocationBlock)
+					else if (InTheserverBlock && InTheLocationBlock)
 					{
 						classconfig.obj_location.push_back(location_);
 						location_.ft_clearclasslocation(location_);
@@ -133,8 +133,10 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType bind_info)
 		{
 			std::cerr << "Error" << std::endl;
 		}
-		print_vector_of_structs(bind_info);
-		classconfig.ft_show(block);
+		// print_vector_of_structs(bind_info);
+		// classconfig.ft_show(block);
 	}
+	else
+		throw(std::runtime_error("Config File Not Found"));
 	return block;
 }

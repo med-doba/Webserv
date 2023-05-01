@@ -1,5 +1,5 @@
-#ifndef serverParsePARSE_HPP
-#define serverParsePARSE_HPP
+#ifndef SERVERPARSE_HPP
+#define SERVERPARSE_HPP
 
 #include <fstream>
 #include <string>
@@ -24,7 +24,7 @@ class serverParse
 		std::vector<std::string>	listen;
 		std::string					host;
 		std::vector<std::string>	root;
-		std::vector<std::string>	serverParse_name;
+		std::vector<std::string>	server_name;
 		std::vector<std::string>	index;
 		std::vector<std::string>	error_page;
 		std::vector<std::string>	client_max_body_size;
@@ -54,7 +54,7 @@ class serverParse
 		void	ft_show(std::vector<serverParse>  &block);
 		//
 		bool	listen_;
-		bool	serverParse_name_;
+		bool	server_name_;
 		bool	client_max_body_size_;
 		bool	index_;
 		bool	root_;
@@ -73,7 +73,7 @@ void	ft_check_cmbsize(serverParse &classconfig, std::string &lines, locationPars
 void	ft_check_index(serverParse &classconfig, std::string &lines, locationParse &location_, int n);
 void	ft_check_root(serverParse &classconfig, std::string &lines, locationParse &location_, int n);
 void	ft_check_errorpage(serverParse &classconfig, std::string &lines);
-void	ft_check_serverParse_name(serverParse &classconfig, std::string &lines);
+void	ft_check_server_name(serverParse &classconfig, std::string &lines);
 void	ft_check_host(serverParse &classconfig, std::string &lines);
 void	ft_check_listen(serverParse	&classconfig, std::string	&lines);
 void	ft_check_allow_methods(serverParse &classconfig, std::string &lines, locationParse &location_);
@@ -87,7 +87,7 @@ typedef	struct bind_info
 }	bind_info;
 
 typedef	std::vector<bind_info>	MapType;
-std::vector<serverParse>		ft_parse_conf(std::string fileConf, MapType	bind_info);
+std::vector<serverParse>		ft_parse_conf(std::string fileConf, MapType & bind_info);
 
 void	print_vector_of_structs(MapType& v);
 void	ft_rm_double_ports(std::vector<std::string>	&ports);

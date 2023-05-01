@@ -27,23 +27,44 @@ server::~server()
 
 }
 
-void server::fill()
+struct sockaddr_in * getAdrress(std::string host)
+{
+	struct addrinfo hints, *res, *p;
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	if (getaddrinfo(host.data(), NULL, &hints, &res) != 0)
+		throw (std::runtime_error("error host"));
+	for(p = res;p != NULL; p = p->ai_next)
+	{
+		if (p->ai_family == AF_INET)
+		{
+			struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
+			return (ipv4);
+		}
+	}
+	freeaddrinfo(res);
+	return (NULL);
+}
+
+void server::fill(MapType	bind_info)
 {
 	miniserver obj;
-	obj.port = 8081;
-	obj.str_port = std::to_string(obj.port);
-	obj.address.sin_family = AF_INET;
-	obj.address.sin_addr.s_addr = INADDR_ANY;
-	obj.address.sin_port = htons(obj.port);
-	obj.addrlen = sizeof(obj.address);
-	servers.push_back(obj);
-	// obj.port = 8081;
-	// obj.str_port = std::to_string(obj.port);
-	// obj.address.sin_family = AF_INET;
-	// obj.address.sin_addr.s_addr = INADDR_ANY;
-	// obj.address.sin_port = htons(obj.port);
-	// obj.addrlen = sizeof(obj.address);
-	// servers.push_back(obj);
+	for (size_t i = 0; i < bind_info.size(); i++)
+	{
+		std::cout << "host == " << bind_info[i].host << std::endl;
+		obj.address.sin_addr.s_addr = getAdrress(bind_info[i].host)->sin_addr.s_addr;
+		for (size_t j = 0; j < bind_info[i].ports.size(); j++)
+		{
+			std::cout << "ports == " << bind_info[i].ports[j] << std::endl;
+			obj.port = std::stoi(bind_info[i].ports[j]);
+			obj.str_port = bind_info[i].ports[j];
+			obj.address.sin_family = AF_INET;
+			obj.address.sin_port = htons(obj.port);
+			obj.addrlen = sizeof(obj.address);
+			servers.push_back(obj);
+		}
+	}
 }
 
 void server::lunch_servers()
