@@ -306,6 +306,41 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy)
     return 1;
 }
 
+int parssingOfHeader::VerifyURI(client &obj)
+{
+	std::string compare = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
+    if (obj.URI.size() > 2048)
+    {
+        obj.respond.type = 1;
+        obj.respond.status_code = 414;
+        obj.respond.phrase = "Request-URI Too Long";
+        obj.respond.content = 1;
+        obj.respond.body = "Request-URI is bigger than 2048";
+        obj.respond.close = CLOSE;
+        return -1;
+    }
+	for (size_t i = 0; i < obj.URI.size(); i++)
+	{
+		for (size_t j = 0; j < compare.size(); j++)
+		{
+			if (obj.URI[i] == compare[j])
+				break ;
+			if (obj.URI[i] != compare[j] && j == compare.size() - 1)
+			{
+				obj.respond.type = 1;
+				obj.respond.status_code = 400;
+				obj.respond.phrase = "Bad Request";
+				obj.respond.content = 1;
+				obj.respond.body = "Character Not Allowed In The URI";
+				obj.respond.close = CLOSE;
+				return -1;
+			}
+		}
+		
+	}
+	return (0);
+
+}
 
 int parssingOfHeader::checkHeaderLine(client &obj)
 {
@@ -358,17 +393,9 @@ int parssingOfHeader::checkHeaderLine(client &obj)
     }
     obj.URI.assign(&temp[0]);
     free(temp);
+	if (VerifyURI(obj) == -1)
+		return (-2);
     //std::cout << "URI == " << obj.URI.size() << std::endl;
-    if (obj.URI.size() > 2048)
-    {
-        obj.respond.type = 1;
-        obj.respond.status_code = 414;
-        obj.respond.phrase = "Request-URI Too Long";
-        obj.respond.content = 1;
-        obj.respond.body = "Request-URI is bigger than 2048";
-        obj.respond.close = CLOSE;
-        return -2;
-    }
     // check for all kinds of spaces
     // for (size_t i = 0; i < obj.URI.size(); i++)
     // {

@@ -39,6 +39,8 @@ class server
 	void response(struct pollfd &pfds, int index);
 	void receive(int pfds_index, int index);
 	void new_connection(int index);
+	int checkLocation(struct pollfd &pfds, int index);
+	serverParse findServerBlock(int index);
 };
 
 #endif

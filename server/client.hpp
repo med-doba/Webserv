@@ -102,6 +102,7 @@ class parssingOfHeader
 
         int checkHeaderOfreq_(client &obj, std::string copy);
         int checkHeaderLine(client &obj);
+		int VerifyURI(client &obj);
 		int check_media(client &obj);
         int checkHeaders(client &obj, std::string copy);
         ~parssingOfHeader();

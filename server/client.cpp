@@ -52,7 +52,7 @@ int client::normal_response(struct pollfd &pfds)
 {
 	// char c;
 
-	// //std::cout << "normal response" << std::endl;
+	std::cout << "normal response"<< std::endl;
 	if (!input.is_open())
 	{
 		// //std::cout << "lol2 " << std::endl;
@@ -60,7 +60,7 @@ int client::normal_response(struct pollfd &pfds)
 		input.open("../tests/upload.html");
 		if (!input.is_open())
 		{
-			//std::cout << "couldn't open file" << std::endl;
+			std::cout << "couldn't open file" << std::endl;
 			return (1);
 		}
 		// while (input.get(c))
@@ -85,11 +85,11 @@ int client::normal_response(struct pollfd &pfds)
 	}
 	if (!response_header.empty())
 	{
-		// //std::cout << "send chunks" << std::endl;
+		// std::cout << "send chunks" << std::endl;
 		int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
 		if (i < 0)
 		{
-			//std::cout << "error "  << this->client_socket << std::endl;
+			std::cout << "error "  << this->client_socket << std::endl;
 			//std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
 			//std::cout << this->headerOfRequest << std::endl;
 			printf("errno = %d: %s\n", errno, strerror(errno));
@@ -101,7 +101,7 @@ int client::normal_response(struct pollfd &pfds)
 	}
 	else
 	{ 
-		//std::cout << "sent complete " << this->client_socket << std::endl;
+		std::cout << "sent complete " << this->client_socket << std::endl;
 		//std::cout << "ready -- " << this->ready << std::endl;
 		//std::cout << this->headerOfRequest << std::endl;
 		headerOfRequest.clear();

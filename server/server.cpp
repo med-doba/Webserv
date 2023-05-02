@@ -53,11 +53,11 @@ void server::fill(MapType	bind_info)
 	miniserver obj;
 	for (size_t i = 0; i < bind_info.size(); i++)
 	{
-		//std::cout << "host == " << bind_info[i].host << std::endl;
+		std::cout << "host == " << bind_info[i].host << std::endl;
 		obj.address.sin_addr.s_addr = getAdrress(bind_info[i].host).sin_addr.s_addr;
 		for (size_t j = 0; j < bind_info[i].ports.size(); j++)
 		{
-			//std::cout << "ports == " << bind_info[i].ports[j] << std::endl;
+			std::cout << "ports == " << bind_info[i].ports[j] << std::endl;
 			obj.port = std::stoi(bind_info[i].ports[j]);
 			obj.str_port = bind_info[i].ports[j];
 			obj.address.sin_family = AF_INET;
@@ -123,7 +123,7 @@ void server::monitor()
 				{
 					if (pfds[i].fd == clients[j].client_socket)
 					{
-						// //std::cout << "ready to recv " << clients[j].client_socket << std::endl;
+						std::cout << "ready to recv " << clients[j].client_socket << std::endl;
 						this->receive(i, j);
 						break ;
 					}
@@ -135,7 +135,7 @@ void server::monitor()
 				{
 					if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 1)
 					{
-						//std::cout << "ready to send" << std::endl;
+						std::cout << "ready to send" << std::endl;
 						this->response(this->pfds[i], j);
 						break ;
 					}
@@ -162,43 +162,67 @@ void server::new_connection(int index)
 	c.events = POLLIN | POLLOUT;
 	pfds.push_back(c);
 	clients.push_back(obj);
-	//std::cout << "new client connected " << obj.client_socket << std::endl;
+	std::cout << "new client connected " << obj.client_socket << std::endl;
 }
 
 void server::disconnect(int index)
 {
-	//std::cout << "client disconnected " << clients[index].client_socket << std::endl;
+	std::cout << "client disconnected " << clients[index].client_socket << std::endl;
 	close(clients[index].client_socket);
 	pfds.erase(pfds.begin() + index + servers.size());
 	clients.erase(clients.begin() + index);
 	this->remove = 1;
 }
 
+int server::checkLocation(struct pollfd &pfds, int index)
+{
+	(void)pfds;
+	(void)index;
+	
+	return (0);
+}
+
+serverParse server::findServerBlock(int index)
+{
+	std::string headerreq = clients[index].headerOfRequest;
+	std::string host;
+	int pos = headerreq.find("Host: ");
+	std::cout << "begin pos == " << pos << std::endl;
+	std::cout << "last pos == " <<headerreq.find(':', pos)  << std::endl;
+	host = headerreq.substr(pos, headerreq.find(':', pos));
+	std::cout << "host == %"<< host  << "%"<< std::endl;
+	std::cout << "end" << std::endl;
+	return (serverParse());
+}
+
 void server::response(struct pollfd &pfds, int index)
 {
 	if (clients[index].flag == ERROR)
 	{
-		//std::cout << "ERROR" << std::endl;
+		std::cout << "ERROR" << std::endl;
 		clients[index].respond.generate_response();
 		if (clients[index].respond.send_response(clients[index], pfds) == 1)
 			this->disconnect(index);
+		return;
 	}
-	else if (clients[index].tmp == POST)
+	serverParse serobj = findServerBlock(index);
+	if (checkLocation(pfds, index) == -1)
+		return;
+	if (clients[index].tmp == POST)
 	{
-		//std::cout << "POST method" << std::endl;
+		std::cout << "POST method" << std::endl;
 		if (clients[index].postMethod(pfds) == CLOSE)
 			this->disconnect(index);
 	}
 	else if (clients[index].tmp == DELETE)
 	{
-		//std::cout << "DELETE method" << std::endl;
-		//std::cout << clients[index].headerOfRequest << std::endl;
+		std::cout << "DELETE method" << std::endl;
 		if (clients[index].deleteMethod(pfds) == CLOSE)
 			this->disconnect(index);
 	}
 	else if (clients[index].tmp == GET)
 	{
-		//std::cout << "GEt method" << std::endl;
+		std::cout << "GEt method" << std::endl;
 		clients[index].normal_response(pfds);
 	}
 }
