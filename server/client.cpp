@@ -13,35 +13,35 @@
 // 	}
 // 	if (!response_header.empty())
 // 	{
-// 		// std::cout << "send chunks" << std::endl;
+// 		// //std::cout << "send chunks" << std::endl;
 // 		int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
 // 		if (i < 0)
 // 		{
-// 			std::cout << "error "  << this->client_socket << std::endl;
-// 			std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
-// 			// std::cout << this->headerOfRequest << std::endl;
+// 			//std::cout << "error "  << this->client_socket << std::endl;
+// 			//std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
+// 			// //std::cout << this->headerOfRequest << std::endl;
 // 			printf("errno = %d: %s\n", errno, strerror(errno));
 // 			// response_header.clear();
 // 			return ;
 // 		}
 // 		if (i == (int)response_header.size())
 // 		{
-// 			std::cout << "sent complete " << this->client_socket << std::endl;
-// 			std::cout << "ready -- " << this->ready << std::endl;
-// 			std::cout << this->headerOfRequest << std::endl;
-// 			// std::cout << this->buffer << std::endl;
+// 			//std::cout << "sent complete " << this->client_socket << std::endl;
+// 			//std::cout << "ready -- " << this->ready << std::endl;
+// 			//std::cout << this->headerOfRequest << std::endl;
+// 			// //std::cout << this->buffer << std::endl;
 // 			this->clear();
 // 			pfds.revents &= ~POLLOUT;
 // 			return ;
 // 		}
 // 		response_header.erase(0, i);
-// 		// std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
+// 		// //std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
 // 	}
 // 	else
 // 	{ 
-// 		std::cout << "sent complete " << this->client_socket << std::endl;
-// 		std::cout << "ready -- " << this->ready << std::endl;
-// 		std::cout << this->headerOfRequest << std::endl;
+// 		//std::cout << "sent complete " << this->client_socket << std::endl;
+// 		//std::cout << "ready -- " << this->ready << std::endl;
+// 		//std::cout << this->headerOfRequest << std::endl;
 // 		this->clear();
 // 		pfds.revents &= ~POLLOUT;
 // 		return ;
@@ -52,20 +52,20 @@ int client::normal_response(struct pollfd &pfds)
 {
 	// char c;
 
-	std::cout << "normal response" << std::endl;
+	// //std::cout << "normal response" << std::endl;
 	if (!input.is_open())
 	{
-		// std::cout << "lol2 " << std::endl;
+		// //std::cout << "lol2 " << std::endl;
 		// input.open("../tests/pdf.pdf");
 		input.open("../tests/upload.html");
 		if (!input.is_open())
 		{
-			std::cout << "couldn't open file" << std::endl;
+			//std::cout << "couldn't open file" << std::endl;
 			return (1);
 		}
 		// while (input.get(c))
 		// {
-		// 	std::cout << "loop" << std::endl;
+		// 	//std::cout << "loop" << std::endl;
 		// 	content_buffer.push_back(c);
 		// }
 		input.seekg(0, std::ios::end);
@@ -85,25 +85,25 @@ int client::normal_response(struct pollfd &pfds)
 	}
 	if (!response_header.empty())
 	{
-		// std::cout << "send chunks" << std::endl;
+		// //std::cout << "send chunks" << std::endl;
 		int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
 		if (i < 0)
 		{
-			std::cout << "error "  << this->client_socket << std::endl;
-			std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
-			std::cout << this->headerOfRequest << std::endl;
+			//std::cout << "error "  << this->client_socket << std::endl;
+			//std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
+			//std::cout << this->headerOfRequest << std::endl;
 			printf("errno = %d: %s\n", errno, strerror(errno));
 			// response_header.clear();
 			return (0);
 		}
 		response_header.erase(0, i);
-		// std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
+		// //std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
 	}
 	else
 	{ 
-		std::cout << "sent complete " << this->client_socket << std::endl;
-		std::cout << "ready -- " << this->ready << std::endl;
-		std::cout << this->headerOfRequest << std::endl;
+		//std::cout << "sent complete " << this->client_socket << std::endl;
+		//std::cout << "ready -- " << this->ready << std::endl;
+		//std::cout << this->headerOfRequest << std::endl;
 		headerOfRequest.clear();
 		// content_buffer.clear();
 		buffer.clear();
@@ -219,10 +219,10 @@ int client::checkHeaderOfreq()
 					i = copyheader.find("Transfer-Encoding: chunked");   // find way to check if boundry
 					if(i != -1)
 					{ 
-						std::cout << "lol" << std::endl;
+						//std::cout << "lol" << std::endl;
 						i = pos  + 2;
 						pos = copyheader.find("Content-Length");  
-						std::cout << copyheader<< std::endl;
+						//std::cout << copyheader<< std::endl;
 						if(pos != -1)
 							ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
 						
@@ -247,8 +247,10 @@ int client::checkHeaderOfreq()
 							_tmp = 0;
 							while (temp[_tmp] != '\r' && temp[_tmp] != '\n' && temp[_tmp + 1] != '\n')
 								_tmp++;
-							boundary.append("--").append(ft_substr(temp,0,_tmp));// free boundry and temp?
-							// std::cout << "=> " <<  boundary << std::endl;
+							char *strtmp = ft_substr(temp,0,_tmp);
+							boundary.append("--").append(strtmp);// free boundry and temp?
+							free(strtmp);
+							// //std::cout << "=> " <<  boundary << std::endl;
 							return 1;
 						}
 						ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
@@ -355,8 +357,8 @@ int client::pushToBuffer()
 
 int client::deleteMethod(struct pollfd &pfds)
 {
-	std::cout << "hello from delete"  << std::endl;
-	std::cout << "URI -- " << URI << std::endl;
+	//std::cout << "hello from delete"  << std::endl;
+	//std::cout << "URI -- " << URI << std::endl;
 	std::string str;
 	if (URI.size() <= 7)
 		respond.flagResponse = FORBIDEN;
@@ -369,12 +371,12 @@ int client::deleteMethod(struct pollfd &pfds)
 			int i = remove((char *)URI.data());
 			if (i  == 0)
 			{
-				std::cout << "removed successfully" << std::endl;
+				//std::cout << "removed successfully" << std::endl;
 				this->respond.flagResponse = DELETED;
 			}
 			else
 			{
-				std::cout << "error on remove" << std::endl;
+				//std::cout << "error on remove" << std::endl;
 				this->respond.flagResponse = NOTFOUND;
 			}
 		}
@@ -425,19 +427,19 @@ int client::postMethod(struct pollfd &pfds)
 {
 	if(this->flag == NONCHUNKED) // if has content length
 	{
-		std::cout << "post handle1" << std::endl;
+		//std::cout << "post handle1" << std::endl;
 		this->bodyParss.handle_post(*this);
 		this->respond.ready = 1;
 	}
 	else if(this->flag == CHUNKED)// // handle chunked data when resend request
 	{
-		std::cout << "chunked handle1" << std::endl;
+		//std::cout << "chunked handle1" << std::endl;
 		this->bodyParss.handling_chunked_data(*this);
 		this->respond.ready = 1;
 	}
 	else if(this->flag == FORM)
 	{
-		std::cout << "form handle1" << std::endl;
+		//std::cout << "form handle1" << std::endl;
 		this->bodyParss.handling_form_data(*this);
 		this->respond.ready = 1;
 	}

@@ -32,7 +32,7 @@ void response::defineContentType()
 
 void response::generate_response()
 {
-	std::cout << "type == " << type << std::endl;
+	//std::cout << "type == " << type << std::endl;
 	if (type == 1)
 	{
 		this->defineContentType();
@@ -56,7 +56,7 @@ void response::generate_response()
 			response_req += body;
 		type = 0;
 		flagResponse = -1;
-		std::cout << response_req << std::endl;
+		//std::cout << response_req << std::endl;
 	}
 }
 
@@ -83,12 +83,12 @@ int response::send_response(client &obj, struct pollfd &pfds)
 	i = send(obj.client_socket, response_req.c_str(), response_req.size(), 0);
 	if (i < 0)
 	{
-		std::cout << "error in sending" << std::endl;
+		//std::cout << "error in sending" << std::endl;
 		return (-1);
 	}
 	else if (i == (int)response_req.size())
 	{
-		std::cout << "sent complete" << std::endl;
+		//std::cout << "sent complete" << std::endl;
 		close = obj.respond.close;
 		obj.clear();
 		pfds.revents&= ~POLLOUT;

@@ -23,6 +23,8 @@ handling i should incoprate this in the normal response as well
 => handle if a header doesn't have a value only if that header is nessecary
 to the request method (pending ...) (mustapha will do it)
 
+=> if a bind fails do not exist just thorw error and continue (pending ...)
+
 => handle chanked transfer if size of buffer bigger than the contentlength in the headers (done)
 
 => handle delete required headers (done)
@@ -114,8 +116,8 @@ Parse request
 std::istringstream request_stream(request);
 std::string method, uri, version;
 request_stream >> method >> uri >> version;
-std::cout << request << std::endl;
-std::cout << "method " << method << " uri " << uri << " ver " << version << std::endl;
+//std::cout << request << std::endl;
+//std::cout << "method " << method << " uri " << uri << " ver " << version << std::endl;
 // Construct response
 std::string response_body = "Hello, World! how are you doing haitam?\n";
 std::ostringstream response_stream;

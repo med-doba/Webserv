@@ -62,12 +62,15 @@ int parssingOfHeader::check_media(client &obj)
 	{
         int i = obj.headerOfRequest.find(';', pos);
         std::string check = obj.headerOfRequest.substr(pos + 14 , i - pos - 14);
-        std::cout << "check == " << check << std::endl;
+        // std::cout << "check == %" << (int)check[check.size() - 1] << "%"<< std::endl;
+        // std::cout << "check == " << check.size() << std::endl;
         if (check.compare("multipart/form-data") == 0)
             return (0);
 		media = obj.headerOfRequest.substr(pos + 14, obj.headerOfRequest.find('\r', pos));
-        std::cout << "media == " << media << std::endl;
-        std::cout << "asdhaksdka" << std::endl;
+        // std::cout << "media == " << media << std::endl;
+        media.pop_back();
+        // std::cout << "media == " << media.size() << std::endl;
+        //std::cout << "asdhaksdka" << std::endl;
 		for (int i = 0; i < 8; i++)
 		{
 			if (media.compare(media_handled[i]) == 0)
@@ -244,7 +247,7 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy)
         if(i != -1)
 		{
 			int ContentLength = ft_atoi(copy.substr(i + 16,copy.size()).c_str());
-			std::cout << "content == "<< ContentLength<< std::endl;
+			//std::cout << "content == "<< ContentLength<< std::endl;
 			if (ContentLength > 0)
             {
                 obj.respond.type = 1;
@@ -321,7 +324,7 @@ int parssingOfHeader::checkHeaderLine(client &obj)
         obj.tmp = GET;
     if(strcmp(temp,"DELETE") == 0)
         obj.tmp = DELETE;
-    // std::cout << "method == " << tmp << std::endl;
+    // //std::cout << "method == " << tmp << std::endl;
     if( strcmp(temp,"GET") != 0 && strcmp(temp,"POST") != 0 && strcmp(temp,"DELETE") != 0)
     {
         free(temp);
@@ -355,7 +358,7 @@ int parssingOfHeader::checkHeaderLine(client &obj)
     }
     obj.URI.assign(&temp[0]);
     free(temp);
-    std::cout << "URI == " << obj.URI.size() << std::endl;
+    //std::cout << "URI == " << obj.URI.size() << std::endl;
     if (obj.URI.size() > 2048)
     {
         obj.respond.type = 1;

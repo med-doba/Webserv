@@ -69,8 +69,8 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
     int i = write(fd,(void*)(bodyofRequest.data()),bodyofRequest.size());
 	if (i == (int)bodyofRequest.size())
 		flagResponse = CREATED;
-	std::cout << "write i == " << i << std::endl;
-	std::cout << "buffer size == " << bodyofRequest.size() << std::endl;
+	//std::cout << "write i == " << i << std::endl;
+	//std::cout << "buffer size == " << bodyofRequest.size() << std::endl;
     close(fd);
 }
 
@@ -127,7 +127,9 @@ void parssingOfBody::handling_form_data(client &obj)
         tmp = 0;
         while (temp[tmp] != '\r' && temp[tmp + 1] != '\n')
             tmp++;
-        obj.boundary.append("--").append(ft_substr_(temp,0,tmp));// free boundry and temp?    
+        char *strtmp = ft_substr_(temp,0,tmp);
+        obj.boundary.append("--").append(strtmp);// free boundry and temp?    
+        free(strtmp);
         obj.total_bytes_received = obj.ContentLength;
         obj.i = 0;
         obj.bodyofRequest.clear();
@@ -150,12 +152,12 @@ void parssingOfBody::handling_form_data(client &obj)
             start_idx = end_idx + separator.length();
         }
         int size = obj.buffer.size() - (obj.headerOfRequest.size() + 3);
-        std::cout << obj.buffer.size() << std::endl;
-        std::cout << obj.headerOfRequest << std::endl;
+        //std::cout << obj.buffer.size() << std::endl;
+        //std::cout << obj.headerOfRequest << std::endl;
         if (size > obj.ContentLength)
         {
-            std::cout << "size == " << size << std::endl;
-            std::cout << "content == " << obj.ContentLength << std::endl;
+            //std::cout << "size == " << size << std::endl;
+            //std::cout << "content == " << obj.ContentLength << std::endl;
             obj.respond.status_code = 400;
             obj.respond.phrase = "Bad Request";
             obj.respond.type = 1;
@@ -245,9 +247,9 @@ void parssingOfBody::handle_post(client &obj)
 	string test = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
 	if((int)test.size() >= obj.ContentLength)// finish recivng
     { 
-		std::cout << "i == " << obj.i << std::endl;
-		std::cout << "content == "<< obj.ContentLength << std::endl;
-		std::cout << "buffer23 size == " << obj.buffer.size()<< std::endl;
+		//std::cout << "i == " << obj.i << std::endl;
+		//std::cout << "content == "<< obj.ContentLength << std::endl;
+		//std::cout << "buffer23 size == " << obj.buffer.size()<< std::endl;
         obj.bodyofRequest = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
         if (!obj.bodyofRequest.empty())
             create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse);
