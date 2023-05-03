@@ -1,2 +1,4 @@
 tmp/
 cgi-bin/
+.vscode/
+upload/

@@ -22,7 +22,7 @@ class locationParse
 		std::vector<std::string>	root;
 		std::vector<std::string>	index;
 		std::vector<std::string>	error_page;
-		std::vector<std::string>	client_max_body_size;
+		size_t						client_max_body_size;
 		std::vector<std::string>	cgi_path;
 		std::vector<std::string>	cgi_ext;
 		std::vector<std::string>	client_body_temp_path;

@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:49:40 by med-doba          #+#    #+#             */
-/*   Updated: 2023/04/30 23:53:36 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/03 20:01:35 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,10 +43,17 @@ locationParse	&locationParse::operator=(const locationParse &obj)
 		this->index = obj.index;
 		this->error_page = obj.error_page;
 		this->client_max_body_size = obj.client_max_body_size;
+		this->client_max_body_size_ = obj.client_max_body_size_;
 		this->path = obj.path;
 		this->cgi_path = obj.cgi_path;
 		this->cgi_ext = obj.cgi_ext;
-		this->client_body_temp_path = obj.client_body_temp_path;
+		//
+		this->index_ = obj.index_;
+		this->root_ = obj.root_;
+		this->cgi_ = obj.cgi_;
+		this->autoindex_ = obj.autoindex_;
+		this->allow_methods_ = obj.allow_methods_;
+		this->client_max_body_size_ = obj.client_max_body_size_;
 	}
 	return *this;
 }
@@ -75,7 +82,6 @@ bool	locationParse::ft_check_autoindex(std::string &str)
 void	locationParse::ft_clearclasslocation(locationParse &location_)
 {
 	location_.path.clear();
-	location_.client_max_body_size.clear();
 	location_.error_page.clear();
 	location_.root.clear();
 	location_.index.clear();

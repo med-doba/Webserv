@@ -27,7 +27,7 @@ class serverParse
 		std::vector<std::string>	server_name;
 		std::vector<std::string>	index;
 		std::vector<std::string>	error_page;
-		std::vector<std::string>	client_max_body_size;
+		size_t						client_max_body_size;
 		//methodes
 		bool	ft_check_extention(std::string str);
 		bool	ft_check_cmbsize(std::string &str);

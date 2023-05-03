@@ -152,7 +152,7 @@ void server::new_connection(int index)
 	struct sockaddr_in address;
 	unsigned int addrlen = sizeof(address);
 
-	if ((obj.client_socket = accept(servers[index].socket_server, (struct sockaddr*)&(address), (socklen_t*)&(addrlen))) < 0) 
+	if ((obj.client_socket = accept(servers[index].socket_server, (struct sockaddr*)&(address), (socklen_t*)&(addrlen))) < 0)
 	{
 		perror("accept");
 		exit(EXIT_FAILURE);
@@ -234,7 +234,7 @@ serverParse server::findServerBlock(int index)
 		}
 		i++;
 	}
-	
+
 	std::cout << "host == %"<< host  << "%"<< std::endl;
 	std::cout << "end" << std::endl;
 	std::cout << "port == %"<< port  << "%"<< std::endl;
@@ -245,28 +245,38 @@ serverParse server::findServerBlock(int index)
 void server::checkMaxBodySize(client objClient, serverParse obj, int loc)
 {
 	(void)obj;
-	// long long allowedSize = 1000000;
+	size_t allowedSize = 1048576;
 	(void)loc;
 	(void)objClient;
-	// int i = objClient.headerOfRequest.find("Content-Length: ");
-	// if (i != -1)
-	// {
-	// 	// long long length = std::stoi(objClient.headerOfRequest.substr(i + 16,objClient.headerOfRequest.size()).c_str());
-	// 	// if (obj.obj_location[loc].client_max_body_size.size() != 0)
-	// 	// 	allowedSize = ;
-		
-	// 	if (length > 0)
-	// 	{
-	// 		std::cout << "length == " << length << std::endl;
-	// 		objClient.respond.type = 1;
-	// 		objClient.respond.status_code = 400;
-	// 		objClient.respond.phrase = "Bad Request";
-	// 		objClient.respond.content = 1;
-	// 		objClient.respond.body = "The request has a malformed header1";
-	// 		objClient.respond.close = CLOSE;
-	// 		return ;
-	// 	}
-	// }
+	int i = objClient.headerOfRequest.find("Content-Length: ");
+	if (i != -1)
+	{
+		long long length = std::stoi(objClient.headerOfRequest.substr(i + 16,objClient.headerOfRequest.size()).c_str());
+		std::cout << "bool1 == " << obj.obj_location[loc].client_max_body_size_ << std::endl;
+		std::cout << "bool2 == " << obj.client_max_body_size_ << std::endl;
+		if (obj.obj_location[loc].client_max_body_size_)
+		{
+			std::cout << "one\n";
+			allowedSize = obj.obj_location[loc].client_max_body_size;
+		}
+		else if (obj.client_max_body_size_)
+		{
+			std::cout << "two\n";
+			allowedSize = obj.client_max_body_size;
+		}
+		std::cout << "allowed == " << allowedSize << std::endl;
+		if (length > 0)
+		{
+			std::cout << "length == " << length << std::endl;
+			objClient.respond.type = 1;
+			objClient.respond.status_code = 400;
+			objClient.respond.phrase = "Bad Request";
+			objClient.respond.content = 1;
+			objClient.respond.body = "The request has a malformed header1";
+			objClient.respond.close = CLOSE;
+			return ;
+		}
+	}
 }
 
 void server::response(struct pollfd &pfds, int index)
@@ -417,7 +427,7 @@ void server::receive(int pfds_index, int index)
 		clients[index].check();
 		pfds[pfds_index].revents &= ~POLLIN;
 	}
-        
+
     // //std::cout << "out of recv" << std::endl;
     // return 1;
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serverParse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
+/*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/02 17:42:39 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/03 20:01:14 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,19 @@ serverParse	&serverParse::operator=(const serverParse &obj)
 		this->index = obj.index;
 		this->error_page = obj.error_page;
 		this->client_max_body_size = obj.client_max_body_size;
+		//
+		this->root_ = obj.root_;
+		this->index_ = obj.index_;
+		this->listen_ = obj.listen_;
+		this->error_page_ = obj.error_page_;
+		this->server_name_ = obj.server_name_;
+		this->client_max_body_size_ = obj.client_max_body_size_;
+		//
+		this->listen_find = obj.listen_find;
+		this->root_find = obj.root_find;
+		this->error_page_find = obj.error_page_find;
+		this->host_find = obj.host_find;
+		this->location_find = obj.location_find;
 	}
 	return *this;
 }
@@ -87,7 +100,10 @@ bool	serverParse::ft_check_cmbsize(std::string &str)
 		{
 			str.pop_back();
 			if (ft_isDigit(str))
+			{
+				str = std::to_string(std::stoul(str));
 				return true;
+			}
 			else
 				str = tmp;
 		}
@@ -164,7 +180,7 @@ std::vector<std::string>	serverParse::ft_parse_cmbsize(std::string &lines)
 
 void	serverParse::ft_clearvectorserv(serverParse &classconfig)
 {
-	classconfig.client_max_body_size.clear();
+	classconfig.client_max_body_size = 1048576;
 	classconfig.error_page.clear();
 	classconfig.host.clear();
 	classconfig.index.clear();
@@ -311,9 +327,7 @@ void	serverParse::ft_show(std::vector<serverParse> &block)
 		for (it2 = block[i].index.begin(); it2 != block[i].index.end(); it2++)
 			std::cout << *it2 << " ";
 		std::cout << "\n";
-		std::vector<std::string>::iterator it5;
-		for (it5 = block[i].client_max_body_size.begin(); it5 != block[i].client_max_body_size.end(); it5++)
-			std::cout << *it5 << " ";
+		std::cout << "cmdsize_ = " << block[i].client_max_body_size_ << std::endl;
 		std::cout << "\n";
 		for (size_t j = 0; j < block[i].obj_location.size(); j++)
 		{
@@ -329,9 +343,6 @@ void	serverParse::ft_show(std::vector<serverParse> &block)
 			std::vector<std::string>::iterator it11;
 			for (it11 = block[i].obj_location[j].index.begin(); it11 != block[i].obj_location[j].index.end(); it11++)
 				std::cout << *it11 << " ";
-			std::vector<std::string>::iterator it17;
-			for (it17 = block[i].obj_location[j].client_max_body_size.begin(); it17 != block[i].obj_location[j].client_max_body_size.end(); it17++)
-				std::cout << *it17 << " ";
 			std::vector<std::string>::iterator it9;
 			for (it9 = block[i].obj_location[j].allow_methods.begin(); it9 != block[i].obj_location[j].allow_methods.end(); it9++)
 				std::cout << *it9 << " ";
@@ -502,18 +513,18 @@ void	ft_check_index(serverParse &classconfig, std::string &lines, locationParse 
 
 void	ft_check_cmbsize(serverParse &classconfig, std::string &lines, locationParse &location_, int n)
 {
-	if (n == 1 && !classconfig.client_max_body_size_)
+	if (n == 1)
 	{
-		classconfig.client_max_body_size = classconfig.ft_parse_cmbsize(lines);
+		classconfig.client_max_body_size = std::stod(classconfig.ft_parse_cmbsize(lines)[1]);
+		classconfig.client_max_body_size *= 1048576;
 		classconfig.client_max_body_size_ = true;
 	}
-	else if (n == 2 && !location_.client_max_body_size_)
+	else if (n == 2)
 	{
-		location_.client_max_body_size = classconfig.ft_parse_cmbsize(lines);
+		location_.client_max_body_size = std::stod(classconfig.ft_parse_cmbsize(lines)[1]);
+		location_.client_max_body_size *= 1048576;
 		location_.client_max_body_size_ = true;
 	}
-	else
-		classconfig.ft_error("Error: Duplicate directives > cmbsize");
 }
 
 void	ft_setDirective2False(serverParse &classconfig, locationParse &location_, int n)
