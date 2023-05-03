@@ -8,6 +8,7 @@ response::response()
 	version = "HTTP/1.1";
 	del = "\r\n";
 	closeheader = "Connection: close";
+	aliveheader = "Connection: keep-alive";
 	content = 0;
 	flagResponse = -1;
 	ready = 0;
@@ -47,7 +48,8 @@ void response::generate_response()
 		if (close == CLOSE)
 		{
 			response_req += closeheader + del;
-			close = 0;
+			// response_req += aliveheader + del;
+			close = 1;
 		}
 		for (size_t i = 0; i < this->headers.size(); i++)
 			response_req += headers[i] + del;
@@ -56,7 +58,7 @@ void response::generate_response()
 			response_req += body;
 		type = 0;
 		flagResponse = -1;
-		//std::cout << response_req << std::endl;
+		std::cout << response_req << std::endl;
 	}
 }
 

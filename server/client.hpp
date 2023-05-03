@@ -72,6 +72,7 @@ class response
 		std::string version;
 		std::string del;
 		std::string closeheader;
+		std::string aliveheader;
 		int close;
 		std::string contentlength;
 		std::string contenttype;

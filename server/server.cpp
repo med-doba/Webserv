@@ -174,29 +174,107 @@ void server::disconnect(int index)
 	this->remove = 1;
 }
 
-int server::checkLocation(struct pollfd &pfds, int index)
+int server::checkLocation(client &objClient, serverParse obj)
 {
-	(void)pfds;
-	(void)index;
-	
-	return (0);
+	for (size_t i = 0; i < obj.obj_location.size(); i++)
+	{
+		if (objClient.URI.compare(obj.obj_location[i].path) == 0)
+		{
+			std::cout << "path => " << obj.obj_location[i].path << std::endl;
+			return (i);
+		}
+	}
+	if (objClient.flag != ERROR)
+	{
+		objClient.flag = ERROR;
+		objClient.respond.type = 1;
+		objClient.respond.status_code = 400;
+		objClient.respond.phrase = "Bad Request";
+		objClient.respond.content = 1;
+		objClient.respond.body = "Location Not Found";
+		objClient.respond.close = CLOSE;
+	}
+	return (-1);
 }
 
 serverParse server::findServerBlock(int index)
 {
 	std::string headerreq = clients[index].headerOfRequest;
+	std::string line;
 	std::string host;
+	std::string port;
 	int pos = headerreq.find("Host: ");
-	std::cout << "begin pos == " << pos << std::endl;
-	std::cout << "last pos == " <<headerreq.find(':', pos)  << std::endl;
-	host = headerreq.substr(pos, headerreq.find(':', pos));
+	line = headerreq.substr(pos + 6, headerreq.find('\r', pos + 6) - pos - 6);
+	host = line.substr(0, line.find(':'));
+	port = line.substr(line.find(':') + 1);
+	size_t i = 0;
+	while (i < this->block.size())
+	{
+		if (host.compare(block[i].host) != 0)
+		{
+			for (size_t j = 0; j < block[i].server_name.size(); j++)
+			{
+				if (host.compare(block[i].server_name[j]) == 0)
+				{
+					for (size_t l = 1; l < block[i].listen.size(); l++)
+					{
+						if (port.compare(block[i].listen[l]) == 0)
+							return (block[i]);
+					}
+				}
+			}
+		}
+		else
+		{
+			for (size_t l = 1; l < block[i].listen.size(); l++)
+			{
+				if (port.compare(block[i].listen[l]) == 0)
+					return (block[i]);
+			}
+		}
+		i++;
+	}
+	
 	std::cout << "host == %"<< host  << "%"<< std::endl;
 	std::cout << "end" << std::endl;
-	return (serverParse());
+	std::cout << "port == %"<< port  << "%"<< std::endl;
+	std::cout << "end" << std::endl;
+	return (block[i]);
+}
+
+void server::checkMaxBodySize(client objClient, serverParse obj, int loc)
+{
+	(void)obj;
+	// long long allowedSize = 1000000;
+	(void)loc;
+	(void)objClient;
+	// int i = objClient.headerOfRequest.find("Content-Length: ");
+	// if (i != -1)
+	// {
+	// 	// long long length = std::stoi(objClient.headerOfRequest.substr(i + 16,objClient.headerOfRequest.size()).c_str());
+	// 	// if (obj.obj_location[loc].client_max_body_size.size() != 0)
+	// 	// 	allowedSize = ;
+		
+	// 	if (length > 0)
+	// 	{
+	// 		std::cout << "length == " << length << std::endl;
+	// 		objClient.respond.type = 1;
+	// 		objClient.respond.status_code = 400;
+	// 		objClient.respond.phrase = "Bad Request";
+	// 		objClient.respond.content = 1;
+	// 		objClient.respond.body = "The request has a malformed header1";
+	// 		objClient.respond.close = CLOSE;
+	// 		return ;
+	// 	}
+	// }
 }
 
 void server::response(struct pollfd &pfds, int index)
 {
+	serverParse objServer = findServerBlock(index);
+	int loc = checkLocation(clients[index], objServer);
+	if (loc != -1)
+		checkMaxBodySize(clients[index], objServer, loc);
 	if (clients[index].flag == ERROR)
 	{
 		std::cout << "ERROR" << std::endl;
@@ -205,9 +283,6 @@ void server::response(struct pollfd &pfds, int index)
 			this->disconnect(index);
 		return;
 	}
-	serverParse serobj = findServerBlock(index);
-	if (checkLocation(pfds, index) == -1)
-		return;
 	if (clients[index].tmp == POST)
 	{
 		std::cout << "POST method" << std::endl;

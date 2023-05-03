@@ -101,6 +101,38 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy)
         i++;
     }
 
+    i = 0;
+    while (str[i])
+    {
+        while (str[i] && str[i] != ':')
+            i++;
+        i+=2;
+        int k = i;
+        while (str[i] && str[i] != '\r' && str[i] != '\n'  && str[i + 1] != '\n')  
+            i++;
+        if(str.substr(k,i - k).size() == 0)// if has empty value
+        {
+            obj.respond.type = 1;
+            obj.respond.status_code = 400;
+            obj.respond.phrase = "Bad Request";
+            obj.respond.content = 1;
+            obj.respond.body = "The request is invalid or malformed.";
+            obj.respond.close = CLOSE;
+            return -2;
+        }
+        if(str[i] != '\r' && str[i] != '\n' && str[i + 1] == '\n')// if line dont end by '\r'
+        {
+            obj.respond.type = 1;
+            obj.respond.status_code = 400;
+            obj.respond.phrase = "Bad Request";
+            obj.respond.content = 1;
+            obj.respond.body = "The request is invalid or malformed.";
+            obj.respond.close = CLOSE;
+            return -2;
+        }
+        i++;
+    }
+
 	i = str.find("Host: ");
 	if(i == -1)
 	{
@@ -272,37 +304,6 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy)
         }
     }
     
-    i = 0;
-    while (str[i])
-    {
-        while (str[i] && str[i] != ':')
-            i++;
-        i+=2;
-        int k = i;
-        while (str[i] && str[i] != '\r' && str[i] != '\n'  && str[i + 1] != '\n')  
-            i++;
-        if(str.substr(k,i - k).size() == 0)// if has empty value
-        {
-            obj.respond.type = 1;
-            obj.respond.status_code = 400;
-            obj.respond.phrase = "Bad Request";
-            obj.respond.content = 1;
-            obj.respond.body = "The request is invalid or malformed.";
-            obj.respond.close = 1;
-            return -2;
-        }
-        if(str[i] != '\r' && str[i] != '\n' && str[i + 1] == '\n')// if line dont end by '\r'
-        {
-            obj.respond.type = 1;
-            obj.respond.status_code = 400;
-            obj.respond.phrase = "Bad Request";
-            obj.respond.content = 1;
-            obj.respond.body = "The request is invalid or malformed.";
-            obj.respond.close = 1;
-            return -2;
-        }
-        i++;
-    }
     return 1;
 }
 
@@ -395,21 +396,6 @@ int parssingOfHeader::checkHeaderLine(client &obj)
     free(temp);
 	if (VerifyURI(obj) == -1)
 		return (-2);
-    //std::cout << "URI == " << obj.URI.size() << std::endl;
-    // check for all kinds of spaces
-    // for (size_t i = 0; i < obj.URI.size(); i++)
-    // {
-    //     if (isspace(obj.URI[i]) != 0)
-    //     {
-    //         obj.respond.type = 1;
-    //         obj.respond.status_code = 400;
-    //         obj.respond.phrase = "Bad Request";
-    //         obj.respond.content = 1;
-    //         obj.respond.body = "The request has a malformed header1";
-    //         obj.respond.close = CLOSE;
-    //         return -2;
-    //     }
-    // }
     
     i++;
     j = i;
