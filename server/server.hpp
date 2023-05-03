@@ -40,8 +40,9 @@ class server
 	void receive(int pfds_index, int index);
 	void new_connection(int index);
 	int checkLocation(client &objClient, serverParse obj);
-	void checkMaxBodySize(client objClient, serverParse obj, int loc);
-	serverParse findServerBlock(int index);
+	void checkMaxBodySize(client& objClient, serverParse obj, int loc);
+	void checkMethodAllowed(client& objClient, serverParse obj, int loc);
+	serverParse& findServerBlock(int index);
 };
 
 #endif

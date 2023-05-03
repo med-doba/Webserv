@@ -45,6 +45,7 @@ void response::generate_response()
 			response_req += contentlength + std::to_string(body.size()) + del;
 			content = 0;
 		}
+		std::cout << "close == " << close << std::endl;
 		if (close == CLOSE)
 		{
 			response_req += closeheader + del;
