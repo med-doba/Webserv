@@ -197,7 +197,7 @@ int server::checkLocation(client &objClient, serverParse obj)
 	return (-1);
 }
 
-serverParse server::findServerBlock(int index)
+serverParse& server::findServerBlock(int index)
 {
 	std::string headerreq = clients[index].headerOfRequest;
 	std::string line;
@@ -242,41 +242,60 @@ serverParse server::findServerBlock(int index)
 	return (block[i]);
 }
 
-void server::checkMaxBodySize(client objClient, serverParse obj, int loc)
+void server::checkMaxBodySize(client& objClient, serverParse obj, int loc)
 {
-	(void)obj;
 	size_t allowedSize = 1048576;
-	(void)loc;
-	(void)objClient;
 	int i = objClient.headerOfRequest.find("Content-Length: ");
 	if (i != -1)
 	{
-		long long length = std::stoi(objClient.headerOfRequest.substr(i + 16,objClient.headerOfRequest.size()).c_str());
-		std::cout << "bool1 == " << obj.obj_location[loc].client_max_body_size_ << std::endl;
-		std::cout << "bool2 == " << obj.client_max_body_size_ << std::endl;
+		size_t length = std::stoi(objClient.headerOfRequest.substr(i + 16,objClient.headerOfRequest.size()).c_str());
 		if (obj.obj_location[loc].client_max_body_size_)
-		{
-			std::cout << "one\n";
 			allowedSize = obj.obj_location[loc].client_max_body_size;
-		}
 		else if (obj.client_max_body_size_)
-		{
-			std::cout << "two\n";
 			allowedSize = obj.client_max_body_size;
-		}
 		std::cout << "allowed == " << allowedSize << std::endl;
-		if (length > 0)
+		if (length > allowedSize && objClient.flag != ERROR)
 		{
-			std::cout << "length == " << length << std::endl;
+			objClient.flag = ERROR;
 			objClient.respond.type = 1;
-			objClient.respond.status_code = 400;
-			objClient.respond.phrase = "Bad Request";
+			objClient.respond.status_code = 413;
+			objClient.respond.phrase = "Request Entity Too Large";
 			objClient.respond.content = 1;
-			objClient.respond.body = "The request has a malformed header1";
+			objClient.respond.body = "File Too Big";
 			objClient.respond.close = CLOSE;
 			return ;
 		}
 	}
+}
+
+void server::checkMethodAllowed(client& objClient, serverParse obj, int loc)
+{
+	std::string method;
+	locationParse locobj = obj.obj_location[loc];
+	if (objClient.tmp == POST)
+		method = "POST";
+	else if (objClient.tmp == GET)
+		method = "GET";
+	else if (objClient.tmp == DELETE)
+		method = "DELETE";
+	for (size_t i = 1; i < locobj.allow_methods.size(); i++)
+	{
+		std::cout << "methods == " << locobj.allow_methods[i] << std::endl;
+		if (method.compare(locobj.allow_methods[i]) == 0)
+			return;
+	}
+	if (objClient.flag != ERROR)
+	{
+		objClient.flag = ERROR;
+		objClient.respond.type = 1;
+		objClient.respond.status_code = 405;
+		objClient.respond.phrase = "Method Not Allowed";
+		objClient.respond.content = 1;
+		objClient.respond.body = "Method " + method + " Not Allowed In This Location";
+		objClient.respond.close = CLOSE;
+		return ;
+	}
+	
 }
 
 void server::response(struct pollfd &pfds, int index)
@@ -285,6 +304,8 @@ void server::response(struct pollfd &pfds, int index)
 	int loc = checkLocation(clients[index], objServer);
 	if (loc != -1)
 		checkMaxBodySize(clients[index], objServer, loc);
+	if (loc != -1)
+		checkMethodAllowed(clients[index], objServer, loc);
 	if (clients[index].flag == ERROR)
 	{
 		std::cout << "ERROR" << std::endl;
