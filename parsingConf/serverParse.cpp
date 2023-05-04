@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/03 20:01:14 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/04 09:52:51 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -404,11 +404,11 @@ void	ft_check_allow_methods(serverParse &classconfig, std::string &lines, locati
 		classconfig.ft_error("Error: duplicate directives > allow_methods");
 }
 
-void	ft_check_listen(serverParse	&classconfig, std::string	&lines)
+void	ft_check_listen(serverParse	&classconfig, std::string &lines)
 {
 	std::vector<std::string>			tmp_listen;
 	std::vector<std::string>::iterator	it;
-
+	
 	if (!classconfig.listen_)
 	{
 		classconfig.listen = classconfig.ft_split(lines, " \t;");
