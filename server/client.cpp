@@ -102,16 +102,11 @@ int client::normal_response(struct pollfd &pfds)
 	else
 	{ 
 		std::cout << "sent complete " << this->client_socket << std::endl;
-		//std::cout << "ready -- " << this->ready << std::endl;
-		//std::cout << this->headerOfRequest << std::endl;
-		headerOfRequest.clear();
-		// content_buffer.clear();
-		buffer.clear();
-		ready = 0;
-		flag = 0;
-		pfds.revents &= ~POLLOUT;
-		input.close();
-		return (0);
+		int close = this->respond.close;
+		this->clear();
+		pfds.revents&= ~POLLOUT;
+		// std::cout << "closesendget == " << close << std::endl;
+		return (close);
 	}
 	return (0);
 }
@@ -481,4 +476,17 @@ int client::postMethod(struct pollfd &pfds)
 			return (CLOSE);
 	}
 	return (0);
+}
+
+void client::initResponse()
+{
+	if (this->respond.flagResponse == NOTFOUND)
+	{
+		this->respond.status_code = 404;
+		this->respond.phrase = "Not Found";
+		this->respond.body = "Resource Not Found In Root";
+		this->respond.content = 1;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
 }

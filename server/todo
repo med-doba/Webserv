@@ -45,12 +45,11 @@ specified in the Content-Type header is not supported by the server.  (done)
 
 => handle if the URI has any spaces (pending ...)
 
-
 => server hangs when contentLength is bigger the actual body (pending ...)
 
-=> doba segv no listen found
+=> doba segv no listen found (done)
 
-
+=> create a map with key is the status code and the value is the phrase-line (pending ...)
 
 
 

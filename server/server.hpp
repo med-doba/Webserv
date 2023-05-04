@@ -42,6 +42,8 @@ class server
 	int checkLocation(client &objClient, serverParse obj);
 	void checkMaxBodySize(client& objClient, serverParse obj, int loc);
 	void checkMethodAllowed(client& objClient, serverParse obj, int loc);
+	void checkRedirection(client& objClient, serverParse obj, int loc);
+	void GetBehaviour(client &ObjClient, struct pollfd &pfds, serverParse ObjServer, int loc);
 	serverParse& findServerBlock(int index);
 };
 

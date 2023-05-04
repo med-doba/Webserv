@@ -49,8 +49,12 @@ void response::generate_response()
 		if (close == CLOSE)
 		{
 			response_req += closeheader + del;
-			// response_req += aliveheader + del;
 			close = 1;
+		}
+		else if (close == ALIVE)
+		{
+			response_req += aliveheader + del;
+			close = 0;
 		}
 		for (size_t i = 0; i < this->headers.size(); i++)
 			response_req += headers[i] + del;
@@ -58,7 +62,7 @@ void response::generate_response()
 		if (!body.empty())
 			response_req += body;
 		type = 0;
-		flagResponse = -1;
+		// flagResponse = -1;
 		std::cout << response_req << std::endl;
 	}
 }
@@ -95,6 +99,7 @@ int response::send_response(client &obj, struct pollfd &pfds)
 		close = obj.respond.close;
 		obj.clear();
 		pfds.revents&= ~POLLOUT;
+		std::cout << "closesend == " << close << std::endl;
 		return (close);
 	}
 	else if (i < (int)response_req.size())

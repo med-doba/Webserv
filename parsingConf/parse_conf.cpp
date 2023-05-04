@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_conf.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/04 18:19:26 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/04 18:31:14 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,8 +114,7 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 				{
 					if (InTheserverBlock && !InTheLocationBlock)
 					{
-						//
-						if (!(classconfig.root_find && classconfig.error_page_find && classconfig.location_find && classconfig.listen_find))
+						if (!(classconfig.root_find && classconfig.error_page_find && classconfig.location_find && classconfig.listen_find && classconfig.host_find))
 							classconfig.ft_error("Error: Missing required directives");
 						InTheserverBlock = false;
 						ft_2bind(classconfig, bind_info);
@@ -139,8 +138,8 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 					classconfig.ft_error("Error: missing or mismatched brackets");
 			}
 			file_conf.close();
-			if (!(classconfig.root_find && classconfig.error_page_find && classconfig.location_find && classconfig.listen_find))
-				classconfig.ft_error("Error: Missing required directives");
+			// if (!(classconfig.root_find && classconfig.error_page_find && classconfig.location_find && classconfig.listen_find))
+			// 	classconfig.ft_error("Error: Missing required directives");
 		}
 		catch(...)
 		{

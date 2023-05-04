@@ -174,26 +174,49 @@ void server::disconnect(int index)
 	this->remove = 1;
 }
 
-int server::checkLocation(client &objClient, serverParse obj)
+int server::checkLocation(client &ObjClient, serverParse ObjServer)
 {
-	for (size_t i = 0; i < obj.obj_location.size(); i++)
+	std::string root;
+	for (size_t i = 0; i < ObjServer.obj_location.size(); i++)
 	{
-		if (objClient.URI.compare(obj.obj_location[i].path) == 0)
+		if (ObjClient.URI.compare(ObjServer.obj_location[i].path) == 0)
 		{
-			std::cout << "path => " << obj.obj_location[i].path << std::endl;
+			std::cout << "path => " << ObjServer.obj_location[i].path << std::endl;
 			return (i);
 		}
 	}
-	if (objClient.flag != ERROR)
+	size_t i = 0;
+	for (;i < ObjServer.obj_location.size(); i++)
 	{
-		objClient.flag = ERROR;
-		objClient.respond.type = 1;
-		objClient.respond.status_code = 400;
-		objClient.respond.phrase = "Bad Request";
-		objClient.respond.content = 1;
-		objClient.respond.body = "Location Not Found";
-		objClient.respond.close = CLOSE;
+		if (ObjServer.obj_location[i].path.compare("/") == 0)
+		{
+			std::cout << "path => " << ObjServer.obj_location[i].path << std::endl;
+			break ;
+		}
 	}
+	locationParse ObjLocation = ObjServer.obj_location[i];
+	if (ObjLocation.root.size() != 0)
+		root = ObjLocation.root[1];
+	else if (ObjServer.root.size() != 0)
+		root = ObjLocation.root[1];
+	if (root[root.size() - 1] == '/')
+		root.pop_back();
+	root = root + ObjClient.URI;
+	if (access(root.data(), F_OK) != 0)
+	{
+		if (ObjClient.flag != ERROR)
+		{
+			ObjClient.flag = ERROR;
+			ObjClient.respond.type = 1;
+			ObjClient.respond.status_code = 400;
+			ObjClient.respond.phrase = "Bad Request";
+			ObjClient.respond.content = 1;
+			ObjClient.respond.body = "Location Not Found";
+			ObjClient.respond.close = CLOSE;
+		}
+	}
+	else
+		return (i);
 	return (-1);
 }
 
@@ -280,7 +303,7 @@ void server::checkMethodAllowed(client& objClient, serverParse obj, int loc)
 		method = "DELETE";
 	for (size_t i = 1; i < locobj.allow_methods.size(); i++)
 	{
-		std::cout << "methods == " << locobj.allow_methods[i] << std::endl;
+		// std::cout << "methods == " << locobj.allow_methods[i] << std::endl;
 		if (method.compare(locobj.allow_methods[i]) == 0)
 			return;
 	}
@@ -298,13 +321,70 @@ void server::checkMethodAllowed(client& objClient, serverParse obj, int loc)
 	
 }
 
+void server::checkRedirection(client& objClient, serverParse obj, int loc)
+{
+	locationParse locobj = obj.obj_location[loc];
+	if (locobj.rtn.size() != 0)
+	{
+		for (size_t i = 0; i < locobj.rtn.size(); i++)
+		{
+			std::cout << "ret == " << locobj.rtn[i] << std::endl;
+		}
+		
+		std::string redirectUrl = "http://" + locobj.rtn[2] + "/";
+		objClient.flag = ERROR;
+		objClient.respond.type = 1;
+		objClient.respond.status_code = stoi(locobj.rtn[1]);
+		if (objClient.respond.status_code == 301)
+			objClient.respond.phrase = "Moved Permanently";
+		else
+			objClient.respond.phrase = "Found";
+		objClient.respond.headers.push_back("Location: " + redirectUrl);
+		objClient.respond.headers.push_back("Cache-Control: no-cache, no-store, must-revalidate");
+		objClient.respond.headers.push_back("Pragma: no-cache");
+		objClient.respond.headers.push_back("Expires: 0");
+		// objClient.respond.content = 5;
+		// objClient.respond.body = responseBody;
+		// objClient.respond.close = CLOSE;
+		return ;
+	}
+}
+
+void server::GetBehaviour(client &ObjClient, struct pollfd &pfds, serverParse ObjServer, int loc)
+{
+	(void)pfds;
+	(void)ObjClient;
+	std::string root;
+	locationParse ObjLocation = ObjServer.obj_location[loc];
+	if (ObjLocation.root.size() != 0)
+		root = ObjLocation.root[1];
+	else if (ObjServer.root.size() != 0)
+		root = ObjLocation.root[1];
+	if (root[root.size() - 1] == '/')
+		root.pop_back();
+	root = root + ObjClient.URI;
+	if (access(root.data(), F_OK) != 0)
+	{
+		// ObjClient.respond.status_code = 404;
+		// ObjClient.respond.phrase = "Not Found";
+		// ObjClient.respond.body = "Resource Not Found In Root";
+		// ObjClient.respond.content = 1;
+		ObjClient.respond.ready = 1;
+		ObjClient.respond.flagResponse = NOTFOUND;
+		return ;
+	}
+	std::cout << "root == "<< root << std::endl;
+}
+
 void server::response(struct pollfd &pfds, int index)
 {
 	serverParse objServer = findServerBlock(index);
 	int loc = checkLocation(clients[index], objServer);
-	if (loc != -1)
+	if (loc != -1 && clients[index].flag != ERROR)
 		checkMaxBodySize(clients[index], objServer, loc);
-	if (loc != -1)
+	if (loc != -1 && clients[index].flag != ERROR)
+		checkRedirection(clients[index], objServer, loc);
+	if (loc != -1 && clients[index].flag != ERROR)
 		checkMethodAllowed(clients[index], objServer, loc);
 	if (clients[index].flag == ERROR)
 	{
@@ -314,22 +394,30 @@ void server::response(struct pollfd &pfds, int index)
 			this->disconnect(index);
 		return;
 	}
-	if (clients[index].tmp == POST)
-	{
-		std::cout << "POST method" << std::endl;
-		if (clients[index].postMethod(pfds) == CLOSE)
-			this->disconnect(index);
-	}
-	else if (clients[index].tmp == DELETE)
-	{
-		std::cout << "DELETE method" << std::endl;
-		if (clients[index].deleteMethod(pfds) == CLOSE)
-			this->disconnect(index);
-	}
-	else if (clients[index].tmp == GET)
+	// if (clients[index].tmp == POST)
+	// {
+	// 	std::cout << "POST method" << std::endl;
+	// 	if (clients[index].postMethod(pfds) == CLOSE)
+	// 		this->disconnect(index);
+	// }
+	// else if (clients[index].tmp == DELETE)
+	// {
+	// 	std::cout << "DELETE method" << std::endl;
+	// 	if (clients[index].deleteMethod(pfds) == CLOSE)
+	// 		this->disconnect(index);
+	// }
+	if (clients[index].tmp == GET && clients[index].respond.ready != 1)
 	{
 		std::cout << "GEt method" << std::endl;
-		clients[index].normal_response(pfds);
+		this->GetBehaviour(clients[index], pfds, objServer, loc);
+		// clients[index].normal_response(pfds);
+	}
+	if (clients[index].respond.ready == 1)
+	{
+		clients[index].initResponse();
+		clients[index].respond.generate_response();
+		if (clients[index].respond.send_response(clients[index], pfds) == 1)
+			this->disconnect(index);
 	}
 }
 
@@ -341,15 +429,15 @@ void server::receive(int pfds_index, int index)
     rtn = clients[index].pushToBuffer();
 
 	// t = rtn;
-	if (rtn == -1)
-	{
-		//std::cout << "socket client " << clients[index].client_socket << std::endl;
-		//std::cout << clients[index].headerOfRequest << std::endl;
-		return ;
-	}
+	// if (rtn == -1)
+	// {
+	// 	//std::cout << "socket client " << clients[index].client_socket << std::endl;
+	// 	//std::cout << clients[index].headerOfRequest << std::endl;
+	// 	return ;
+	// }
     if(rtn == 0 || rtn == -1)
 	{
-		//std::cout << "r == " << rtn << " socket client " << clients[index].client_socket << std::endl;
+		std::cout << "r == " << rtn << " socket client " << clients[index].client_socket << std::endl;
 		//std::cout << clients[index].headerOfRequest << std::endl;
 		this->disconnect(index);
         return ;

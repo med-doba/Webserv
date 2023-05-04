@@ -31,7 +31,8 @@ enum {
 	UPDATED,
 	DELETED,
 	NOTFOUND,
-	FORBIDEN
+	FORBIDEN,
+	ALIVE
 };
 
 using std::string;
@@ -153,6 +154,7 @@ class client
 	int normal_response(struct pollfd &pfds);
 	int postMethod(struct pollfd &pfds);
 	int deleteMethod(struct pollfd &pfds);
+	void initResponse();
 	client();
 	client(const client &obj);
 	client& operator=(const client& obj);
