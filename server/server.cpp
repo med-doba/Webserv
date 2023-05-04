@@ -394,6 +394,12 @@ void server::response(struct pollfd &pfds, int index)
 			this->disconnect(index);
 		return;
 	}
+	if (clients[index].tmp == GET && clients[index].respond.ready != 1)
+	{
+		std::cout << "GEt method" << std::endl;
+		this->GetBehaviour(clients[index], pfds, objServer, loc);
+		// clients[index].normal_response(pfds);
+	}
 	// if (clients[index].tmp == POST)
 	// {
 	// 	std::cout << "POST method" << std::endl;
@@ -406,12 +412,6 @@ void server::response(struct pollfd &pfds, int index)
 	// 	if (clients[index].deleteMethod(pfds) == CLOSE)
 	// 		this->disconnect(index);
 	// }
-	if (clients[index].tmp == GET && clients[index].respond.ready != 1)
-	{
-		std::cout << "GEt method" << std::endl;
-		this->GetBehaviour(clients[index], pfds, objServer, loc);
-		// clients[index].normal_response(pfds);
-	}
 	if (clients[index].respond.ready == 1)
 	{
 		clients[index].initResponse();
