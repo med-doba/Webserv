@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/04 09:52:51 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/04 18:18:53 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -388,7 +388,7 @@ void	ft_check_autoindex(serverParse &classconfig, std::string &lines, locationPa
 		location_.autoindex_ = true;
 	}
 	else
-		classconfig.ft_error("Error: Duplicate directives > autoindex");
+		classconfig.ft_error("Error: icate directives > autoindex");
 }
 
 void	ft_check_allow_methods(serverParse &classconfig, std::string &lines, locationParse &location_)
@@ -408,7 +408,7 @@ void	ft_check_listen(serverParse	&classconfig, std::string &lines)
 {
 	std::vector<std::string>			tmp_listen;
 	std::vector<std::string>::iterator	it;
-	
+
 	if (!classconfig.listen_)
 	{
 		classconfig.listen = classconfig.ft_split(lines, " \t;");

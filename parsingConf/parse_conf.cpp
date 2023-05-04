@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/04 10:00:02 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/04 18:19:26 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,17 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 					else if (!classconfig_tmp.begin()->compare("client_max_body_size"))
 						ft_check_cmbsize(classconfig, lines, location_, 2);
 					else if (!classconfig_tmp.begin()->compare("return"))
-						location_.rtn = classconfig.ft_split(lines, " \t;");
+					{
+						if (!location_.rtn_)
+						{
+							location_.rtn_ = true;
+							location_.rtn = classconfig.ft_split(lines, " \t;");
+							if (location_.rtn.size() != 3)
+								classconfig.ft_error("Error: not a valide line for return");
+						}
+						else
+							classconfig.ft_error("Error: duplicate directives > return");
+					}
 					else if (!classconfig_tmp.begin()->compare("allow_methods"))
 						ft_check_allow_methods(classconfig, lines, location_);
 					else if (!classconfig_tmp.begin()->compare("autoindex"))

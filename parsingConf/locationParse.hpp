@@ -37,6 +37,7 @@ class locationParse
 		bool	cgi_;
 		bool	autoindex_;
 		bool	allow_methods_;
+		bool	rtn_;
 		//
 };
 
