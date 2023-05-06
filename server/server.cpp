@@ -105,10 +105,8 @@ void server::monitor()
 	while (1)
 	{
 		this->remove = 0;
-		this->poll_count = poll(&pfds[0], this->pfds.size(), 10);
+		this->poll_count = poll(&pfds[0], this->pfds.size(), -1);
 		// std::cout << "poll count == " << poll_count << std::endl;
-		if (this->poll_count == -1)
-			exit(1);
 		for (size_t i = 0; i < this->pfds.size(); i++)
 		{
 			if (this->pfds[i].revents & POLLIN)
@@ -123,7 +121,7 @@ void server::monitor()
 				}
 				for (size_t j = 0; j < clients.size(); j++)
 				{
-					if (pfds[i].fd == clients[j].client_socket)
+					if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 0)
 					{
 						std::cout << "ready to recv " << clients[j].client_socket << std::endl;
 						this->receive(i, j);
@@ -137,7 +135,7 @@ void server::monitor()
 				{
 					if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 1)
 					{
-						std::cout << "ready to send" << std::endl;
+						std::cout << "ready to send " <<  pfds[i].fd << std::endl;
 						this->response(this->pfds[i], j);
 						break ;
 					}
@@ -185,7 +183,7 @@ int server::checkLocation(client &ObjClient, serverParse ObjServer)
 	{
 		if (ObjClient.URI.compare(ObjServer.obj_location[i].path) == 0)
 		{
-			std::cout << "path => " << ObjServer.obj_location[i].path << std::endl;
+			// std::cout << "path => " << ObjServer.obj_location[i].path << std::endl;
 			return (i);
 		}
 	}
@@ -194,7 +192,7 @@ int server::checkLocation(client &ObjClient, serverParse ObjServer)
 	{
 		if (ObjServer.obj_location[i].path.compare("/") == 0)
 		{
-			std::cout << "path => " << ObjServer.obj_location[i].path << std::endl;
+			// std::cout << "path => " << ObjServer.obj_location[i].path << std::endl;
 			break ;
 		}
 	}
@@ -231,7 +229,7 @@ serverParse& server::findServerBlock(int index)
 	std::string host;
 	std::string port;
 	int pos = headerreq.find("Host: ");
-	line = headerreq.substr(pos + 6, headerreq.find('\r', pos + 6) - pos - 6);
+	line = headerreq.substr(pos + 6, headerreq.find('\r', pos + 6) - (pos + 6));
 	host = line.substr(0, line.find(':'));
 	port = line.substr(line.find(':') + 1);
 	size_t i = 0;
@@ -377,16 +375,16 @@ void server::GetBehaviour(client &ObjClient, struct pollfd &pfds, serverParse Ob
 		ObjClient.respond.flagResponse = NOTFOUND;
 		return ;
 	}
-	std::cout << "before input check \n";
+	// std::cout << "before input check \n";
 	if (!ObjClient.input.is_open())
 	{
-		std::cout << "inside check\n";
+		// std::cout << "inside check\n";
 		ObjClient.respond.ready = 1;
 		ObjClient.respond.flagResponse = OPFILE;
 		ObjClient.path = root;
 	}
-	std::cout << "after input check \n";
-	std::cout << "root == "<< root << std::endl;
+	// std::cout << "after input check \n";
+	// std::cout << "root == "<< root << std::endl;
 }
 
 void server::response(struct pollfd &pfds, int index)
@@ -419,14 +417,14 @@ void server::response(struct pollfd &pfds, int index)
 	// 	if (clients[index].deleteMethod(pfds) == CLOSE)
 	// 		this->disconnect(index);
 	// }
-	std::cout << "respond ready == " << clients[index].respond.ready << std::endl;
+	std::cout << "respond ready == " << clients[index].respond.ready << " sock == " << clients[index].client_socket << std::endl;
 	if (clients[index].tmp == GET && clients[index].respond.ready != 1)
 	{
 		std::cout << "GEt method == " << clients[index].client_socket << std::endl;
 		this->GetBehaviour(clients[index], pfds, objServer, loc);
 		// clients[index].normal_response(pfds);
 	}
-	std::cout << "respond ready2 == " << clients[index].respond.ready << std::endl;
+	std::cout << "respond2 ready == " << clients[index].respond.ready << " sock == " << clients[index].client_socket << std::endl;
 	if (clients[index].respond.ready == 1)
 	{
 		clients[index].initResponse();
@@ -517,9 +515,10 @@ void server::receive(int pfds_index, int index)
 		std::cout << "here get method " << clients[index].client_socket << std::endl;
 		// std::cout << "headers == " << clients[index].headerOfRequest << std::endl;
 		// std::cout << "flag == " << clients[index].flag << std::endl;
+		std::cout << "index == " << index << std::endl;
 		clients[index].check();
 		pfds[pfds_index].revents &= ~POLLIN;
-		std::cout << "ready -- " << clients[index].ready << std::endl;
+		// std::cout << "ready -- " << clients[index].ready << std::endl;
 		return ;
 		// without budy => GET method
 	}

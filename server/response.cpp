@@ -47,7 +47,7 @@ void response::generate_response()
 			response_req += contentlength + std::to_string(body.size()) + del;
 			content = 0;
 		}
-		std::cout << "close == " << close << std::endl;
+		// std::cout << "close == " << close << std::endl;
 		if (close == CLOSE)
 		{
 			response_req += closeheader + del;
@@ -61,11 +61,11 @@ void response::generate_response()
 		for (size_t i = 0; i < this->headers.size(); i++)
 			response_req += headers[i] + del;
 		response_req += del;
-		std::cout << response_req << std::endl;
+		std::cout << response_req  << std::endl;
 		if (!body.empty())
 			response_req += body;
 		type = 0;
-		std::cout << "creating requests" << std::endl;
+		// std::cout << "creating requests" << std::endl;
 		// flagResponse = -1;
 	}
 }
@@ -102,7 +102,7 @@ int response::send_response(client &obj, struct pollfd &pfds)
 		close = obj.respond.close;
 		obj.clear();
 		pfds.revents&= ~POLLOUT;
-		std::cout << "closesend == " << close << std::endl;
+		// std::cout << "closesend == " << close << std::endl;
 		return (close);
 	}
 	else if (i < (int)response_req.size())
@@ -126,6 +126,18 @@ response& response::operator=(const response &obj)
 		this->status_code = obj.status_code;
 		this->type = obj.type;
 		this->close = obj.close;
+		this->body = obj.body;
+		this->version = obj.version;
+		this->headers = obj.headers;
+		this->response_req = obj.response_req;
+		this->del = obj.del;
+		this->closeheader = obj.closeheader;
+		this->aliveheader = obj.aliveheader;
+		this->contentlength = obj.contentlength;
+		this->contenttype = obj.contenttype;
+		this->content = obj.content;
+		this->flagResponse = obj.flagResponse;
+		this->ready = obj.ready;
 	}
 	return  (*this);
 }

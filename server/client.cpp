@@ -69,7 +69,6 @@ int client::fillBody()
 	if (pos != std::string::npos)
 	{
 		std::string ext = &this->path[pos];
-		std::cout << "extension == " << &this->path[pos] << std::endl;
 		if (ext.compare(".pdf") == 0)
 			this->respond.content = 2;
 		else if (ext.compare(".txt") == 0)
@@ -96,7 +95,8 @@ int client::fillBody()
 	input.seekg(0, std::ios::end);
 	size_t size = input.tellg();
 	input.seekg(0, std::ios::beg);
-
+	std::cout << "size of file == " << size << " client sock == " << this->client_socket << std::endl;
+	std::cout << this->headerOfRequest << std::endl;
 	// Reserve space in the buffer
 	std::vector<char> content(size);
 
@@ -112,7 +112,16 @@ void client::check(void)
 
 	res = headerOfRequest.find("/favicon.ico");
 	if (res != -1)
-		this->ready = 0;
+	{
+		this->flag = ERROR;
+		this->respond.type = 1;
+		this->respond.status_code = 404;
+		this->respond.phrase = "Not Found";
+		// this->respond.content = 1;
+		// this->respond.body = "Location Not Found";
+		this->respond.close = CLOSE;
+		this->ready = 1;
+	}
 	else
 		this->ready = 1;
 }
@@ -154,13 +163,13 @@ client& client::operator=(const client& obj)
 	if (this != &obj)
 	{
 		this->client_socket = obj.client_socket;
+		this->URI = obj.URI;
 		this->buffer = obj.buffer;
 		this->boundary = obj.boundary;
 		this->response_header = obj.response_header;
 		this->body = obj.body;
 		this->headerOfRequest = obj.headerOfRequest;
 		this->bodyofRequest = obj.bodyofRequest;
-		// this->content_buffer = obj.content_buffer;
 		this->bytes_read = obj.bytes_read;
 		this->flag = obj.flag;
 		this->bodyParss = obj.bodyParss;
@@ -174,6 +183,8 @@ client& client::operator=(const client& obj)
 		this->j = obj.j;
 		this->len = obj.len;
 		this->ContentLength = obj.ContentLength;
+		this->ready = obj.ready;
+		this->path = obj.path;
 	}
 	return (*this);
 }
@@ -330,7 +341,7 @@ int client::pushToBuffer()
     char data[BUFFER];
     bzero(data, BUFFER);
     this->bytes_read = recv(client_socket, &data, BUFFER, 0);
-
+	std::cout << "bytes read == " << this->bytes_read << std::endl;
     if(bytes_read == -1)
         return -1;
     if(bytes_read == 0)
@@ -486,11 +497,11 @@ void client::initResponse()
 	}
 	else if (this->respond.flagResponse == OPFILE)
 	{
-		std::cout << "filling body " << std::endl;
+		// std::cout << "filling body " << std::endl;
 		this->fillBody();
 		this->respond.status_code = 200;
 		this->respond.phrase = "OK";
-		this->respond.close = ALIVE;
+		this->respond.close = CLOSE;
 		// this->respond.body = "Resource Not Found In Root";
 		// this->respond.content = 1;
 		this->respond.flagResponse = -1;
