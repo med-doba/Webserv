@@ -29,6 +29,8 @@ void response::defineContentType()
 		contenttype += "Content-Type: text/html";
 	else if (content == 6)
 		contenttype += "Content-Type: video/mp4";
+	else if (content == 7)
+		contenttype += "Content-Type: text/css";
 }
 
 void response::generate_response()
@@ -59,11 +61,12 @@ void response::generate_response()
 		for (size_t i = 0; i < this->headers.size(); i++)
 			response_req += headers[i] + del;
 		response_req += del;
+		std::cout << response_req << std::endl;
 		if (!body.empty())
 			response_req += body;
 		type = 0;
+		std::cout << "creating requests" << std::endl;
 		// flagResponse = -1;
-		std::cout << response_req << std::endl;
 	}
 }
 
@@ -90,12 +93,12 @@ int response::send_response(client &obj, struct pollfd &pfds)
 	i = send(obj.client_socket, response_req.c_str(), response_req.size(), 0);
 	if (i < 0)
 	{
-		//std::cout << "error in sending" << std::endl;
+		std::cout << "error in sending" << std::endl;
 		return (-1);
 	}
 	else if (i == (int)response_req.size())
 	{
-		//std::cout << "sent complete" << std::endl;
+		std::cout << "sent complete == " << pfds.fd << std::endl;
 		close = obj.respond.close;
 		obj.clear();
 		pfds.revents&= ~POLLOUT;
@@ -103,7 +106,10 @@ int response::send_response(client &obj, struct pollfd &pfds)
 		return (close);
 	}
 	else if (i < (int)response_req.size())
+	{
+		std::cout << "chunks == " << pfds.fd << std::endl;
 		response_req.erase(0, i);
+	}
 	return (-1);
 }
 

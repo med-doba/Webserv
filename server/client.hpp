@@ -32,7 +32,8 @@ enum {
 	DELETED,
 	NOTFOUND,
 	FORBIDEN,
-	ALIVE
+	ALIVE,
+	OPFILE
 };
 
 using std::string;
@@ -128,6 +129,7 @@ class client
 	int bytes_read;
 	int flag;
 	int ready;
+	std::string path;
 
 
 	parssingOfHeader headerParss;
@@ -155,6 +157,7 @@ class client
 	int postMethod(struct pollfd &pfds);
 	int deleteMethod(struct pollfd &pfds);
 	void initResponse();
+	int fillBody();
 	client();
 	client(const client &obj);
 	client& operator=(const client& obj);

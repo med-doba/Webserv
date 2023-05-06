@@ -106,7 +106,9 @@ void server::monitor()
 	{
 		this->remove = 0;
 		this->poll_count = poll(&pfds[0], this->pfds.size(), 10);
-		// //std::cout << "poll count == " << poll_count << std::endl;
+		// std::cout << "poll count == " << poll_count << std::endl;
+		if (this->poll_count == -1)
+			exit(1);
 		for (size_t i = 0; i < this->pfds.size(); i++)
 		{
 			if (this->pfds[i].revents & POLLIN)
@@ -115,7 +117,7 @@ void server::monitor()
 				{
 					if (pfds[i].fd == servers[j].socket_server)
 					{
-						this->new_connection(j);
+						this->new_connection(i, j);
 						break ;
 					}
 				}
@@ -145,7 +147,7 @@ void server::monitor()
 	}
 }
 
-void server::new_connection(int index)
+void server::new_connection(int indexPfds, int index)
 {
 	client obj;
 	struct pollfd c;
@@ -162,11 +164,13 @@ void server::new_connection(int index)
 	c.events = POLLIN | POLLOUT;
 	pfds.push_back(c);
 	clients.push_back(obj);
+	this->pfds[indexPfds].revents &= ~POLLIN;
 	std::cout << "new client connected " << obj.client_socket << std::endl;
 }
 
 void server::disconnect(int index)
 {
+	std::cout << "header == " << clients[index].headerOfRequest << std::endl;
 	std::cout << "client disconnected " << clients[index].client_socket << std::endl;
 	close(clients[index].client_socket);
 	pfds.erase(pfds.begin() + index + servers.size());
@@ -373,6 +377,15 @@ void server::GetBehaviour(client &ObjClient, struct pollfd &pfds, serverParse Ob
 		ObjClient.respond.flagResponse = NOTFOUND;
 		return ;
 	}
+	std::cout << "before input check \n";
+	if (!ObjClient.input.is_open())
+	{
+		std::cout << "inside check\n";
+		ObjClient.respond.ready = 1;
+		ObjClient.respond.flagResponse = OPFILE;
+		ObjClient.path = root;
+	}
+	std::cout << "after input check \n";
 	std::cout << "root == "<< root << std::endl;
 }
 
@@ -406,12 +419,14 @@ void server::response(struct pollfd &pfds, int index)
 	// 	if (clients[index].deleteMethod(pfds) == CLOSE)
 	// 		this->disconnect(index);
 	// }
+	std::cout << "respond ready == " << clients[index].respond.ready << std::endl;
 	if (clients[index].tmp == GET && clients[index].respond.ready != 1)
 	{
-		std::cout << "GEt method" << std::endl;
+		std::cout << "GEt method == " << clients[index].client_socket << std::endl;
 		this->GetBehaviour(clients[index], pfds, objServer, loc);
 		// clients[index].normal_response(pfds);
 	}
+	std::cout << "respond ready2 == " << clients[index].respond.ready << std::endl;
 	if (clients[index].respond.ready == 1)
 	{
 		clients[index].initResponse();
@@ -425,8 +440,9 @@ void server::receive(int pfds_index, int index)
 {
     int rtn;
 	// int t;
-
+	// std::cout << "buffer before " << clients[index].buffer << std::endl;
     rtn = clients[index].pushToBuffer();
+	// std::cout << "buffer after " << clients[index].buffer << std::endl;
 
 	// t = rtn;
 	// if (rtn == -1)
@@ -498,8 +514,12 @@ void server::receive(int pfds_index, int index)
 		// 		clients[index].flag_res = -1;
 		// 	// }
 		// }
+		std::cout << "here get method " << clients[index].client_socket << std::endl;
+		// std::cout << "headers == " << clients[index].headerOfRequest << std::endl;
+		// std::cout << "flag == " << clients[index].flag << std::endl;
 		clients[index].check();
 		pfds[pfds_index].revents &= ~POLLIN;
+		std::cout << "ready -- " << clients[index].ready << std::endl;
 		return ;
 		// without budy => GET method
 	}

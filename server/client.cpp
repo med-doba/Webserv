@@ -1,53 +1,5 @@
 #include "client.hpp"
 
-// void client::normal_response(struct pollfd &pfds)
-// {
-// 	if (response_header.empty())
-// 	{
-// 		std::string res = "hello from server";
-// 		response_header = "HTTP/1.1 200 OK\r\n"
-// 						"Content-Type: text/plain\r\n"
-// 						"Content-length: " + std::to_string(res.size()) + "\r\n"
-// 						"\r\n";
-// 		response_header += std::string(res.begin(), res.end());
-// 	}
-// 	if (!response_header.empty())
-// 	{
-// 		// //std::cout << "send chunks" << std::endl;
-// 		int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
-// 		if (i < 0)
-// 		{
-// 			//std::cout << "error "  << this->client_socket << std::endl;
-// 			//std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
-// 			// //std::cout << this->headerOfRequest << std::endl;
-// 			printf("errno = %d: %s\n", errno, strerror(errno));
-// 			// response_header.clear();
-// 			return ;
-// 		}
-// 		if (i == (int)response_header.size())
-// 		{
-// 			//std::cout << "sent complete " << this->client_socket << std::endl;
-// 			//std::cout << "ready -- " << this->ready << std::endl;
-// 			//std::cout << this->headerOfRequest << std::endl;
-// 			// //std::cout << this->buffer << std::endl;
-// 			this->clear();
-// 			pfds.revents &= ~POLLOUT;
-// 			return ;
-// 		}
-// 		response_header.erase(0, i);
-// 		// //std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
-// 	}
-// 	else
-// 	{ 
-// 		//std::cout << "sent complete " << this->client_socket << std::endl;
-// 		//std::cout << "ready -- " << this->ready << std::endl;
-// 		//std::cout << this->headerOfRequest << std::endl;
-// 		this->clear();
-// 		pfds.revents &= ~POLLOUT;
-// 		return ;
-// 	}
-// }
-
 int client::normal_response(struct pollfd &pfds)
 {
 	// char c;
@@ -57,7 +9,7 @@ int client::normal_response(struct pollfd &pfds)
 	{
 		// //std::cout << "lol2 " << std::endl;
 		// input.open("../tests/pdf.pdf");
-		input.open("../tests/upload.html");
+		input.open("../tests/pdf.pdf");
 		if (!input.is_open())
 		{
 			std::cout << "couldn't open file" << std::endl;
@@ -78,7 +30,7 @@ int client::normal_response(struct pollfd &pfds)
 		// Read the file in chunks
 		input.read(&content[0], size);
 		response_header = "HTTP/1.1 200 OK\r\n"
-						"Content-Type: text/html\r\n"
+						"Content-Type: application/pdf\r\n"
 						"Content-length: " + std::to_string(content.size()) + "\r\n"
 						"\r\n";
 		response_header += std::string(content.begin(), content.end());
@@ -108,6 +60,49 @@ int client::normal_response(struct pollfd &pfds)
 		// std::cout << "closesendget == " << close << std::endl;
 		return (close);
 	}
+	return (0);
+}
+
+int client::fillBody()
+{
+	size_t pos = this->path.find_last_of('.');
+	if (pos != std::string::npos)
+	{
+		std::string ext = &this->path[pos];
+		std::cout << "extension == " << &this->path[pos] << std::endl;
+		if (ext.compare(".pdf") == 0)
+			this->respond.content = 2;
+		else if (ext.compare(".txt") == 0)
+			this->respond.content = 1;
+		else if (ext.compare(".png") == 0)
+			this->respond.content = 3;
+		else if (ext.compare(".jpg") == 0)
+			this->respond.content = 4;
+		else if (ext.compare(".html") == 0)
+			this->respond.content = 5;
+		else if (ext.compare(".mp4") == 0)
+			this->respond.content = 6;
+		else if (ext.compare(".css") == 0)
+			this->respond.content = 7;
+	}
+	else
+		this->respond.content = 1;
+	input.open(this->path);
+	if (!input.is_open())
+	{
+		std::cout << "couldn't open file" << std::endl;
+		return (-1);
+	}
+	input.seekg(0, std::ios::end);
+	size_t size = input.tellg();
+	input.seekg(0, std::ios::beg);
+
+	// Reserve space in the buffer
+	std::vector<char> content(size);
+
+	// Read the file in chunks
+	input.read(&content[0], size);
+	this->respond.body = std::string(content.begin(), content.end());
 	return (0);
 }
 
@@ -486,6 +481,18 @@ void client::initResponse()
 		this->respond.phrase = "Not Found";
 		this->respond.body = "Resource Not Found In Root";
 		this->respond.content = 1;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == OPFILE)
+	{
+		std::cout << "filling body " << std::endl;
+		this->fillBody();
+		this->respond.status_code = 200;
+		this->respond.phrase = "OK";
+		this->respond.close = ALIVE;
+		// this->respond.body = "Resource Not Found In Root";
+		// this->respond.content = 1;
 		this->respond.flagResponse = -1;
 		this->respond.type = 1;
 	}
