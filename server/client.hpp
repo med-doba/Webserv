@@ -2,7 +2,9 @@
 #define CLIENT_HPP
 
 #include <iostream>
+#include <string>
 #include <vector>
+#include <codecvt>
 #include <strings.h>
 #include <unistd.h>
 #include <sstream>
@@ -81,6 +83,7 @@ class response
 		int close;
 		std::string contentlength;
 		std::string contenttype;
+		std::string redirectUrl;
 		int content;
 		int flagResponse;
 		int ready;
@@ -162,6 +165,7 @@ class client
 	void initResponse();
 	int fillBody();
 	int generateListing();
+	void generateUrl();
 	client();
 	client(const client &obj);
 	client& operator=(const client& obj);

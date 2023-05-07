@@ -3,6 +3,7 @@
 response::response()
 {
 	type = 0;
+	redirectUrl = "";
 	status_code = 0;
 	phrase = "";
 	version = "HTTP/1.1";
@@ -74,6 +75,7 @@ void response::clear()
 {
 	response_req.clear();
 	status_code = 0;
+	redirectUrl.clear();
 	type = 0;
 	contenttype.clear();
 	phrase.clear();
@@ -103,7 +105,7 @@ int response::send_response(client &obj, struct pollfd &pfds)
 		std::cout << "sent complete == " << pfds.fd << std::endl;
 		close = obj.respond.close;
 		obj.clear();
-		pfds.revents&= ~POLLOUT;
+		// pfds.revents&= ~POLLOUT;
 		// std::cout << "closesend == " << close << std::endl;
 		return (close);
 	}
@@ -112,6 +114,8 @@ int response::send_response(client &obj, struct pollfd &pfds)
 		std::cout << "chunks == " << pfds.fd << std::endl;
 		response_req.erase(0, i);
 	}
+	else if (i > (int)response_req.size())
+		std::cout << "honaaaa\n";
 	return (-1);
 }
 
@@ -131,6 +135,7 @@ response& response::operator=(const response &obj)
 		this->body = obj.body;
 		this->version = obj.version;
 		this->headers = obj.headers;
+		this->redirectUrl = obj.redirectUrl;
 		this->response_req = obj.response_req;
 		this->del = obj.del;
 		this->closeheader = obj.closeheader;

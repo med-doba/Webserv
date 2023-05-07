@@ -45,6 +45,7 @@ class server
 	void checkMethodAllowed(client& objClient, serverParse obj, int loc);
 	void checkRedirection(client& objClient, serverParse obj, int loc);
 	void GetBehaviour(client &ObjClient, serverParse ObjServer, int loc);
+	void PostBehaviour(client &ObjClient, serverParse ObjServer, int loc);
 	serverParse& findServerBlock(int index);
 };
 

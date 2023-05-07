@@ -1,67 +1,67 @@
 #include "client.hpp"
 
-int client::normal_response(struct pollfd &pfds)
-{
-	// char c;
+// int client::normal_response(struct pollfd &pfds)
+// {
+// 	// char c;
 
-	std::cout << "normal response"<< std::endl;
-	if (!input.is_open())
-	{
-		// //std::cout << "lol2 " << std::endl;
-		// input.open("../tests/pdf.pdf");
-		input.open("../tests/pdf.pdf");
-		if (!input.is_open())
-		{
-			std::cout << "couldn't open file" << std::endl;
-			return (1);
-		}
-		// while (input.get(c))
-		// {
-		// 	//std::cout << "loop" << std::endl;
-		// 	content_buffer.push_back(c);
-		// }
-		input.seekg(0, std::ios::end);
-		size_t size = input.tellg();
-		input.seekg(0, std::ios::beg);
+// 	std::cout << "normal response"<< std::endl;
+// 	if (!input.is_open())
+// 	{
+// 		// //std::cout << "lol2 " << std::endl;
+// 		// input.open("../tests/pdf.pdf");
+// 		input.open("../tests/pdf.pdf");
+// 		if (!input.is_open())
+// 		{
+// 			std::cout << "couldn't open file" << std::endl;
+// 			return (1);
+// 		}
+// 		// while (input.get(c))
+// 		// {
+// 		// 	//std::cout << "loop" << std::endl;
+// 		// 	content_buffer.push_back(c);
+// 		// }
+// 		input.seekg(0, std::ios::end);
+// 		size_t size = input.tellg();
+// 		input.seekg(0, std::ios::beg);
 
-		// Reserve space in the buffer
-		std::vector<char> content(size);
+// 		// Reserve space in the buffer
+// 		std::vector<char> content(size);
 
-		// Read the file in chunks
-		input.read(&content[0], size);
-		response_header = "HTTP/1.1 200 OK\r\n"
-						"Content-Type: application/pdf\r\n"
-						"Content-length: " + std::to_string(content.size()) + "\r\n"
-						"\r\n";
-		response_header += std::string(content.begin(), content.end());
-	}
-	if (!response_header.empty())
-	{
-		// std::cout << "send chunks" << std::endl;
-		int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
-		if (i < 0)
-		{
-			std::cout << "error "  << this->client_socket << std::endl;
-			//std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
-			//std::cout << this->headerOfRequest << std::endl;
-			printf("errno = %d: %s\n", errno, strerror(errno));
-			// response_header.clear();
-			return (0);
-		}
-		response_header.erase(0, i);
-		// //std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
-	}
-	else
-	{ 
-		std::cout << "sent complete " << this->client_socket << std::endl;
-		int close = this->respond.close;
-		this->clear();
-		pfds.revents&= ~POLLOUT;
-		// std::cout << "closesendget == " << close << std::endl;
-		return (close);
-	}
-	return (0);
-}
+// 		// Read the file in chunks
+// 		input.read(&content[0], size);
+// 		response_header = "HTTP/1.1 200 OK\r\n"
+// 						"Content-Type: application/pdf\r\n"
+// 						"Content-length: " + std::to_string(content.size()) + "\r\n"
+// 						"\r\n";
+// 		response_header += std::string(content.begin(), content.end());
+// 	}
+// 	if (!response_header.empty())
+// 	{
+// 		// std::cout << "send chunks" << std::endl;
+// 		int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
+// 		if (i < 0)
+// 		{
+// 			std::cout << "error "  << this->client_socket << std::endl;
+// 			//std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
+// 			//std::cout << this->headerOfRequest << std::endl;
+// 			printf("errno = %d: %s\n", errno, strerror(errno));
+// 			// response_header.clear();
+// 			return (0);
+// 		}
+// 		response_header.erase(0, i);
+// 		// //std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
+// 	}
+// 	else
+// 	{ 
+// 		std::cout << "sent complete " << this->client_socket << std::endl;
+// 		int close = this->respond.close;
+// 		this->clear();
+// 		pfds.revents&= ~POLLOUT;
+// 		// std::cout << "closesendget == " << close << std::endl;
+// 		return (close);
+// 	}
+// 	return (0);
+// }
 
 int client::fillBody()
 {
@@ -95,14 +95,23 @@ int client::fillBody()
 	input.seekg(0, std::ios::end);
 	size_t size = input.tellg();
 	input.seekg(0, std::ios::beg);
-	std::cout << "size of file == " << size << " client sock == " << this->client_socket << std::endl;
-	std::cout << this->headerOfRequest << std::endl;
+
 	// Reserve space in the buffer
+	if (size == 0)
+		return (0);
 	std::vector<char> content(size);
 
 	// Read the file in chunks
 	input.read(&content[0], size);
 	this->respond.body = std::string(content.begin(), content.end());
+	// std::wstringstream content;
+	// content << input.rdbuf();
+
+	// std::wstring wbody;
+	// wbody.assign(content.str());
+    // std::wstring_convert<std::codecvt_utf8<wchar_t> > converter;
+    // std::string str = converter.to_bytes(wbody);
+	// this->respond.body = str;
 	return (0);
 }
 
@@ -374,7 +383,7 @@ int client::pushToBuffer()
     char data[BUFFER];
     bzero(data, BUFFER);
     this->bytes_read = recv(client_socket, &data, BUFFER, 0);
-	std::cout << "bytes read == " << this->bytes_read << std::endl;
+	// std::cout << "bytes read == " << this->bytes_read << std::endl;
     if(bytes_read == -1)
         return -1;
     if(bytes_read == 0)
@@ -449,7 +458,7 @@ int client::deleteMethod(struct pollfd &pfds)
 		if (i == 0)
 		{
 			this->clear();
-			pfds.revents &= ~POLLOUT;
+			// pfds.revents &= ~POLLOUT;
 		}
 		else if (i == CLOSE)
 			return (CLOSE);
@@ -509,12 +518,22 @@ int client::postMethod(struct pollfd &pfds)
 		if (i == 0)
 		{
 			this->clear();
-			pfds.revents &= ~POLLOUT;
+			// pfds.revents &= ~POLLOUT;
 		}
 		else if (i == CLOSE)
 			return (CLOSE);
 	}
 	return (0);
+}
+
+void client::generateUrl()
+{
+	int pos = this->headerOfRequest.find("Host: ");
+	std::string line = this->headerOfRequest.substr(pos + 6, this->headerOfRequest.find('\r', pos + 6) - (pos + 6));
+	std::string host = line.substr(0, line.find(':'));
+	std::string port = line.substr(line.find(':') + 1);
+	std::string redirectUrl = "http://" + host + ":" + port + this->URI + "/";
+	this->respond.redirectUrl = redirectUrl;
 }
 
 void client::initResponse()
@@ -545,14 +564,14 @@ void client::initResponse()
 	}
 	else if (this->respond.flagResponse == REDIRECT)
 	{
-		std::string redirectUrl = "http://localhost:8081" + this->URI + "/";
+		this->generateUrl();
 		this->respond.status_code = 301;
 		this->respond.phrase = "Moved Permanently";
 		this->respond.close = ALIVE;
 		this->respond.headers.push_back("Cache-Control: no-cache, no-store");
 		this->respond.headers.push_back("Pragma: no-cache");
 		this->respond.headers.push_back("Expires: 0");
-		this->respond.headers.push_back("Location: " + redirectUrl);
+		this->respond.headers.push_back("Location: " + this->respond.redirectUrl);
 		// this->respond.body = "Resource Not Found In Root";
 		// this->respond.content = 1;
 		this->respond.flagResponse = -1;
