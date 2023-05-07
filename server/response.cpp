@@ -35,7 +35,7 @@ void response::defineContentType()
 
 void response::generate_response()
 {
-	//std::cout << "type == " << type << std::endl;
+	std::cout << "type == " << type << std::endl;
 	if (type == 1)
 	{
 		this->defineContentType();
@@ -90,7 +90,9 @@ int response::send_response(client &obj, struct pollfd &pfds)
 	int i;
 	int close = 0;
 
+	std::cout << "resp == " << response_req.size() << std::endl;
 	i = send(obj.client_socket, response_req.c_str(), response_req.size(), 0);
+	std::cout << "i == " << i << std::endl;
 	if (i < 0)
 	{
 		std::cout << "error in sending" << std::endl;

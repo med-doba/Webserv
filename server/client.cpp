@@ -106,6 +106,38 @@ int client::fillBody()
 	return (0);
 }
 
+int client::generateListing()
+{
+	DIR* directory = opendir(this->path.c_str());
+	std::string html;
+    if (directory == nullptr) {
+        // handle error
+        return (-1);
+    }
+    
+    html += "<html><head><title>Directory Listing</title></head><body><h1>Directory Listing</h1><ul>";
+    
+    dirent* entry;
+    while ((entry = readdir(directory)) != nullptr) {
+        // Ignore . and .. directories
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+        
+        html += "<li><a href=\"";
+        html += entry->d_name;
+        html += "\">";
+        html += entry->d_name;
+        html += "</a></li>";
+    }
+    
+    html += "</ul></body></html>";
+    
+    closedir(directory);
+	this->respond.body = html;
+	return (0);
+}
+
 void client::check(void)
 {
 	int res;
@@ -113,6 +145,7 @@ void client::check(void)
 	res = headerOfRequest.find("/favicon.ico");
 	if (res != -1)
 	{
+		std::cout << "favsock == " << client_socket << std::endl;
 		this->flag = ERROR;
 		this->respond.type = 1;
 		this->respond.status_code = 404;
@@ -501,9 +534,50 @@ void client::initResponse()
 		this->fillBody();
 		this->respond.status_code = 200;
 		this->respond.phrase = "OK";
-		this->respond.close = CLOSE;
+		this->respond.close = ALIVE;
+		this->respond.headers.push_back("Cache-Control: no-cache, no-store");
+		this->respond.headers.push_back("Pragma: no-cache");
+		this->respond.headers.push_back("Expires: 0");
 		// this->respond.body = "Resource Not Found In Root";
 		// this->respond.content = 1;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == REDIRECT)
+	{
+		std::string redirectUrl = "http://localhost:8081" + this->URI + "/";
+		this->respond.status_code = 301;
+		this->respond.phrase = "Moved Permanently";
+		this->respond.close = ALIVE;
+		this->respond.headers.push_back("Cache-Control: no-cache, no-store");
+		this->respond.headers.push_back("Pragma: no-cache");
+		this->respond.headers.push_back("Expires: 0");
+		this->respond.headers.push_back("Location: " + redirectUrl);
+		// this->respond.body = "Resource Not Found In Root";
+		// this->respond.content = 1;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == FORBIDEN)
+	{
+		this->respond.status_code = 403;
+		this->respond.phrase = "Forbidden";
+		this->respond.type = 1;
+		this->respond.content = 1;
+		this->respond.body = "You Don't Have Permession To Do That";
+	}
+	else if (this->respond.flagResponse == AUTOINDEX)
+	{
+		// std::cout << "filling body " << std::endl;
+		this->generateListing();
+		this->respond.status_code = 200;
+		this->respond.phrase = "OK";
+		this->respond.close = ALIVE;
+		this->respond.headers.push_back("Cache-Control: no-cache, no-store");
+		this->respond.headers.push_back("Pragma: no-cache");
+		this->respond.headers.push_back("Expires: 0");
+		// this->respond.body = "Resource Not Found In Root";
+		this->respond.content = 5;
 		this->respond.flagResponse = -1;
 		this->respond.type = 1;
 	}

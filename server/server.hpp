@@ -10,6 +10,7 @@
 #include "miniserver.hpp"
 #include "../parsingConf/serverParse.hpp"
 #include "client.hpp"
+#include <sys/stat.h>
 // #include <netinet/in.h>
 // #include <arpa/inet.h>
 #include <netdb.h>
@@ -43,7 +44,7 @@ class server
 	void checkMaxBodySize(client& objClient, serverParse obj, int loc);
 	void checkMethodAllowed(client& objClient, serverParse obj, int loc);
 	void checkRedirection(client& objClient, serverParse obj, int loc);
-	void GetBehaviour(client &ObjClient, struct pollfd &pfds, serverParse ObjServer, int loc);
+	void GetBehaviour(client &ObjClient, serverParse ObjServer, int loc);
 	serverParse& findServerBlock(int index);
 };
 

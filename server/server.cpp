@@ -16,6 +16,7 @@ server& server::operator=(const server& obj)
 		this->servers = obj.servers;
 		this->clients = obj.clients;
 		this->pfds = obj.pfds;
+		this->block = obj.block;
 		this->remove = obj.remove;
 		this->poll_count = obj.poll_count;
 	}
@@ -121,7 +122,8 @@ void server::monitor()
 				}
 				for (size_t j = 0; j < clients.size(); j++)
 				{
-					if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 0)
+					// if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 0)
+					if (pfds[i].fd == clients[j].client_socket)
 					{
 						std::cout << "ready to recv " << clients[j].client_socket << std::endl;
 						this->receive(i, j);
@@ -129,7 +131,7 @@ void server::monitor()
 					}
 				}
 			}
-			if (this->remove == 0 && this->pfds[i].revents & POLLOUT)
+			else if (this->remove == 0 && this->pfds[i].revents & POLLOUT)
 			{
 				for (size_t j = 0; j < clients.size(); j++)
 				{
@@ -352,10 +354,9 @@ void server::checkRedirection(client& objClient, serverParse obj, int loc)
 	}
 }
 
-void server::GetBehaviour(client &ObjClient, struct pollfd &pfds, serverParse ObjServer, int loc)
+void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 {
-	(void)pfds;
-	(void)ObjClient;
+	struct stat info;
 	std::string root;
 	locationParse ObjLocation = ObjServer.obj_location[loc];
 	if (ObjLocation.root.size() != 0)
@@ -365,24 +366,76 @@ void server::GetBehaviour(client &ObjClient, struct pollfd &pfds, serverParse Ob
 	if (root[root.size() - 1] == '/')
 		root.pop_back();
 	root = root + ObjClient.URI;
+	ObjClient.path = root;
 	if (access(root.data(), F_OK) != 0)
 	{
-		// ObjClient.respond.status_code = 404;
-		// ObjClient.respond.phrase = "Not Found";
-		// ObjClient.respond.body = "Resource Not Found In Root";
-		// ObjClient.respond.content = 1;
 		ObjClient.respond.ready = 1;
 		ObjClient.respond.flagResponse = NOTFOUND;
 		return ;
 	}
-	// std::cout << "before input check \n";
-	if (!ObjClient.input.is_open())
+
+    if (stat(root.data(), &info) != 0)
 	{
-		// std::cout << "inside check\n";
-		ObjClient.respond.ready = 1;
-		ObjClient.respond.flagResponse = OPFILE;
-		ObjClient.path = root;
+        std::cerr << "Error: Unable to stat file/directory.\n";
+        return ;
+    }
+
+	if (S_ISDIR(info.st_mode))
+	{
+        std::cout << root << " is a directory.\n";
+		if (root[root.size() - 1] == '/')
+		{
+			if (ObjLocation.index.size() != 0)
+			{
+				for (size_t i = 1; i < ObjLocation.index.size() ; i++) {
+					std::string testPath = root + ObjLocation.index[i];
+					if (access(testPath.data(), F_OK) == 0)
+					{
+						ObjClient.respond.ready = 1;
+						ObjClient.respond.flagResponse = OPFILE;
+						ObjClient.path = testPath;
+						return;
+					}
+				}
+			}
+			if (ObjLocation.autoindex.size() != 0)
+			{
+				if (ObjLocation.autoindex[1].compare("off") == 0)
+				{
+					ObjClient.respond.ready = 1;
+					ObjClient.respond.flagResponse = FORBIDEN;
+				}
+				else
+				{
+					ObjClient.respond.ready = 1;
+					ObjClient.respond.flagResponse = AUTOINDEX;
+				}
+			}
+			if (ObjLocation.autoindex.size() == 0)
+			{
+				ObjClient.respond.ready = 1;
+				ObjClient.respond.flagResponse = FORBIDEN;
+			}
+
+		}
+		else
+		{
+			ObjClient.respond.ready = 1;
+			ObjClient.respond.flagResponse = REDIRECT;
+			return;
+		}
+    }
+	else if (S_ISREG(info.st_mode))
+	{
+        std::cout << root << " is a file.\n";
+		if (!ObjClient.input.is_open())
+		{
+			// std::cout << "inside check\n";
+			ObjClient.respond.ready = 1;
+			ObjClient.respond.flagResponse = OPFILE;
+		}
 	}
+	// std::cout << "before input check \n";
 	// std::cout << "after input check \n";
 	// std::cout << "root == "<< root << std::endl;
 }
@@ -421,7 +474,7 @@ void server::response(struct pollfd &pfds, int index)
 	if (clients[index].tmp == GET && clients[index].respond.ready != 1)
 	{
 		std::cout << "GEt method == " << clients[index].client_socket << std::endl;
-		this->GetBehaviour(clients[index], pfds, objServer, loc);
+		this->GetBehaviour(clients[index], objServer, loc);
 		// clients[index].normal_response(pfds);
 	}
 	std::cout << "respond2 ready == " << clients[index].respond.ready << " sock == " << clients[index].client_socket << std::endl;
@@ -515,7 +568,6 @@ void server::receive(int pfds_index, int index)
 		std::cout << "here get method " << clients[index].client_socket << std::endl;
 		// std::cout << "headers == " << clients[index].headerOfRequest << std::endl;
 		// std::cout << "flag == " << clients[index].flag << std::endl;
-		std::cout << "index == " << index << std::endl;
 		clients[index].check();
 		pfds[pfds_index].revents &= ~POLLIN;
 		// std::cout << "ready -- " << clients[index].ready << std::endl;

@@ -15,6 +15,7 @@
 #include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <poll.h>
+#include <dirent.h>
 
 enum {
 	EMPTY,
@@ -33,7 +34,9 @@ enum {
 	NOTFOUND,
 	FORBIDEN,
 	ALIVE,
-	OPFILE
+	OPFILE,
+	REDIRECT,
+	AUTOINDEX
 };
 
 using std::string;
@@ -158,6 +161,7 @@ class client
 	int deleteMethod(struct pollfd &pfds);
 	void initResponse();
 	int fillBody();
+	int generateListing();
 	client();
 	client(const client &obj);
 	client& operator=(const client& obj);

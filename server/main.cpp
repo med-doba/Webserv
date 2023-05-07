@@ -2,7 +2,7 @@
 
 int main(int ac, char **av)
 {
-	signal(SIGPIPE, SIG_IGN);
+	// signal(SIGPIPE, SIG_IGN);
 	MapType	bind_info;
 
 	try

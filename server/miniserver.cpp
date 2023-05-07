@@ -14,6 +14,7 @@ miniserver& miniserver::operator=(const miniserver& obj)
 {
 	if (this != &obj)
 	{
+		this->socket_server = obj.socket_server;
 		this->port = obj.port;
 		this->str_port = obj.str_port;
 		this->address = obj.address;
