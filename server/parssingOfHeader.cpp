@@ -160,11 +160,12 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy)
         i = str.find("Content-Type: ");
         if(i == -1)
         {
+			std::cout << str << std::endl;
             obj.respond.type = 1;
             obj.respond.status_code = 400;
             obj.respond.phrase = "Bad Request";
             obj.respond.content = 1;
-            obj.respond.body = "No Content-Type Header Found";
+            obj.respond.body = "1No Content-Type Header Found";
             obj.respond.close = CLOSE;
             return -6;
         }
@@ -337,7 +338,20 @@ int parssingOfHeader::VerifyURI(client &obj)
 				return -1;
 			}
 		}
-		
+	}
+	for (size_t i = 0; i < obj.URI.size(); i++)
+	{
+		if (obj.URI[i] == '%')
+		{
+			std::string space = obj.URI.substr(i,3);
+			if (space.compare("%20") == 0)
+			{
+				std::string tmp = obj.URI;
+				obj.URI = tmp.substr(0, i);
+				obj.URI += " ";
+				obj.URI += tmp.substr(i + 3);
+			}
+		}
 	}
 	return (0);
 

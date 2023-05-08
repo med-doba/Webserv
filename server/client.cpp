@@ -65,10 +65,11 @@
 
 int client::fillBody()
 {
-	size_t pos = this->path.find_last_of('.');
+	std::string OpFile = this->path + this->URI;
+	size_t pos = OpFile.find_last_of('.');
 	if (pos != std::string::npos)
 	{
-		std::string ext = &this->path[pos];
+		std::string ext = &OpFile[pos];
 		if (ext.compare(".pdf") == 0)
 			this->respond.content = 2;
 		else if (ext.compare(".txt") == 0)
@@ -86,7 +87,7 @@ int client::fillBody()
 	}
 	else
 		this->respond.content = 1;
-	input.open(this->path);
+	input.open(OpFile);
 	if (!input.is_open())
 	{
 		std::cout << "couldn't open file" << std::endl;
@@ -117,7 +118,8 @@ int client::fillBody()
 
 int client::generateListing()
 {
-	DIR* directory = opendir(this->path.c_str());
+	std::string listing = this->path + this->URI;
+	DIR* directory = opendir(listing.c_str());
 	std::string html;
     if (directory == nullptr) {
         // handle error
@@ -466,7 +468,7 @@ int client::deleteMethod(struct pollfd &pfds)
 	return (0);
 }
 
-int client::postMethod(struct pollfd &pfds)
+int client::postMethod()
 {
 	if(this->flag == NONCHUNKED) // if has content length
 	{
@@ -485,43 +487,6 @@ int client::postMethod(struct pollfd &pfds)
 		//std::cout << "form handle1" << std::endl;
 		this->bodyParss.handling_form_data(*this);
 		this->respond.ready = 1;
-	}
-	if (this->respond.ready == 1)
-	{
-		if (this->respond.flagResponse == CREATED)
-		{
-			this->respond.status_code = 201;
-			this->respond.phrase = "created";
-			this->respond.type = 1;
-			this->respond.content = 1;
-			// this->respond.headers.push_back("Location: " + )
-			this->respond.body = "successfully uploaded";
-		}
-		if (this->respond.flagResponse == EMPTY)
-		{
-			this->respond.status_code = 204;
-			this->respond.phrase = "No Content";
-			this->respond.type = 1;
-			// this->respond.content = 1;
-			// this->respond.body = "No Body Found";
-		}
-		if (this->respond.flagResponse == EXIST)
-		{
-			this->respond.status_code = 409;
-			this->respond.phrase = "Conflict";
-			this->respond.type = 1;
-			this->respond.content = 1;
-			this->respond.body = "Resource Already Exist";
-		}
-		this->respond.generate_response();
-		int i = this->respond.send_response(*this ,pfds);
-		if (i == 0)
-		{
-			this->clear();
-			// pfds.revents &= ~POLLOUT;
-		}
-		else if (i == CLOSE)
-			return (CLOSE);
 	}
 	return (0);
 }
@@ -544,6 +509,7 @@ void client::initResponse()
 		this->respond.phrase = "Not Found";
 		this->respond.body = "Resource Not Found In Root";
 		this->respond.content = 1;
+		this->respond.close = ALIVE;
 		this->respond.flagResponse = -1;
 		this->respond.type = 1;
 	}
@@ -582,6 +548,7 @@ void client::initResponse()
 		this->respond.status_code = 403;
 		this->respond.phrase = "Forbidden";
 		this->respond.type = 1;
+		this->respond.close = ALIVE;
 		this->respond.content = 1;
 		this->respond.body = "You Don't Have Permession To Do That";
 	}
@@ -599,5 +566,35 @@ void client::initResponse()
 		this->respond.content = 5;
 		this->respond.flagResponse = -1;
 		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == CREATED)
+	{
+		this->respond.status_code = 201;
+		this->respond.phrase = "created";
+		this->respond.type = 1;
+		this->respond.close = ALIVE;
+		this->respond.content = 1;
+		this->respond.body = "successfully uploaded";
+		this->respond.flagResponse = -1;
+	}
+	else if (this->respond.flagResponse == EMPTY)
+	{
+		this->respond.status_code = 204;
+		this->respond.phrase = "No Content";
+		this->respond.type = 1;
+		this->respond.close = ALIVE;
+		this->respond.flagResponse = -1;
+		// this->respond.content = 1;
+		// this->respond.body = "No Body Found";
+	}
+	else if (this->respond.flagResponse == EXIST)
+	{
+		this->respond.status_code = 409;
+		this->respond.phrase = "Conflict";
+		this->respond.type = 1;
+		this->respond.close = ALIVE;
+		this->respond.content = 1;
+		this->respond.body = "Resource Already Exist";
+		this->respond.flagResponse = -1;
 	}
 }

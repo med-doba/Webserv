@@ -41,11 +41,11 @@ void parssingOfBody::clear()
 	close(fd);
 }
 
-void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string & headerOfRequest, int &flagResponse)
+void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string & headerOfRequest, int &flagResponse, std::string path)
 {
     int rtn;
 
-	file = "upload/";
+	file = path;
     exetention = std::to_string(rand() % 100000);
     if( (rtn = headerOfRequest.find("mp4") ) != -1) 
         fd = open((char*)(file.append(exetention).append(".mp4").data()),O_CREAT | O_RDWR , 0777);
@@ -84,8 +84,9 @@ void parssingOfBody::putDataTofile(string  data, client & obj)
         int t = pos + 10;
         while (data[t] != '"')
             t++;
-		file = "upload/";
+		file = obj.path + "/";
         file +=  data.substr(pos + 10,t - (pos + 10));
+		std::cout << "file == " << file << std::endl;
         fd = open((char*)(file.data()),O_CREAT | O_RDWR | O_EXCL , 0777);
         if (fd < 0)
         {
@@ -231,7 +232,7 @@ void  parssingOfBody::handling_chunked_data(client &obj)
 					obj.respond.content = 1;
 					return;
 				}
-				create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse);
+				create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.path);
 			}
             else
 				obj.respond.flagResponse = EMPTY;
@@ -252,7 +253,7 @@ void parssingOfBody::handle_post(client &obj)
 		//std::cout << "buffer23 size == " << obj.buffer.size()<< std::endl;
         obj.bodyofRequest = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
         if (!obj.bodyofRequest.empty())
-            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse);
+            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.path);
         else
             obj.respond.flagResponse = EMPTY;
     }

@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <cstring>
 #include <sys/ioctl.h>
+#include <signal.h>
 
 #include "miniserver.hpp"
 #include "../parsingConf/serverParse.hpp"

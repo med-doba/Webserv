@@ -61,7 +61,7 @@ class parssingOfBody
         void handling_chunked_data(client &obj);
         void handling_form_data(client &obj);
 		void putDataTofile(string  data, client & obj);
-        void  create_file_and_put_content(std::string & bodyofRequest,std::string & headerOfRequest, int&created);
+        void  create_file_and_put_content(std::string & bodyofRequest,std::string & headerOfRequest, int&created, std::string path);
 		void clear();
 
         ~parssingOfBody();
@@ -160,7 +160,7 @@ class client
 	char *ft_substr(char const *s, unsigned int start, size_t len);
 	void check(void);
 	int normal_response(struct pollfd &pfds);
-	int postMethod(struct pollfd &pfds);
+	int postMethod();
 	int deleteMethod(struct pollfd &pfds);
 	void initResponse();
 	int fillBody();
