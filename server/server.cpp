@@ -348,14 +348,14 @@ void server::checkMethodAllowed(client& objClient, serverParse obj, int loc)
 		objClient.respond.close = CLOSE;
 		return ;
 	}
-	
+
 }
 
 void server::checkRedirection(client& objClient, serverParse obj, int loc)
 {
 	locationParse locobj = obj.obj_location[loc];
 	if (locobj.rtn.size() != 0)
-	{	
+	{
 		std::string redirectUrl = "http://" + locobj.rtn[2] + "/";
 		objClient.flag = ERROR;
 		objClient.respond.type = 1;

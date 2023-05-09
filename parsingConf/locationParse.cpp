@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:49:40 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/03 20:01:35 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/09 11:04:07 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ locationParse	&locationParse::operator=(const locationParse &obj)
 		this->autoindex_ = obj.autoindex_;
 		this->allow_methods_ = obj.allow_methods_;
 		this->client_max_body_size_ = obj.client_max_body_size_;
+		this->client_body_temp_path = obj.client_body_temp_path;
 	}
 	return *this;
 }

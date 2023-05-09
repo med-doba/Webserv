@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_conf.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
+/*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/09 10:59:22 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/09 11:06:58 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,11 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 					else if (!classconfig_tmp.begin()->compare("cgi_pass"))
 						ft_check_cgi(classconfig, lines, location_);
 					else if (!classconfig_tmp.begin()->compare("client_body_temp_path"))
+					{
 						location_.client_body_temp_path = classconfig.ft_split(lines, " \t;");
+						if (location_.client_body_temp_path.size() != 2)
+							classconfig.ft_error("Error: not a valide value for client_body_temp_path");
+					}
 					else
 						classconfig.ft_error("Error: invalid directives");
 				}
