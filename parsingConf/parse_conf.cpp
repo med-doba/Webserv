@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/04 18:19:26 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/04 18:29:09 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,9 +114,6 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 				{
 					if (InTheserverBlock && !InTheLocationBlock)
 					{
-						//
-						if (!(classconfig.root_find && classconfig.error_page_find && classconfig.location_find && classconfig.listen_find))
-							classconfig.ft_error("Error: Missing required directives");
 						InTheserverBlock = false;
 						ft_2bind(classconfig, bind_info);
 						block.push_back(classconfig);
