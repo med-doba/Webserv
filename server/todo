@@ -51,6 +51,50 @@ specified in the Content-Type header is not supported by the server.  (done)
 
 => create a map with key is the status code and the value is the phrase-line (pending ...)
 
+=> do all the MIME-Types (pending ...)
+
+=> infinite rederict 
+example :
+location /redir {
+  return 301 /redir;
+}
+
+=> implement the range header in the response plus rather than the whole file only read as much as you're gonna send (pending ...)
+
+   The Location response-header field is used to redirect the recipient
+   to a location other than the Request-URI for completion of the
+   request or identification of a new resource. For 201 (Created)
+   responses, the Location is that of the new resource which was created
+   by the request. For 3xx responses, the location SHOULD indicate the
+   server's preferred URI for automatic redirection to the resource. The
+   field value consists of a single absolute URI.
+
+
+POST:
+       Location       = "Location" ":" absoluteURI
+
+   An example is:
+
+       Location: http://www.w3.org/pub/WWW/People.html
+
+      Note: The Content-Location header field (section 14.14) differs
+      from Location in that the Content-Location identifies the original
+      location of the entity enclosed in the request. It is therefore
+      possible for a response to contain header fields for both Location
+      and Content-Location. Also see section 13.10 for cache
+      requirements of some methods.
+
+
+   If a resource has been created on the origin server, the response
+   SHOULD be 201 (Created) and contain an entity which describes the
+   status of the request and refers to the new resource, and a Location
+   header (see section 14.30).
+
+   The action performed by the POST method might not result in a
+   resource that can be identified by a URI. In this case, either 200
+   (OK) or 204 (No Content) is the appropriate response status,
+   depending on whether or not the response includes an entity that
+   describes the result.
 
 
 
@@ -63,12 +107,11 @@ specified in the Content-Type header is not supported by the server.  (done)
 
 
 
-
-
-
-
-
-
+DELETE :
+   A successful response SHOULD be 200 (OK) if the response includes an
+   entity describing the status, 202 (Accepted) if the action has not
+   yet been enacted, or 204 (No Content) if the action has been enacted
+   but the response does not include an entity.
 
 
 

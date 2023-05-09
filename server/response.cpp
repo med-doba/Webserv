@@ -114,8 +114,6 @@ int response::send_response(client &obj, struct pollfd &pfds)
 		std::cout << "chunks == " << pfds.fd << std::endl;
 		response_req.erase(0, i);
 	}
-	else if (i > (int)response_req.size())
-		std::cout << "honaaaa\n";
 	return (-1);
 }
 

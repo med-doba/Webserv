@@ -143,6 +143,18 @@ void server::monitor()
 					}
 				}
 			}
+			if (this->remove == 0 && this->pfds[i].revents & (POLLNVAL | POLLHUP | POLLERR))
+			{
+				for (size_t j = 0; j < clients.size(); j++)
+				{
+					if (pfds[i].fd == clients[j].client_socket)
+					{
+						this->disconnect(j);
+						break ;
+					}
+				}
+			}
+
 		}
 	}
 }
@@ -287,11 +299,17 @@ serverParse& server::findServerBlock(int index)
 		}
 		i++;
 	}
-
-	std::cout << "host == %"<< host  << "%"<< std::endl;
-	std::cout << "end" << std::endl;
-	std::cout << "port == %"<< port  << "%"<< std::endl;
-	std::cout << "end" << std::endl;
+	if (clients[index].flag != ERROR)
+	{
+		clients[index].flag = ERROR;
+		clients[index].respond.type = 1;
+		clients[index].respond.status_code = 400;
+		clients[index].respond.phrase = "Bad Request";
+		clients[index].respond.content = 1;
+		clients[index].respond.body = "No Server Block Matches With The Host Header";
+		clients[index].respond.close = CLOSE;
+		return (block[0]);
+	}
 	return (block[i]);
 }
 
@@ -414,8 +432,10 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 					if (access(testPath.data(), F_OK) == 0)
 					{
 						ObjClient.respond.ready = 1;
-						ObjClient.respond.flagResponse = OPFILE;
-						ObjClient.path = testPath;
+						// ObjClient.respond.flagResponse = OPFILE;
+						ObjClient.respond.flagResponse = REDIRECT;
+						// ObjClient.path = testPath;
+						ObjClient.redirpath = "/" + ObjLocation.index[i];
 						return;
 					}
 				}
@@ -444,6 +464,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 		{
 			ObjClient.respond.ready = 1;
 			ObjClient.respond.flagResponse = REDIRECT;
+			ObjClient.redirpath = ObjClient.URI + "/";
 			return;
 		}
     }
@@ -470,11 +491,9 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 	{
 		if (ObjLocation.allow_methods[i].compare("POST") == 0)
 		{
-			std::cout << "size == " << ObjLocation.client_body_temp_path.size()<< std::endl;
-			for (size_t j = 0; j < ObjLocation.client_body_temp_path.size(); j++)
-			{
-				std::cout << "up == " << ObjLocation.client_body_temp_path[i] << std::endl;
-			}
+			std::cout << "lol1\n";
+			ObjClient.path = ObjLocation.client_body_temp_path[1];
+			std::cout << "lol2\n";
 			ObjClient.postMethod();
 			return;
 		}
@@ -483,8 +502,10 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 
 void server::response(struct pollfd &pfds, int index)
 {
+	int loc = -1;
 	serverParse objServer = findServerBlock(index);
-	int loc = checkLocation(clients[index], objServer);
+	if (clients[index].flag != ERROR)
+		loc = checkLocation(clients[index], objServer);
 	if (loc != -1 && clients[index].flag != ERROR)
 		checkMaxBodySize(clients[index], objServer, loc);
 	if (loc != -1 && clients[index].flag != ERROR)

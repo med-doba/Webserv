@@ -65,7 +65,12 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
         fd = open((char*)(file.append(exetention).append(".css").data()),O_CREAT | O_RDWR , 0777);
     else // is a text file such as html ..
         fd = open((char*)(file.append(exetention).data()),O_CREAT | O_RDWR , 0777);
-    
+    if (fd < 0)
+    {
+        std::cout << "couldn't open file" << std::endl;
+        flagResponse = FORBIDEN;
+        return ;
+    }
     int i = write(fd,(void*)(bodyofRequest.data()),bodyofRequest.size());
 	if (i == (int)bodyofRequest.size())
 		flagResponse = CREATED;

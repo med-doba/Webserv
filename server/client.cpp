@@ -232,6 +232,7 @@ client& client::operator=(const client& obj)
 		this->ContentLength = obj.ContentLength;
 		this->ready = obj.ready;
 		this->path = obj.path;
+		this->redirpath = obj.redirpath;
 	}
 	return (*this);
 }
@@ -500,7 +501,7 @@ void client::generateUrl()
 	std::string line = this->headerOfRequest.substr(pos + 6, this->headerOfRequest.find('\r', pos + 6) - (pos + 6));
 	std::string host = line.substr(0, line.find(':'));
 	std::string port = line.substr(line.find(':') + 1);
-	std::string redirectUrl = "http://" + host + ":" + port + this->URI + "/";
+	std::string redirectUrl = "http://" + host + ":" + port + this->redirpath;
 	this->respond.redirectUrl = redirectUrl;
 }
 

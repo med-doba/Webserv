@@ -136,6 +136,7 @@ class client
 	int flag;
 	int ready;
 	std::string path;
+	std::string redirpath;
 
 
 	parssingOfHeader headerParss;
