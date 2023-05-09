@@ -401,7 +401,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
         std::cerr << "Error: Unable to stat file/directory.\n";
         return ;
     }
-
+	std::cout << "path == " << root << std::endl;
 	if (S_ISDIR(info.st_mode))
 	{
         std::cout << root << " is a directory.\n";
@@ -454,6 +454,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 		{
 			// std::cout << "inside check\n";
 			ObjClient.respond.ready = 1;
+			ObjClient.path = root;
 			ObjClient.respond.flagResponse = OPFILE;
 		}
 	}

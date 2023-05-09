@@ -65,7 +65,7 @@
 
 int client::fillBody()
 {
-	std::string OpFile = this->path + this->URI;
+	std::string OpFile = this->path;
 	size_t pos = OpFile.find_last_of('.');
 	if (pos != std::string::npos)
 	{
@@ -78,6 +78,8 @@ int client::fillBody()
 			this->respond.content = 3;
 		else if (ext.compare(".jpg") == 0)
 			this->respond.content = 4;
+		else if (ext.compare(".jpeg") == 0)
+			this->respond.content = 4;
 		else if (ext.compare(".html") == 0)
 			this->respond.content = 5;
 		else if (ext.compare(".mp4") == 0)
@@ -87,6 +89,7 @@ int client::fillBody()
 	}
 	else
 		this->respond.content = 1;
+	std::cout << "file == " << OpFile << std::endl;
 	input.open(OpFile);
 	if (!input.is_open())
 	{
