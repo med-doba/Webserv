@@ -39,7 +39,9 @@ enum {
 	OPFILE,
 	REDIRECT,
 	AUTOINDEX,
-	INTERNALERR
+	CONFLICT,
+	INTERNALERR,
+	CGI
 };
 
 using std::string;
@@ -88,10 +90,10 @@ class response
 		int content;
 		int flagResponse;
 		int ready;
-		
+
         response(/* args */);
 		void generate_response();
-		int send_response(client &obj, struct pollfd &pfds);
+		int send_response(client *obj, struct pollfd &pfds);
 		void defineContentType();
 		response(const response &obj);
 		response& operator=(const response &obj);

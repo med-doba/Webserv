@@ -52,7 +52,7 @@
 // 		// //std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
 // 	}
 // 	else
-// 	{ 
+// 	{
 // 		std::cout << "sent complete " << this->client_socket << std::endl;
 // 		int close = this->respond.close;
 // 		this->clear();
@@ -72,8 +72,6 @@ int client::fillBody()
 		std::string ext = &OpFile[pos];
 		if (ext.compare(".pdf") == 0)
 			this->respond.content = 2;
-		else if (ext.compare(".txt") == 0)
-			this->respond.content = 1;
 		else if (ext.compare(".png") == 0)
 			this->respond.content = 3;
 		else if (ext.compare(".jpg") == 0)
@@ -86,6 +84,8 @@ int client::fillBody()
 			this->respond.content = 6;
 		else if (ext.compare(".css") == 0)
 			this->respond.content = 7;
+		else
+			this->respond.content = 1;
 	}
 	else
 		this->respond.content = 1;
@@ -132,16 +132,16 @@ int client::generateListing()
         // handle error
         return (-1);
     }
-    
+
     html += "<html><head><title>Directory Listing</title></head><body><h1>Directory Listing</h1><ul>";
-    
+
     dirent* entry;
     while ((entry = readdir(directory)) != nullptr) {
         // Ignore . and .. directories
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
             continue;
         }
-        
+
         html += "<li><a href=\"";
 		if (this->URI[this->URI.size() - 1] == '/')
 			html += this->URI;
@@ -152,9 +152,9 @@ int client::generateListing()
         html += entry->d_name;
         html += "</a></li>";
     }
-    
+
     html += "</ul></body></html>";
-    
+
     closedir(directory);
 	this->respond.body = html;
 	std::cout << "body -- " << html << std::endl;
@@ -251,17 +251,15 @@ client& client::operator=(const client& obj)
 
 client::~client()
 {
-	// this->clear();
-	std::cout << "distructor" << std::endl;
 }
 
 int client::checkHeaderOfreq()
 {
     int pos = 0;
 	int _tmp = 0;
-    
+
     while (buffer[pos] && flag == 0)// for entring one time
-    { 
+    {
         if((buffer[pos] == '\r' || buffer[pos] == '\n') && buffer[pos + 1] == '\n')
         {
             pos += 2;
@@ -281,18 +279,18 @@ int client::checkHeaderOfreq()
 				{
 					i = copyheader.find("Transfer-Encoding: chunked");   // find way to check if boundry
 					if(i != -1)
-					{ 
+					{
 						//std::cout << "lol" << std::endl;
 						i = pos  + 2;
-						pos = copyheader.find("Content-Length");  
+						pos = copyheader.find("Content-Length");
 						//std::cout << copyheader<< std::endl;
 						if(pos != -1)
 							ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
-						
+
 						flag = CHUNKED;
 						return 1;
 					}
-					pos = copyheader.find("Content-Length");  
+					pos = copyheader.find("Content-Length");
 					if(pos != -1)
 					{
 						j = copyheader.find("boundary");
@@ -302,7 +300,7 @@ int client::checkHeaderOfreq()
 							ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
 							// if(ContentLength == 0)
 							//     return -2;
-							
+
 							i = headerOfRequest.size() + 3;// after herder
 							bytes_read -= i;
 							_tmp = j + 9;
@@ -373,7 +371,7 @@ long long	client::ft_atoi(const char *str)
 	}
 	return (res * negative);
 }
-  
+
 char * client::ft_substr(char const *s, unsigned int start, size_t len)
 {
 	size_t	i;
@@ -396,7 +394,7 @@ char * client::ft_substr(char const *s, unsigned int start, size_t len)
 	}
 	str[j] = 0;
 	return (str);
-}  
+}
 
 int client::pushToBuffer()
 {
@@ -408,8 +406,8 @@ int client::pushToBuffer()
         return -1;
     if(bytes_read == 0)
         return 0;
-    int j = 0; 
-    
+    int j = 0;
+
     while (j < bytes_read)
     {
         buffer.push_back(data[j]);
@@ -474,7 +472,7 @@ int client::deleteMethod(struct pollfd &pfds)
 			this->respond.body = "You Don't Have Permession To Do That";
 		}
 		this->respond.generate_response();
-		int i = this->respond.send_response(*this ,pfds);
+		int i = this->respond.send_response(this ,pfds);
 		if (i == 0)
 		{
 			this->clear();
@@ -526,6 +524,16 @@ void client::initResponse()
 		this->respond.status_code = 404;
 		this->respond.phrase = "Not Found";
 		this->respond.body = "Resource Not Found In Root";
+		this->respond.content = 1;
+		this->respond.close = ALIVE;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == CONFLICT)
+	{
+		this->respond.status_code = 409;
+		this->respond.phrase = "Conflict";
+		this->respond.body = "No / At The End Of The URI";
 		this->respond.content = 1;
 		this->respond.close = ALIVE;
 		this->respond.flagResponse = -1;
@@ -626,5 +634,15 @@ void client::initResponse()
 		this->respond.content = 1;
 		this->respond.body = "Internal Server Error";
 		this->respond.flagResponse = -1;
+	}
+	else if (this->respond.flagResponse == DELETED)
+	{
+		this->respond.close = ALIVE;
+		this->respond.status_code = 204;
+		this->respond.phrase = "No Content";
+		this->respond.type = 1;
+		this->respond.flagResponse = -1;
+		// this->respond.content = 1;
+		// this->respond.body = "Resource Already Exist";
 	}
 }
