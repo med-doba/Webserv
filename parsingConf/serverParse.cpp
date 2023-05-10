@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/04 18:18:53 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/10 15:12:55 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ serverParse	&serverParse::operator=(const serverParse &obj)
 		this->server_name = obj.server_name;
 		this->index = obj.index;
 		this->error_page = obj.error_page;
+		this->ErrorPages = obj.ErrorPages;
 		this->client_max_body_size = obj.client_max_body_size;
 		//
 		this->root_ = obj.root_;
@@ -187,6 +188,7 @@ void	serverParse::ft_clearvectorserv(serverParse &classconfig)
 	classconfig.listen.clear();
 	classconfig.root.clear();
 	classconfig.server_name.clear();
+	classconfig.ErrorPages.clear();
 }
 
 void	serverParse::ft_clearvectorlocation_test(std::vector<locationParse> &location_)
@@ -476,7 +478,31 @@ void	ft_check_errorpage(serverParse &classconfig, std::string &lines)
 		tmp_error_page = classconfig.ft_parse_errorpage(lines);
 		classconfig.error_page.insert(classconfig.error_page.end(), (tmp_error_page.begin() + 1), tmp_error_page.end());
 	}
+	int				staticCode = std::stoi(classconfig.ft_parse_errorpage(lines)[1]);
+	std::string		path = classconfig.ft_parse_errorpage(lines)[2];
+	classconfig.ErrorPages.push_back(std::make_pair(staticCode, path));
 }
+
+////-*-/*-*-*-*-/*-//-/*-/*-/*-/*-/*-/*-*-/*-
+void	checkErrorPageLocation(serverParse &classconfig, locationParse &location_, std::string &lines)
+{
+	std::vector<std::string>	tmp_error_page;
+
+	if (!location_.error_page_)
+	{
+		location_.error_page =  classconfig.ft_parse_errorpage(lines);
+		location_.error_page_ = true;
+	}
+	else
+	{
+		tmp_error_page = classconfig.ft_parse_errorpage(lines);
+		location_.error_page.insert(location_.error_page.end(), (tmp_error_page.begin() + 1), tmp_error_page.end());
+	}
+	int				staticCode = std::stoi(classconfig.ft_parse_errorpage(lines)[1]);
+	std::string		path = classconfig.ft_parse_errorpage(lines)[2];
+	location_.ErrorPages.push_back(std::make_pair(staticCode, path));
+}
+////-*-/*-*-*-*-/*-//-/*-/*-/*-/*-/*-/*-*-/*-
 
 void	ft_check_root(serverParse &classconfig, std::string &lines, locationParse &location_, int n)
 {
@@ -547,6 +573,8 @@ void	ft_setDirective2False(serverParse &classconfig, locationParse &location_, i
 		location_.cgi_ = false;
 		location_.autoindex_ = false;
 		location_.allow_methods_ = false;
+		location_.rtn_ = false;
+		location_.error_page_ = false;
 	}
 }
 

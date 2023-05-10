@@ -6,11 +6,21 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/09 11:06:58 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/10 15:13:15 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "serverParse.hpp"
+
+
+#include <utility>
+void	print_vector(const std::vector<std::pair<int, std::string> >& v)
+{
+	for (std::vector<std::pair<int, std::string> >::const_iterator it = v.begin(); it != v.end(); ++it)
+	{
+		std::cout << "(" << it->first << ", " << it->second << ")" << std::endl;
+	}
+}
 
 std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 {
@@ -83,7 +93,9 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 					else if (!classconfig_tmp.begin()->compare("index"))
 						ft_check_index(classconfig, lines, location_, 2);
 					else if (!classconfig_tmp.begin()->compare("error_page"))
-						location_.error_page = classconfig.ft_parse_errorpage(lines);
+					{
+						checkErrorPageLocation(classconfig, location_, lines);
+					}
 					else if (!classconfig_tmp.begin()->compare("client_max_body_size"))
 						ft_check_cmbsize(classconfig, lines, location_, 2);
 					else if (!classconfig_tmp.begin()->compare("return"))
@@ -94,6 +106,10 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 							location_.rtn = classconfig.ft_split(lines, " \t;");
 							if (location_.rtn.size() != 3)
 								classconfig.ft_error("Error: not a valide line for return");
+							if (!location_.rtn[2].compare(0, 4, "www."))
+								location_.rtn[2].insert(0, "https://");
+							else if (location_.rtn[2].compare(0, 1, "/"))
+								classconfig.ft_error("Error: not a valide value for return");
 						}
 						else
 							classconfig.ft_error("Error: duplicate directives > return");
@@ -151,6 +167,18 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 		}
 		// print_vector_of_structs(bind_info);
 		// classconfig.ft_show(block);
+		for (size_t i = 0; i <  block.size(); i++)
+		{
+			std::cout << "server block " << i << std::endl;
+			print_vector(block[i].ErrorPages);
+			std::cout << "location block" << std::endl;
+			for (size_t j = 0; j < block[i].obj_location.size(); j++)
+			{
+				print_vector(block[i].obj_location[j].ErrorPages);
+			}
+			// std::cout << "location block" << std::endl;
+			std::cout << "//\\//\\//\\//\\//\\//\\" << std::endl;
+		}
 	}
 	else
 		throw(std::runtime_error("Config File Not Found"));

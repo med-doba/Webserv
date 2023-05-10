@@ -27,6 +27,7 @@ class serverParse
 		std::vector<std::string>	server_name;
 		std::vector<std::string>	index;
 		std::vector<std::string>	error_page;
+		std::vector<std::pair<int, std::string> >	ErrorPages;
 		size_t						client_max_body_size;
 		//methodes
 		bool	ft_check_extention(std::string str);
@@ -79,6 +80,7 @@ void	ft_check_listen(serverParse	&classconfig, std::string	&lines);
 void	ft_check_allow_methods(serverParse &classconfig, std::string &lines, locationParse &location_);
 void	ft_check_autoindex(serverParse &classconfig, std::string &lines, locationParse &location_);
 void	ft_check_cgi(serverParse &classconfig, std::string &lines, locationParse &location_);
+void	checkErrorPageLocation(serverParse &classconfig, locationParse &location_, std::string &lines);
 //
 typedef	struct bind_info
 {
