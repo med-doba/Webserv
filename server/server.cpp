@@ -418,6 +418,8 @@ void server::checkRedirection(client *ObjClient, serverParse obj, int loc)
 			{
 				for (size_t i = 0; i < obj.obj_location.size(); i++)
 				{
+					// std::cout << "retuunr -- " << ObjLocation.rtn[2].size() << std::endl;
+					// std::cout << "location == " << obj.obj_location[i].path .size() << std::endl;
 					if (ObjLocation.rtn[2].compare(obj.obj_location[i].path) == 0)
 					{
 						ObjClient->redirpath = ObjLocation.rtn[2];
@@ -433,7 +435,7 @@ void server::checkRedirection(client *ObjClient, serverParse obj, int loc)
 						ObjClient->respond.headers.push_back("Cache-Control: no-cache, no-store, must-revalidate");
 						ObjClient->respond.headers.push_back("Pragma: no-cache");
 						ObjClient->respond.headers.push_back("Expires: 0");
-
+						return ;
 					}
 				}
 				ObjClient->flag = ERROR;
@@ -447,7 +449,7 @@ void server::checkRedirection(client *ObjClient, serverParse obj, int loc)
 		}
 		else
 		{
-			std::string redirectUrl = "http://" + ObjLocation.rtn[2] + "/";
+			std::string redirectUrl = ObjLocation.rtn[2] + "/";
 			ObjClient->flag = ERROR;
 			ObjClient->respond.type = 1;
 			ObjClient->respond.status_code = stoi(ObjLocation.rtn[1]);
