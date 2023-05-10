@@ -1,6 +1,7 @@
 #ifndef LOCATIONPARSE_HPP
 #define LOCATIONPARSE_HPP
 
+// #include "serverParse.hpp"
 #include <fstream>
 #include <string>
 #include <iostream>
@@ -22,6 +23,7 @@ class locationParse
 		std::vector<std::string>	root;
 		std::vector<std::string>	index;
 		std::vector<std::string>	error_page;
+		std::vector<std::pair<int, std::string> >	ErrorPages;
 		size_t						client_max_body_size;
 		std::vector<std::string>	cgi_path;
 		std::vector<std::string>	cgi_ext;
@@ -30,6 +32,7 @@ class locationParse
 		bool	ft_check_autoindex(std::string &str);
 		void	ft_clearclasslocation(locationParse &location_);
 		bool	ft_check_allow_methodsed(std::vector<std::string> &allow_methodsed);
+		// void	checkErrorPageLocation(serverParse &classconfig, locationParse &location_, std::string &lines);
 		//
 		bool	client_max_body_size_;
 		bool	index_;
@@ -38,6 +41,7 @@ class locationParse
 		bool	autoindex_;
 		bool	allow_methods_;
 		bool	rtn_;
+		bool	error_page_;
 		//
 };
 
