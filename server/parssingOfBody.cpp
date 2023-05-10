@@ -45,30 +45,40 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
 {
     int rtn;
 
-	file = path;
+    if (path[path.size() - 1] == '/')
+        file = path;
+    else
+        file = path + "/";
+    if (access(file.c_str(), F_OK) != 0)
+    {
+        flagResponse = NOTFOUND;
+        file.clear();
+        bodyofRequest.clear();
+        return ;
+    }
     exetention = std::to_string(rand() % 100000);
     if( (rtn = headerOfRequest.find("mp4") ) != -1) 
-        fd = open((char*)(file.append(exetention).append(".mp4").data()),O_CREAT | O_RDWR , 0777);
+        fd = open((char*)(file.append(exetention).append(".mp4").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
     else if((rtn = headerOfRequest.find("mp3")) != -1 )
-        fd = open((char*)(file.append(exetention).append(".mp3").data()),O_CREAT | O_RDWR , 0777);
+        fd = open((char*)(file.append(exetention).append(".mp3").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
     else if((rtn = headerOfRequest.find("jpeg")) != -1 )
-        fd = open((char*)(file.append(exetention).append(".jpeg").data()),O_CREAT | O_RDWR , 0777);
+        fd = open((char*)(file.append(exetention).append(".jpeg").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
     else if((rtn = headerOfRequest.find("jpg")) != -1 )
-        fd = open((char*)(file.append(exetention).append(".jpg").data()),O_CREAT | O_RDWR , 0777);
+        fd = open((char*)(file.append(exetention).append(".jpg").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
     else if((rtn = headerOfRequest.find("png")) != -1 )
-        fd = open((char*)(file.append(exetention).append(".png").data()),O_CREAT | O_RDWR , 0777);
+        fd = open((char*)(file.append(exetention).append(".png").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
     else if((rtn = headerOfRequest.find("pdf")) != -1)
-        fd = open((char*)(file.append(exetention).append(".pdf").data()),O_CREAT | O_RDWR , 0777);
+        fd = open((char*)(file.append(exetention).append(".pdf").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
     else if((rtn = headerOfRequest.find("html")) != -1)
-        fd = open((char*)(file.append(exetention).append(".html").data()),O_CREAT | O_RDWR , 0777);
+        fd = open((char*)(file.append(exetention).append(".html").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
     else if((rtn = headerOfRequest.find("css")) != -1)
-        fd = open((char*)(file.append(exetention).append(".css").data()),O_CREAT | O_RDWR , 0777);
+        fd = open((char*)(file.append(exetention).append(".css").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
     else // is a text file such as html ..
-        fd = open((char*)(file.append(exetention).data()),O_CREAT | O_RDWR , 0777);
+        fd = open((char*)(file.append(exetention).data()),O_CREAT | O_RDWR | O_EXCL, 0777);
     if (fd < 0)
     {
         std::cout << "couldn't open file" << std::endl;
-        flagResponse = FORBIDEN;
+        flagResponse = EXIST;
         return ;
     }
     int i = write(fd,(void*)(bodyofRequest.data()),bodyofRequest.size());
@@ -89,9 +99,17 @@ void parssingOfBody::putDataTofile(string  data, client & obj)
         int t = pos + 10;
         while (data[t] != '"')
             t++;
-		file = obj.path + "/";
+        if (obj.uploadPath[obj.uploadPath.size() - 1] == '/')
+            obj.uploadPath.pop_back();
+		file = obj.uploadPath + "/";
+        if (access(file.c_str(), F_OK) != 0)
+        {
+            obj.respond.flagResponse = NOTFOUND;
+            file.clear();
+            obj.bodyofRequest.clear();
+            return ;
+        }
         file +=  data.substr(pos + 10,t - (pos + 10));
-		std::cout << "file == " << file << std::endl;
         fd = open((char*)(file.data()),O_CREAT | O_RDWR | O_EXCL , 0777);
         if (fd < 0)
         {
@@ -258,7 +276,7 @@ void parssingOfBody::handle_post(client &obj)
 		//std::cout << "buffer23 size == " << obj.buffer.size()<< std::endl;
         obj.bodyofRequest = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
         if (!obj.bodyofRequest.empty())
-            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.path);
+            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.uploadPath);
         else
             obj.respond.flagResponse = EMPTY;
     }

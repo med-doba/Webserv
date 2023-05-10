@@ -53,11 +53,15 @@ specified in the Content-Type header is not supported by the server.  (done)
 
 => do all the MIME-Types (pending ...)
 
+=> when i enter a bigpdf then after that i enter html file it goes on infinite loop  doesn't always happen (pending ...)
+
 => infinite rederict 
 example :
 location /redir {
   return 301 /redir;
 }
+
+=> allocates for client vector (pending ...)
 
 => implement the range header in the response plus rather than the whole file only read as much as you're gonna send (pending ...)
 

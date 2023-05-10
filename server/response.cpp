@@ -42,12 +42,6 @@ void response::generate_response()
 		this->defineContentType();
 		response_req = version + " " + std::to_string(status_code);
 		response_req += " " + phrase + del;
-		if (content != 0)
-		{
-			response_req += contenttype + del;
-			response_req += contentlength + std::to_string(body.size()) + del;
-			content = 0;
-		}
 		// std::cout << "close == " << close << std::endl;
 		if (close == CLOSE)
 		{
@@ -61,6 +55,12 @@ void response::generate_response()
 		}
 		for (size_t i = 0; i < this->headers.size(); i++)
 			response_req += headers[i] + del;
+		if (content != 0)
+		{
+			response_req += contenttype + del;
+			response_req += contentlength + std::to_string(body.size()) + del;
+			content = 0;
+		}
 		response_req += del;
 		std::cout << response_req  << std::endl;
 		if (!body.empty())
@@ -111,8 +111,8 @@ int response::send_response(client &obj, struct pollfd &pfds)
 	}
 	else if (i < (int)response_req.size())
 	{
-		std::cout << "chunks == " << pfds.fd << std::endl;
 		response_req.erase(0, i);
+		std::cout << "chunks == " << pfds.fd << std::endl;
 	}
 	return (-1);
 }

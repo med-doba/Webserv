@@ -149,12 +149,18 @@ void server::monitor()
 				{
 					if (pfds[i].fd == clients[j].client_socket)
 					{
+						std::cout << "from here" << std::endl;
 						this->disconnect(j);
 						break ;
 					}
 				}
 			}
-
+			if (this->remove == 1)
+			{
+				std::cout << "size pfds == " << pfds.size() << std::endl;
+				std::cout << "size clients == " << clients.size() << std::endl; 
+				break ;
+			}
 		}
 	}
 }
@@ -177,6 +183,8 @@ void server::new_connection(int indexPfds, int index)
 	c.events = POLLIN | POLLOUT;
 	pfds.push_back(c);
 	clients.push_back(obj);
+	size_t size = obj.input.tellg();
+	std::cout << "size == " << size << std::endl;
 	// this->pfds[indexPfds].revents &= ~POLLIN;
 	std::cout << "new client connected " << obj.client_socket << std::endl;
 }
@@ -184,34 +192,53 @@ void server::new_connection(int indexPfds, int index)
 void server::disconnect(int index)
 {
 	// std::cout << "header == " << clients[index].headerOfRequest << std::endl;
-	// std::cout << "client disconnected " << clients[index].client_socket << std::endl;
+	if (clients[1].input.is_open())
+		std::cout << "is open" << std::endl;
+	clients[index].input.close();
+	std::cout << "client disconnected " << clients[index].client_socket << std::endl;
 	close(clients[index].client_socket);
 	pfds.erase(pfds.begin() + index + servers.size());
 	clients.erase(clients.begin() + index);
+	std::cout << "client size " << clients.size() << std::endl;
 	this->remove = 1;
+	std::cout << "flag == " << clients[0].respond.flagResponse << std::endl;
+	std::cout << "ready === " << clients[0].respond.ready << std::endl;
+	std::cout << "file path == " << clients[0].path << std::endl;
+	std::cout << "sock == " << clients[0].client_socket << std::endl;
+	std::cout << clients[0].headerOfRequest << std::endl;
+	if (clients[0].input.is_open())
+		std::cout << "is open" << std::endl;
+	size_t size = clients[0].input.tellg();
+	std::cout << "size == " << size << std::endl;
+	std::cout << "response == " << clients[0].respond.response_req.substr(0, 500) << std::endl;
 }
 
 int server::checkLocation(client &ObjClient, serverParse ObjServer)
 {
 	std::string root;
-	std::cout << "URI " << ObjClient.URI << std::endl;
-	for (size_t i = 0; i < ObjServer.obj_location.size(); i++)
+	std::string locToFind = ObjClient.URI;
+	while (!locToFind.empty())
 	{
-		if (ObjClient.URI.compare(ObjServer.obj_location[i].path) == 0)
+		for (size_t i = 0; i < ObjServer.obj_location.size(); i++)
 		{
-			// std::cout << "path => " << ObjServer.obj_location[i].path << std::endl;
-			locationParse ObjLocation = ObjServer.obj_location[i];
-			if (ObjLocation.root.size() != 0)
-				root = ObjLocation.root[1];
-			else if (ObjServer.root.size() != 0)
-				root = ObjLocation.root[1];
-			if (root[root.size() - 1] == '/')
-				root.pop_back();
-			// root = root + ObjClient.URI;
-			ObjClient.path = root;
-			return (i);
+			if (locToFind.compare(ObjServer.obj_location[i].path) == 0)
+			{
+				// std::cout << "path => " << ObjServer.obj_location[i].path << std::endl;
+				locationParse ObjLocation = ObjServer.obj_location[i];
+				if (ObjLocation.root.size() != 0)
+					root = ObjLocation.root[1];
+				else if (ObjServer.root.size() != 0)
+					root = ObjServer.root[1];
+				if (root[root.size() - 1] == '/')
+					root.pop_back();
+				// root = root + ObjClient.URI;
+				ObjClient.path = root;
+				return (i);
+			}
 		}
+		locToFind = locToFind.substr(0, locToFind.find_last_of('/'));
 	}
+	
 	size_t i = 0;
 	for (;i < ObjServer.obj_location.size(); i++)
 	{
@@ -243,23 +270,23 @@ int server::checkLocation(client &ObjClient, serverParse ObjServer)
 	if (root[root.size() - 1] == '/')
 		root.pop_back();
 	ObjClient.path = root;
-	root = root + ObjClient.URI;
-	if (access(root.data(), F_OK) != 0)
-	{
-		if (ObjClient.flag != ERROR)
-		{
-			ObjClient.flag = ERROR;
-			ObjClient.respond.type = 1;
-			ObjClient.respond.status_code = 400;
-			ObjClient.respond.phrase = "Bad Request";
-			ObjClient.respond.content = 1;
-			ObjClient.respond.body = "Location Not Found";
-			ObjClient.respond.close = CLOSE;
-		}
-	}
-	else
-		return (i);
-	return (-1);
+	// root = root + ObjClient.URI;
+	// if (access(root.data(), F_OK) != 0)
+	// {
+	// 	if (ObjClient.flag != ERROR)
+	// 	{
+	// 		ObjClient.flag = ERROR;
+	// 		ObjClient.respond.type = 1;
+	// 		ObjClient.respond.status_code = 400;
+	// 		ObjClient.respond.phrase = "Bad Request";
+	// 		ObjClient.respond.content = 1;
+	// 		ObjClient.respond.body = "Location Not Found";
+	// 		ObjClient.respond.close = CLOSE;
+	// 	}
+	// }
+	// else
+	return (i);
+	// return (-1);
 }
 
 serverParse& server::findServerBlock(int index)
@@ -344,8 +371,11 @@ void server::checkMethodAllowed(client& objClient, serverParse obj, int loc)
 	std::string method;
 	locationParse locobj = obj.obj_location[loc];
 	if (objClient.tmp == POST)
+	{
 		method = "POST";
-	else if (objClient.tmp == GET)
+		return ;
+	}
+	if (objClient.tmp == GET)
 		method = "GET";
 	else if (objClient.tmp == DELETE)
 		method = "DELETE";
@@ -406,7 +436,12 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 	// 	root.pop_back();
 	// root = root + ObjClient.URI;
 	// ObjClient.path = root;
-	root = ObjClient.path + ObjClient.URI;
+	std::string resourseRequested = ObjClient.URI.substr(ObjLocation.path.size());
+	if (resourseRequested[0] == '/')
+		resourseRequested = resourseRequested.substr(1);
+	std::cout << "requested  %" << resourseRequested << "%" << std::endl;
+	root = ObjClient.path + "/" + resourseRequested;
+	std::cout << "[athhhhh ]= = " << root << std::endl;
 	if (access(root.data(), F_OK) != 0)
 	{
 		ObjClient.respond.ready = 1;
@@ -417,9 +452,10 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
     if (stat(root.data(), &info) != 0)
 	{
         std::cerr << "Error: Unable to stat file/directory.\n";
+		ObjClient.respond.ready = 1;
+		ObjClient.respond.flagResponse = INTERNALERR;
         return ;
     }
-	std::cout << "path == " << root << std::endl;
 	if (S_ISDIR(info.st_mode))
 	{
         std::cout << root << " is a directory.\n";
@@ -435,7 +471,10 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 						// ObjClient.respond.flagResponse = OPFILE;
 						ObjClient.respond.flagResponse = REDIRECT;
 						// ObjClient.path = testPath;
-						ObjClient.redirpath = "/" + ObjLocation.index[i];
+						std::string path = ObjLocation.path;
+						if (path[path.size() - 1] == '/')
+							path.pop_back();
+						ObjClient.redirpath = path + "/" + ObjLocation.index[i];
 						return;
 					}
 				}
@@ -446,17 +485,25 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 				{
 					ObjClient.respond.ready = 1;
 					ObjClient.respond.flagResponse = FORBIDEN;
+					return ;
 				}
 				else
 				{
 					ObjClient.respond.ready = 1;
+					ObjClient.listPath = ObjClient.path  + "/";
+					std::string opfile = ObjClient.URI.substr(ObjLocation.path.size());
+					if (opfile[0] == '/')
+						opfile = opfile.substr(1);
+					ObjClient.listPath += opfile;
 					ObjClient.respond.flagResponse = AUTOINDEX;
+					return ;
 				}
 			}
 			if (ObjLocation.autoindex.size() == 0)
 			{
 				ObjClient.respond.ready = 1;
 				ObjClient.respond.flagResponse = FORBIDEN;
+				return;
 			}
 
 		}
@@ -470,48 +517,153 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
     }
 	else if (S_ISREG(info.st_mode))
 	{
-        // std::cout << root << " is a file.\n";
+        std::cout << root << " is a file.\n";
+		std::cout << "sock === " << ObjClient.client_socket << std::endl;
 		if (!ObjClient.input.is_open())
 		{
-			// std::cout << "inside check\n";
+			std::cout << "inside check\n";
 			ObjClient.respond.ready = 1;
 			ObjClient.path = root;
+			std::cout << "file path == " << ObjClient.path << std::endl;
 			ObjClient.respond.flagResponse = OPFILE;
+			return ;
+		}
+		else
+		{
+			std::cout << "flag == " << ObjClient.respond.flagResponse << std::endl;
+			std::cout << "ready === " << ObjClient.respond.ready << std::endl;
+			std::cout << "file path == " << ObjClient.path << std::endl;
+			std::cout << ObjClient.headerOfRequest << std::endl;
+			size_t size = ObjClient.input.tellg();
+			std::cout << "size == " << size << std::endl;
+			std::cout << "response == " << ObjClient.respond.response_req.substr(0, 500) << std::endl;
+			exit(1);
+			ObjClient.respond.ready = 1;
 		}
 	}
+	else
+	{
+		ObjClient.respond.ready = 1;
+		ObjClient.respond.flagResponse = INTERNALERR;
+        return ;
+	}
 	// std::cout << "before input check \n";
-	// std::cout << "after input check \n";
+	std::cout << "after input check \n";
 	// std::cout << "root == "<< root << std::endl;
 }
 
 void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 {
+	// struct stat info;
 	locationParse ObjLocation = ObjServer.obj_location[loc];
+	std::string root;
+	ObjClient.uploadPath = "/Users/hmoubal/Desktop/webserv/upload";
+	if (ObjLocation.client_body_temp_path.size() != 0)
+		ObjClient.uploadPath = ObjLocation.client_body_temp_path[1];
 	for (size_t i = 1; i < ObjLocation.allow_methods.size(); i++)
 	{
 		if (ObjLocation.allow_methods[i].compare("POST") == 0)
 		{
-			std::cout << "lol1\n";
-			ObjClient.path = ObjLocation.client_body_temp_path[1];
-			std::cout << "lol2\n";
 			ObjClient.postMethod();
 			return;
 		}
 	}
+	if (ObjLocation.root.size() != 0)
+		root = ObjLocation.root[1];
+	else if (ObjServer.root.size() != 0)
+		root = ObjServer.root[1];
+	if (root[root.size() - 1] == '/')
+		root.pop_back();
+	root = root + ObjClient.URI;
+	if (access(root.data(), F_OK) != 0)
+	{
+		ObjClient.respond.ready = 1;
+		ObjClient.respond.flagResponse = NOTFOUND;
+		return ;
+	}
+    // if (stat(root.data(), &info) != 0)
+	// {
+    //     std::cerr << "Error: Unable to stat file/directory.\n";
+    //     return ;
+    // }
+	// if (S_ISDIR(info.st_mode))
+	// {
+    //     std::cout << root << " is a directory.\n";
+	// 	if (root[root.size() - 1] == '/')
+	// 	{
+	// 		if (ObjLocation.index.size() != 0)
+	// 		{
+	// 			for (size_t i = 1; i < ObjLocation.index.size() ; i++) {
+	// 				std::string testPath = root + ObjLocation.index[i];
+	// 				if (access(testPath.data(), F_OK) == 0)
+	// 				{
+	// 					ObjClient.respond.ready = 1;
+	// 					// ObjClient.respond.flagResponse = OPFILE;
+	// 					ObjClient.respond.flagResponse = REDIRECT;
+	// 					// ObjClient.path = testPath;
+	// 					ObjClient.redirpath = "/" + ObjLocation.index[i];
+	// 					return;
+	// 				}
+	// 			}
+	// 		}
+	// 		if (ObjLocation.autoindex.size() != 0)
+	// 		{
+	// 			if (ObjLocation.autoindex[1].compare("off") == 0)
+	// 			{
+	// 				ObjClient.respond.ready = 1;
+	// 				ObjClient.respond.flagResponse = FORBIDEN;
+	// 			}
+	// 			else
+	// 			{
+	// 				ObjClient.respond.ready = 1;
+	// 				ObjClient.respond.flagResponse = AUTOINDEX;
+	// 			}
+	// 		}
+	// 		if (ObjLocation.autoindex.size() == 0)
+	// 		{
+	// 			ObjClient.respond.ready = 1;
+	// 			ObjClient.respond.flagResponse = FORBIDEN;
+	// 		}
+
+	// 	}
+	// 	else
+	// 	{
+	// 		ObjClient.respond.ready = 1;
+	// 		ObjClient.respond.flagResponse = REDIRECT;
+	// 		ObjClient.redirpath = ObjClient.URI + "/";
+	// 		return;
+	// 	}
+    // }
+	// else if (S_ISREG(info.st_mode))
+	// {
+    //     // std::cout << root << " is a file.\n";
+	// 	if (!ObjClient.input.is_open())
+	// 	{
+	// 		// std::cout << "inside check\n";
+	// 		ObjClient.respond.ready = 1;
+	// 		ObjClient.path = root;
+	// 		ObjClient.respond.flagResponse = OPFILE;
+	// 	}
+	// }
+	ObjClient.respond.flagResponse = NOTFOUND;
+	ObjClient.respond.ready = 1;
 }
 
 void server::response(struct pollfd &pfds, int index)
 {
 	int loc = -1;
 	serverParse objServer = findServerBlock(index);
-	if (clients[index].flag != ERROR)
-		loc = checkLocation(clients[index], objServer);
-	if (loc != -1 && clients[index].flag != ERROR)
-		checkMaxBodySize(clients[index], objServer, loc);
-	if (loc != -1 && clients[index].flag != ERROR)
-		checkRedirection(clients[index], objServer, loc);
-	if (loc != -1 && clients[index].flag != ERROR)
-		checkMethodAllowed(clients[index], objServer, loc);
+	if (clients[index].respond.ready != 1)
+	{
+		if (clients[index].flag != ERROR)
+			loc = checkLocation(clients[index], objServer);
+		if (loc != -1 && clients[index].flag != ERROR)
+			checkMaxBodySize(clients[index], objServer, loc);
+		if (loc != -1 && clients[index].flag != ERROR)
+			checkRedirection(clients[index], objServer, loc);
+		if (loc != -1 && clients[index].flag != ERROR)
+			checkMethodAllowed(clients[index], objServer, loc);
+	}
 	if (clients[index].flag == ERROR)
 	{
 		std::cout << "ERROR" << std::endl;

@@ -38,7 +38,8 @@ enum {
 	ALIVE,
 	OPFILE,
 	REDIRECT,
-	AUTOINDEX
+	AUTOINDEX,
+	INTERNALERR
 };
 
 using std::string;
@@ -137,6 +138,8 @@ class client
 	int ready;
 	std::string path;
 	std::string redirpath;
+	std::string uploadPath;
+	std::string listPath;
 
 
 	parssingOfHeader headerParss;

@@ -89,11 +89,12 @@ int client::fillBody()
 	}
 	else
 		this->respond.content = 1;
-	std::cout << "file == " << OpFile << std::endl;
 	input.open(OpFile);
 	if (!input.is_open())
 	{
 		std::cout << "couldn't open file" << std::endl;
+		this->respond.ready = 1;
+		this->respond.flagResponse = INTERNALERR;
 		return (-1);
 	}
 	input.seekg(0, std::ios::end);
@@ -103,6 +104,7 @@ int client::fillBody()
 	// Reserve space in the buffer
 	if (size == 0)
 		return (0);
+	std::cout << "size === " << size << std::endl;
 	std::vector<char> content(size);
 
 	// Read the file in chunks
@@ -121,7 +123,9 @@ int client::fillBody()
 
 int client::generateListing()
 {
-	std::string listing = this->path + this->URI;
+	std::string listing = this->listPath;
+	std::cout << "listing == " << listing << std::endl;
+	std::cout << "uri ==-=-=- " << this->URI << std::endl;
 	DIR* directory = opendir(listing.c_str());
 	std::string html;
     if (directory == nullptr) {
@@ -139,7 +143,11 @@ int client::generateListing()
         }
         
         html += "<li><a href=\"";
-        html += entry->d_name;
+		if (this->URI[this->URI.size() - 1] == '/')
+			html += this->URI;
+		else
+			html += this->URI + "/" ;
+		html += entry->d_name;
         html += "\">";
         html += entry->d_name;
         html += "</a></li>";
@@ -149,6 +157,7 @@ int client::generateListing()
     
     closedir(directory);
 	this->respond.body = html;
+	std::cout << "body -- " << html << std::endl;
 	return (0);
 }
 
@@ -186,6 +195,7 @@ void client::clear()
 	flag = 0;
 	tmp = 0;
 	flag_ = 0;
+	input.clear();
 	input.close();
 }
 
@@ -233,12 +243,16 @@ client& client::operator=(const client& obj)
 		this->ready = obj.ready;
 		this->path = obj.path;
 		this->redirpath = obj.redirpath;
+		this->uploadPath = obj.uploadPath;
+		this->listPath = obj.listPath;
 	}
 	return (*this);
 }
 
 client::~client()
 {
+	// this->clear();
+	std::cout << "distructor" << std::endl;
 }
 
 int client::checkHeaderOfreq()
@@ -519,8 +533,9 @@ void client::initResponse()
 	}
 	else if (this->respond.flagResponse == OPFILE)
 	{
-		// std::cout << "filling body " << std::endl;
-		this->fillBody();
+		std::cout << "filling body == " << this->client_socket << std::endl;
+		if (this->fillBody() == -1)
+			this->initResponse();
 		this->respond.status_code = 200;
 		this->respond.phrase = "OK";
 		this->respond.close = ALIVE;
@@ -554,6 +569,7 @@ void client::initResponse()
 		this->respond.type = 1;
 		this->respond.close = ALIVE;
 		this->respond.content = 1;
+		this->respond.flagResponse = -1;
 		this->respond.body = "You Don't Have Permession To Do That";
 	}
 	else if (this->respond.flagResponse == AUTOINDEX)
@@ -599,6 +615,16 @@ void client::initResponse()
 		this->respond.close = ALIVE;
 		this->respond.content = 1;
 		this->respond.body = "Resource Already Exist";
+		this->respond.flagResponse = -1;
+	}
+	else if (this->respond.flagResponse == INTERNALERR)
+	{
+		this->respond.status_code = 500;
+		this->respond.phrase = "Internal Server Error";
+		this->respond.type = 1;
+		this->respond.close = CLOSE;
+		this->respond.content = 1;
+		this->respond.body = "Internal Server Error";
 		this->respond.flagResponse = -1;
 	}
 }
