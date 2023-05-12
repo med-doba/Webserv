@@ -184,6 +184,13 @@ void client::check(void)
 
 void client::clear()
 {
+	std::cout << "clearing " << std::endl;
+	if (input.is_open())
+	{
+		std::cout << "closing " << std::endl;
+		input.clear();
+		input.close();
+	}
 	headerOfRequest.clear();
 	bodyParss.clear();
 	boundary.clear();
@@ -195,8 +202,6 @@ void client::clear()
 	flag = 0;
 	tmp = 0;
 	flag_ = 0;
-	input.clear();
-	input.close();
 }
 
 client::client()
@@ -472,7 +477,7 @@ int client::deleteMethod(struct pollfd &pfds)
 			this->respond.body = "You Don't Have Permession To Do That";
 		}
 		this->respond.generate_response();
-		int i = this->respond.send_response(this ,pfds);
+		int i = this->respond.send_response(*this ,pfds);
 		if (i == 0)
 		{
 			this->clear();

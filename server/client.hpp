@@ -93,7 +93,7 @@ class response
 
         response(/* args */);
 		void generate_response();
-		int send_response(client *obj, struct pollfd &pfds);
+		int send_response(client &obj, struct pollfd &pfds);
 		void defineContentType();
 		response(const response &obj);
 		response& operator=(const response &obj);

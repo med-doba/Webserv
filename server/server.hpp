@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 #include <fcntl.h>
 #include <cstring>
 #include <string>
@@ -26,7 +27,9 @@ class server
 {
 	public:
 	std::vector<miniserver> servers;
-	std::vector<client *> clients;
+	// std::vector<client *> clients;
+	std::vector<client> clients;
+	// std::map<int, client *> clients;
 	std::vector<struct pollfd> pfds;
 	std::vector<serverParse>	block;
 	int remove;
@@ -43,13 +46,13 @@ class server
 	void response(struct pollfd &pfds, int index);
 	void receive(int pfds_index, int index);
 	void new_connection(int indexPfds, int index);
-	int checkLocation(client *objClient, serverParse obj);
-	void checkMaxBodySize(client* objClient, serverParse obj, int loc);
-	void checkMethodAllowed(client* objClient, serverParse obj, int loc);
-	void checkRedirection(client* objClient, serverParse obj, int loc);
-	void GetBehaviour(client *ObjClient, serverParse ObjServer, int loc);
-	void PostBehaviour(client *ObjClient, serverParse ObjServer, int loc);
-	void DeleteBehaviour(client *ObjClient, serverParse ObjServer, int loc);
+	int checkLocation(client &objClient, serverParse obj);
+	void checkMaxBodySize(client &objClient, serverParse obj, int loc);
+	void checkMethodAllowed(client &objClient, serverParse obj, int loc);
+	void checkRedirection(client &objClient, serverParse obj, int loc);
+	void GetBehaviour(client &ObjClient, serverParse ObjServer, int loc);
+	void PostBehaviour(client &ObjClient, serverParse ObjServer, int loc);
+	void DeleteBehaviour(client &ObjClient, serverParse ObjServer, int loc);
 	int DeleteAllContent(std::string path);
 	int DeleteFile(std::string path);
 	serverParse& findServerBlock(int index);

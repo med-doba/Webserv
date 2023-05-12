@@ -87,13 +87,13 @@ void response::clear()
 	ready = 0;
 }
 
-int response::send_response(client *obj, struct pollfd &pfds)
+int response::send_response(client &obj, struct pollfd &pfds)
 {
 	int i;
 	int close = 0;
 
 	std::cout << "resp == " << response_req.size() << std::endl;
-	i = send(obj->client_socket, response_req.c_str(), response_req.size(), 0);
+	i = send(obj.client_socket, response_req.c_str(), response_req.size(), 0);
 	std::cout << "i == " << i << std::endl;
 	if (i < 0)
 	{
@@ -103,8 +103,8 @@ int response::send_response(client *obj, struct pollfd &pfds)
 	else if (i == (int)response_req.size())
 	{
 		std::cout << "sent complete == " << pfds.fd << std::endl;
-		close = obj->respond.close;
-		obj->clear();
+		close = obj.respond.close;
+		obj.clear();
 		// pfds.revents&= ~POLLOUT;
 		// std::cout << "closesend == " << close << std::endl;
 		return (close);
