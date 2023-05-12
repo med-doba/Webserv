@@ -35,7 +35,7 @@ to the request method (pending ...) (mustapha will do it)
 
 => extension random generation doesn't work test case : run server then send a file then rerun server and notice the file doesn't get created (pending ...)
 
-=> check if no /r is found when looking for the chunked encoding (pending ...)
+=> check if no /r is found when looking for the chunked encoding (done)
 
 =>	415 Unsupported Media Type
 This response means that the server was unable to process the request because the content type
@@ -45,25 +45,25 @@ specified in the Content-Type header is not supported by the server.  (done)
 
 => ask mustapha if he handled nothing but space between the elements of the request line (done)
 
-=> handle if the URI has any spaces (pending ...)
+=> handle if the URI has any spaces (done)
 
 => server hangs when contentLength is bigger the actual body (pending ...)
 
 => doba segv no listen found (done)
 
-=> create a map with key is the status code and the value is the phrase-line (pending ...)
+=> create a map with key is the status code and the value is the phrase-line (done)
 
-=> do all the MIME-Types (pending ...)
+=> do all the MIME-Types (done)
 
-=> when i enter a bigpdf then after that i enter html file it goes on infinite loop  doesn't always happen (pending ...)
+=> when i enter a bigpdf then after that i enter html file it goes on infinite loop  doesn't always happen (done)
 
-=> infinite rederict 
+=> infinite rederict (done)
 example :
 location /redir {
   return 301 /redir;
 }
 
-=> allocates for client vector (pending ...)
+=> allocates for client vector (done)
 
 => implement the range header in the response plus rather than the whole file only read as much as you're gonna send (pending ...)
 
