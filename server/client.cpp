@@ -172,7 +172,7 @@ void client::check(void)
 		this->flag = ERROR;
 		this->respond.type = 1;
 		this->respond.status_code = 404;
-		this->respond.phrase = "Not Found";
+		// this->respond.phrase = "Not Found";
 		// this->respond.content = 1;
 		// this->respond.body = "Location Not Found";
 		this->respond.close = CLOSE;
@@ -258,7 +258,7 @@ client::~client()
 {
 }
 
-int client::checkHeaderOfreq()
+int client::checkHeaderOfreq(std::map<std::string, std::string> Percent)
 {
     int pos = 0;
 	int _tmp = 0;
@@ -272,7 +272,7 @@ int client::checkHeaderOfreq()
             {
                 headerOfRequest = buffer.substr(0,pos - 1);// not include \r\n
 				std::string copyheader = headerOfRequest;
-				this->flag_res = headerParss.checkHeaderOfreq_(*this, copyheader);
+				this->flag_res = headerParss.checkHeaderOfreq_(*this, copyheader, Percent);
 				if (this->flag_res < 0)
 				{
 					flag = ERROR;
@@ -421,73 +421,73 @@ int client::pushToBuffer()
     return this->bytes_read;
 }
 
-int client::deleteMethod(struct pollfd &pfds)
-{
-	//std::cout << "hello from delete"  << std::endl;
-	//std::cout << "URI -- " << URI << std::endl;
-	std::string str;
-	if (URI.size() <= 7)
-		respond.flagResponse = FORBIDEN;
-	else
-	{
-		for (int i = 0; i < 7; i++)
-			str.push_back(URI[i]);
-		if (str.compare("upload/") == 0)
-		{
-			int i = remove((char *)URI.data());
-			if (i  == 0)
-			{
-				//std::cout << "removed successfully" << std::endl;
-				this->respond.flagResponse = DELETED;
-			}
-			else
-			{
-				//std::cout << "error on remove" << std::endl;
-				this->respond.flagResponse = NOTFOUND;
-			}
-		}
-		else
-			respond.flagResponse = FORBIDEN;
-	}
-	this->respond.ready = 1;
-	if (this->respond.ready == 1)
-	{
-		if (this->respond.flagResponse == DELETED)
-		{
-			this->respond.status_code = 204;
-			this->respond.phrase = "No Content";
-			this->respond.type = 1;
-			// this->respond.content = 1;
-			// this->respond.body = "Resource Already Exist";
-		}
-		if (this->respond.flagResponse == NOTFOUND)
-		{
-			this->respond.status_code = 404;
-			this->respond.phrase = "Not Found";
-			this->respond.type = 1;
-			this->respond.content = 1;
-			this->respond.body = "Resource Doesn't Exist";
-		}
-		if (this->respond.flagResponse == FORBIDEN)
-		{
-			this->respond.status_code = 403;
-			this->respond.phrase = "Forbidden";
-			this->respond.type = 1;
-			this->respond.content = 1;
-			this->respond.body = "You Don't Have Permession To Do That";
-		}
-		this->respond.generate_response();
-		int i = this->respond.send_response(*this ,pfds);
-		if (i == 0)
-		{
-			this->clear();
-			// pfds.revents &= ~POLLOUT;
-		}
-		else if (i == CLOSE)
-			return (CLOSE);
-	}
-	return (0);
-}
+// int client::deleteMethod(struct pollfd &pfds)
+// {
+// 	//std::cout << "hello from delete"  << std::endl;
+// 	//std::cout << "URI -- " << URI << std::endl;
+// 	std::string str;
+// 	if (URI.size() <= 7)
+// 		respond.flagResponse = FORBIDEN;
+// 	else
+// 	{
+// 		for (int i = 0; i < 7; i++)
+// 			str.push_back(URI[i]);
+// 		if (str.compare("upload/") == 0)
+// 		{
+// 			int i = remove((char *)URI.data());
+// 			if (i  == 0)
+// 			{
+// 				//std::cout << "removed successfully" << std::endl;
+// 				this->respond.flagResponse = DELETED;
+// 			}
+// 			else
+// 			{
+// 				//std::cout << "error on remove" << std::endl;
+// 				this->respond.flagResponse = NOTFOUND;
+// 			}
+// 		}
+// 		else
+// 			respond.flagResponse = FORBIDEN;
+// 	}
+// 	this->respond.ready = 1;
+// 	if (this->respond.ready == 1)
+// 	{
+// 		if (this->respond.flagResponse == DELETED)
+// 		{
+// 			this->respond.status_code = 204;
+// 			this->respond.phrase = "No Content";
+// 			this->respond.type = 1;
+// 			// this->respond.content = 1;
+// 			// this->respond.body = "Resource Already Exist";
+// 		}
+// 		if (this->respond.flagResponse == NOTFOUND)
+// 		{
+// 			this->respond.status_code = 404;
+// 			this->respond.phrase = "Not Found";
+// 			this->respond.type = 1;
+// 			this->respond.content = 1;
+// 			this->respond.body = "Resource Doesn't Exist";
+// 		}
+// 		if (this->respond.flagResponse == FORBIDEN)
+// 		{
+// 			this->respond.status_code = 403;
+// 			this->respond.phrase = "Forbidden";
+// 			this->respond.type = 1;
+// 			this->respond.content = 1;
+// 			this->respond.body = "You Don't Have Permession To Do That";
+// 		}
+// 		this->respond.generate_response();
+// 		int i = this->respond.send_response(*this ,pfds);
+// 		if (i == 0)
+// 		{
+// 			this->clear();
+// 			// pfds.revents &= ~POLLOUT;
+// 		}
+// 		else if (i == CLOSE)
+// 			return (CLOSE);
+// 	}
+// 	return (0);
+// }
 
 int client::postMethod()
 {
@@ -527,7 +527,7 @@ void client::initResponse()
 	if (this->respond.flagResponse == NOTFOUND)
 	{
 		this->respond.status_code = 404;
-		this->respond.phrase = "Not Found";
+		// this->respond.phrase = "Not Found";
 		this->respond.body = "Resource Not Found In Root";
 		this->respond.content = 1;
 		this->respond.close = ALIVE;
@@ -537,7 +537,7 @@ void client::initResponse()
 	else if (this->respond.flagResponse == CONFLICT)
 	{
 		this->respond.status_code = 409;
-		this->respond.phrase = "Conflict";
+		// this->respond.phrase = "Conflict";
 		this->respond.body = "No / At The End Of The URI";
 		this->respond.content = 1;
 		this->respond.close = ALIVE;
@@ -550,7 +550,7 @@ void client::initResponse()
 		if (this->fillBody() == -1)
 			this->initResponse();
 		this->respond.status_code = 200;
-		this->respond.phrase = "OK";
+		// this->respond.phrase = "OK";
 		this->respond.close = ALIVE;
 		this->respond.headers.push_back("Cache-Control: no-cache, no-store");
 		this->respond.headers.push_back("Pragma: no-cache");
@@ -564,7 +564,7 @@ void client::initResponse()
 	{
 		this->generateUrl();
 		this->respond.status_code = 301;
-		this->respond.phrase = "Moved Permanently";
+		// this->respond.phrase = "Moved Permanently";
 		this->respond.close = ALIVE;
 		this->respond.headers.push_back("Cache-Control: no-cache, no-store");
 		this->respond.headers.push_back("Pragma: no-cache");
@@ -578,7 +578,7 @@ void client::initResponse()
 	else if (this->respond.flagResponse == FORBIDEN)
 	{
 		this->respond.status_code = 403;
-		this->respond.phrase = "Forbidden";
+		// this->respond.phrase = "Forbidden";
 		this->respond.type = 1;
 		this->respond.close = ALIVE;
 		this->respond.content = 1;
@@ -590,7 +590,7 @@ void client::initResponse()
 		// std::cout << "filling body " << std::endl;
 		this->generateListing();
 		this->respond.status_code = 200;
-		this->respond.phrase = "OK";
+		// this->respond.phrase = "OK";
 		this->respond.close = ALIVE;
 		this->respond.headers.push_back("Cache-Control: no-cache, no-store");
 		this->respond.headers.push_back("Pragma: no-cache");
@@ -603,7 +603,7 @@ void client::initResponse()
 	else if (this->respond.flagResponse == CREATED)
 	{
 		this->respond.status_code = 201;
-		this->respond.phrase = "created";
+		// this->respond.phrase = "created";
 		this->respond.type = 1;
 		this->respond.close = ALIVE;
 		this->respond.content = 1;
@@ -613,7 +613,7 @@ void client::initResponse()
 	else if (this->respond.flagResponse == EMPTY)
 	{
 		this->respond.status_code = 204;
-		this->respond.phrase = "No Content";
+		// this->respond.phrase = "No Content";
 		this->respond.type = 1;
 		this->respond.close = ALIVE;
 		this->respond.flagResponse = -1;
@@ -623,7 +623,7 @@ void client::initResponse()
 	else if (this->respond.flagResponse == EXIST)
 	{
 		this->respond.status_code = 409;
-		this->respond.phrase = "Conflict";
+		// this->respond.phrase = "Conflict";
 		this->respond.type = 1;
 		this->respond.close = ALIVE;
 		this->respond.content = 1;
@@ -633,7 +633,7 @@ void client::initResponse()
 	else if (this->respond.flagResponse == INTERNALERR)
 	{
 		this->respond.status_code = 500;
-		this->respond.phrase = "Internal Server Error";
+		// this->respond.phrase = "Internal Server Error";
 		this->respond.type = 1;
 		this->respond.close = CLOSE;
 		this->respond.content = 1;
@@ -644,7 +644,7 @@ void client::initResponse()
 	{
 		this->respond.close = ALIVE;
 		this->respond.status_code = 204;
-		this->respond.phrase = "No Content";
+		// this->respond.phrase = "No Content";
 		this->respond.type = 1;
 		this->respond.flagResponse = -1;
 		// this->respond.content = 1;

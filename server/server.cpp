@@ -1,8 +1,93 @@
 #include "server.hpp"
+
+void server::fillStatusCode()
+{
+	StatusPhrase.insert(std::make_pair(100,"Continue"));
+	StatusPhrase.insert(std::make_pair(101,"Switching Protocols"));
+
+
+	StatusPhrase.insert(std::make_pair(200,"OK"));
+	StatusPhrase.insert(std::make_pair(201,"Created"));
+	StatusPhrase.insert(std::make_pair(202,"Accepted"));
+	StatusPhrase.insert(std::make_pair(203,"Non-Authoritative Information"));
+	StatusPhrase.insert(std::make_pair(204,"No Content"));
+	StatusPhrase.insert(std::make_pair(205,"Reset Content"));
+	StatusPhrase.insert(std::make_pair(206,"Partial Content"));
+
+
+	StatusPhrase.insert(std::make_pair(300,"Multiple Choices"));
+	StatusPhrase.insert(std::make_pair(301,"Moved Permanently"));
+	StatusPhrase.insert(std::make_pair(302,"Found"));
+	StatusPhrase.insert(std::make_pair(303,"See Other"));
+	StatusPhrase.insert(std::make_pair(304,"Not Modified"));
+	StatusPhrase.insert(std::make_pair(305,"Use Proxy"));
+	StatusPhrase.insert(std::make_pair(306,"(Unused)"));
+	StatusPhrase.insert(std::make_pair(307,"Temporary Redirect"));
+
+
+	StatusPhrase.insert(std::make_pair(400,"Bad Request"));
+	StatusPhrase.insert(std::make_pair(401,"Unauthorized"));
+	StatusPhrase.insert(std::make_pair(402,"Payment Required"));
+	StatusPhrase.insert(std::make_pair(403,"Forbidden"));
+	StatusPhrase.insert(std::make_pair(404,"Not Found"));
+	StatusPhrase.insert(std::make_pair(405,"Method Not Allowed"));
+	StatusPhrase.insert(std::make_pair(406,"Not Acceptable"));
+	StatusPhrase.insert(std::make_pair(407,"Proxy Authentication Required"));
+	StatusPhrase.insert(std::make_pair(408,"Request Timeout"));
+	StatusPhrase.insert(std::make_pair(409,"Conflict"));
+	StatusPhrase.insert(std::make_pair(410,"Gone"));
+	StatusPhrase.insert(std::make_pair(411,"Length Required"));
+	StatusPhrase.insert(std::make_pair(412,"Precondition Failed"));
+	StatusPhrase.insert(std::make_pair(413,"Request Entity Too Large"));
+	StatusPhrase.insert(std::make_pair(414,"Request-URI Too Long"));
+	StatusPhrase.insert(std::make_pair(415,"Unsupported Media Type"));
+	StatusPhrase.insert(std::make_pair(416,"Requested Range Not Satisfiable"));
+	StatusPhrase.insert(std::make_pair(417,"Expectation Failed"));
+
+
+
+
+	StatusPhrase.insert(std::make_pair(500,"Internal Server Error"));
+	StatusPhrase.insert(std::make_pair(501,"Not Implemented"));
+	StatusPhrase.insert(std::make_pair(502,"Bad Gateway"));
+	StatusPhrase.insert(std::make_pair(503,"Service Unavailable"));
+	StatusPhrase.insert(std::make_pair(504,"Gateway Timeout"));
+	StatusPhrase.insert(std::make_pair(505,"HTTP Version Not Supported"));
+	StatusPhrase.insert(std::make_pair(508,"Loop Detected"));
+}
+
+void server::fillEncoding()
+{
+	PercentEncoding.insert(std::make_pair("%3A",":"));
+	PercentEncoding.insert(std::make_pair("%2F","/"));
+	PercentEncoding.insert(std::make_pair("%3F","?"));
+	PercentEncoding.insert(std::make_pair("%23","#"));
+	PercentEncoding.insert(std::make_pair("%5B","["));
+	PercentEncoding.insert(std::make_pair("%5D","]"));
+	PercentEncoding.insert(std::make_pair("%40","@"));
+	PercentEncoding.insert(std::make_pair("%21","!"));
+	PercentEncoding.insert(std::make_pair("%24","$"));
+	PercentEncoding.insert(std::make_pair("%26","&"));
+	PercentEncoding.insert(std::make_pair("%27","'"));
+	PercentEncoding.insert(std::make_pair("%28","("));
+	PercentEncoding.insert(std::make_pair("%29",")"));
+	PercentEncoding.insert(std::make_pair("%2A","*"));
+	PercentEncoding.insert(std::make_pair("%2B","+"));
+	PercentEncoding.insert(std::make_pair("%2C",","));
+	PercentEncoding.insert(std::make_pair("%3B",";"));
+	PercentEncoding.insert(std::make_pair("%3D","="));
+	PercentEncoding.insert(std::make_pair("%25","%"));
+	PercentEncoding.insert(std::make_pair("%20"," "));
+}
+
+
+
 server::server()
 {
 	this->remove = 0;
 	this->poll_count = 0;
+	this->fillEncoding();
+	this->fillStatusCode();
 }
 server::server(const server &obj)
 {
@@ -241,7 +326,7 @@ void server::disconnect(int index)
 	// delete clients[index];
 	// clients[index] = nullptr;
 	pfds.erase(pfds.begin() + index + servers.size());
-	clients[index].ready = -1;
+	// clients[index].ready = -1;
 	clients[index].clear();
 	clients.erase(clients.begin() + index);
 	// std::cout << "client size " << clients.size() << std::endl;
@@ -296,7 +381,7 @@ int server::checkLocation(client &ObjClient, serverParse ObjServer)
 			ObjClient.flag = ERROR;
 			ObjClient.respond.type = 1;
 			ObjClient.respond.status_code = 400;
-			ObjClient.respond.phrase = "Bad Request";
+			// ObjClient.respond.phrase = "Bad Request";
 			ObjClient.respond.content = 1;
 			ObjClient.respond.body = "Location Not Found";
 			ObjClient.respond.close = CLOSE;
@@ -319,7 +404,7 @@ int server::checkLocation(client &ObjClient, serverParse ObjServer)
 	// 		ObjClient.flag = ERROR;
 	// 		ObjClient.respond.type = 1;
 	// 		ObjClient.respond.status_code = 400;
-	// 		ObjClient.respond.phrase = "Bad Request";
+	// 		// ObjClient.respond.phrase = "Bad Request";
 	// 		ObjClient.respond.content = 1;
 	// 		ObjClient.respond.body = "Location Not Found";
 	// 		ObjClient.respond.close = CLOSE;
@@ -372,7 +457,7 @@ serverParse& server::findServerBlock(int index)
 		clients[index].flag = ERROR;
 		clients[index].respond.type = 1;
 		clients[index].respond.status_code = 400;
-		clients[index].respond.phrase = "Bad Request";
+		// clients[index].respond.phrase = "Bad Request";
 		clients[index].respond.content = 1;
 		clients[index].respond.body = "No Server Block Matches With The Host Header";
 		clients[index].respond.close = CLOSE;
@@ -398,7 +483,7 @@ void server::checkMaxBodySize(client &ObjClient, serverParse obj, int loc)
 			ObjClient.flag = ERROR;
 			ObjClient.respond.type = 1;
 			ObjClient.respond.status_code = 413;
-			ObjClient.respond.phrase = "Request Entity Too Large";
+			// ObjClient.respond.phrase = "Request Entity Too Large";
 			ObjClient.respond.content = 1;
 			ObjClient.respond.body = "File Too Big";
 			ObjClient.respond.close = CLOSE;
@@ -431,7 +516,7 @@ void server::checkMethodAllowed(client &ObjClient, serverParse obj, int loc)
 		ObjClient.flag = ERROR;
 		ObjClient.respond.type = 1;
 		ObjClient.respond.status_code = 405;
-		ObjClient.respond.phrase = "Method Not Allowed";
+		// ObjClient.respond.phrase = "Method Not Allowed";
 		ObjClient.respond.content = 1;
 		ObjClient.respond.body = "Method " + method + " Not Allowed In This Location";
 		ObjClient.respond.close = CLOSE;
@@ -452,7 +537,7 @@ void server::checkRedirection(client &ObjClient, serverParse obj, int loc)
 				ObjClient.flag = ERROR;
 				ObjClient.respond.type = 1;
 				ObjClient.respond.status_code = 508;
-				ObjClient.respond.phrase = "Loop Detected";
+				// ObjClient.respond.phrase = "Loop Detected";
 				ObjClient.respond.body = "Infinite Redirect";
 				ObjClient.respond.content = 1;
 				return ;
@@ -470,10 +555,10 @@ void server::checkRedirection(client &ObjClient, serverParse obj, int loc)
 						ObjClient.flag = ERROR;
 						ObjClient.respond.type = 1;
 						ObjClient.respond.status_code = stoi(ObjLocation.rtn[1]);
-						if (ObjClient.respond.status_code == 301)
-							ObjClient.respond.phrase = "Moved Permanently";
-						else
-							ObjClient.respond.phrase = "Found";
+						// if (ObjClient.respond.status_code == 301)
+							// ObjClient.respond.phrase = "Moved Permanently";
+						// else
+							// ObjClient.respond.phrase = "Found";
 						ObjClient.respond.headers.push_back("Location: " + ObjClient.redirpath);
 						ObjClient.respond.headers.push_back("Cache-Control: no-cache, no-store, must-revalidate");
 						ObjClient.respond.headers.push_back("Pragma: no-cache");
@@ -484,7 +569,7 @@ void server::checkRedirection(client &ObjClient, serverParse obj, int loc)
 				ObjClient.flag = ERROR;
 				ObjClient.respond.type = 1;
 				ObjClient.respond.status_code = 404;
-				ObjClient.respond.phrase = "Not Found";
+				// ObjClient.respond.phrase = "Not Found";
 				ObjClient.respond.body = "Redirect Not Found";
 				ObjClient.respond.content = 1;
 				return ;
@@ -496,10 +581,10 @@ void server::checkRedirection(client &ObjClient, serverParse obj, int loc)
 			ObjClient.flag = ERROR;
 			ObjClient.respond.type = 1;
 			ObjClient.respond.status_code = stoi(ObjLocation.rtn[1]);
-			if (ObjClient.respond.status_code == 301)
-				ObjClient.respond.phrase = "Moved Permanently";
-			else
-				ObjClient.respond.phrase = "Found";
+			// if (ObjClient.respond.status_code == 301)
+				// ObjClient.respond.phrase = "Moved Permanently";
+			// else
+				// ObjClient.respond.phrase = "Found";
 			ObjClient.respond.headers.push_back("Location: " + redirectUrl);
 			ObjClient.respond.headers.push_back("Cache-Control: no-cache, no-store, must-revalidate");
 			ObjClient.respond.headers.push_back("Pragma: no-cache");
@@ -850,7 +935,7 @@ void server::response(struct pollfd &pfds, int index)
 	if (clients[index].flag == ERROR)
 	{
 		std::cout << "ERROR" << std::endl;
-		clients[index].respond.generate_response();
+		clients[index].respond.generate_response(StatusPhrase);
 		if (clients[index].respond.send_response(clients[index], pfds) == 1)
 		{
 			std::cout << "from error response "<< std::endl;
@@ -883,7 +968,7 @@ void server::response(struct pollfd &pfds, int index)
 	if (clients[index].respond.ready == 1)
 	{
 		clients[index].initResponse();
-		clients[index].respond.generate_response();
+		clients[index].respond.generate_response(StatusPhrase);
 		if (clients[index].respond.send_response(clients[index], pfds) == 1)
 		{
 			std::cout << "from response " << std::endl;
@@ -916,7 +1001,7 @@ void server::receive(int pfds_index, int index)
 		this->disconnect(index);
         return ;
 	}
-    rtn = clients[index].checkHeaderOfreq();
+    rtn = clients[index].checkHeaderOfreq(PercentEncoding);
 	// //std::cout << "here tmp -- " << clients[index].tmp << std::endl;
 	// //std::cout << clients[index].headerOfRequest << std::endl;
 	// //std::cout << rtn << std::endl;
@@ -942,7 +1027,7 @@ void server::receive(int pfds_index, int index)
 		else if ((int)test.size() > clients[index].ContentLength)
 		{
 			clients[index].respond.status_code = 400;
-			clients[index].respond.phrase = "Bad Request";
+			// clients[index].respond.phrase = "Bad Request";
 			clients[index].respond.type = 1;
 			clients[index].respond.body = "The request is invalid or malformed.";
 			clients[index].respond.close = CLOSE;

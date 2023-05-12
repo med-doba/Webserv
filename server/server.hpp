@@ -32,6 +32,8 @@ class server
 	// std::map<int, client *> clients;
 	std::vector<struct pollfd> pfds;
 	std::vector<serverParse>	block;
+	std::map<std::string, std::string> PercentEncoding;
+	std::map<int, std::string> StatusPhrase;
 	int remove;
 	int poll_count;
 
@@ -55,6 +57,8 @@ class server
 	void DeleteBehaviour(client &ObjClient, serverParse ObjServer, int loc);
 	int DeleteAllContent(std::string path);
 	int DeleteFile(std::string path);
+	void fillEncoding();
+	void fillStatusCode();
 	serverParse& findServerBlock(int index);
 };
 

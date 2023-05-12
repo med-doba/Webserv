@@ -183,7 +183,7 @@ void parssingOfBody::handling_form_data(client &obj)
             //std::cout << "size == " << size << std::endl;
             //std::cout << "content == " << obj.ContentLength << std::endl;
             obj.respond.status_code = 400;
-            obj.respond.phrase = "Bad Request";
+            // // obj.respond.phrase = "Bad Request";
             obj.respond.type = 1;
             obj.respond.body = "The size of the request body does not match the Content-Length header.";
             obj.respond.close = CLOSE;
@@ -248,7 +248,7 @@ void  parssingOfBody::handling_chunked_data(client &obj)
 				if (obj.ContentLength < (int)obj.bodyofRequest.size())
 				{
 					obj.respond.status_code = 400;
-					obj.respond.phrase = "Bad Request";
+					// // obj.respond.phrase = "Bad Request";
 					obj.respond.type = 1;
 					obj.respond.body = "The request is invalid or malformed.";
 					obj.respond.close = CLOSE;

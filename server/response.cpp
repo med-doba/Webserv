@@ -5,7 +5,7 @@ response::response()
 	type = 0;
 	redirectUrl = "";
 	status_code = 0;
-	phrase = "";
+	// phrase = "";
 	version = "HTTP/1.1";
 	del = "\r\n";
 	closeheader = "Connection: close";
@@ -34,14 +34,17 @@ void response::defineContentType()
 		contenttype += "Content-Type: text/css";
 }
 
-void response::generate_response()
+void response::generate_response(std::map<int, std::string> statusPhrase)
 {
 	std::cout << "type == " << type << std::endl;
 	if (type == 1)
 	{
+		std::map<int, std::string>::iterator it;
 		this->defineContentType();
 		response_req = version + " " + std::to_string(status_code);
-		response_req += " " + phrase + del;
+		it = statusPhrase.find(status_code);
+		if (it != statusPhrase.end())
+			response_req += " " + it->second + del;
 		// std::cout << "close == " << close << std::endl;
 		if (close == CLOSE)
 		{
@@ -78,7 +81,7 @@ void response::clear()
 	redirectUrl.clear();
 	type = 0;
 	contenttype.clear();
-	phrase.clear();
+	// phrase.clear();
 	headers.clear();
 	body.clear();
 	close = 0;
@@ -126,7 +129,7 @@ response& response::operator=(const response &obj)
 {
 	if (this != &obj)
 	{
-		this->phrase = obj.phrase;
+		// this->phrase = obj.phrase;
 		this->status_code = obj.status_code;
 		this->type = obj.type;
 		this->close = obj.close;

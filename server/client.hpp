@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <sstream>
 #include <vector>
+#include <map>
 #include <cstring>
 #include <sys/socket.h>
 #include <fstream>
@@ -74,7 +75,6 @@ class response
 {
     public:
 		int status_code;
-		std::string phrase;
 		int type;
 		std::string response_req;
 		std::string body;
@@ -92,7 +92,7 @@ class response
 		int ready;
 
         response(/* args */);
-		void generate_response();
+		void generate_response(std::map<int, std::string>);
 		int send_response(client &obj, struct pollfd &pfds);
 		void defineContentType();
 		response(const response &obj);
@@ -112,9 +112,9 @@ class parssingOfHeader
 
         long long	ft_atoi(const char *str);
 
-        int checkHeaderOfreq_(client &obj, std::string copy);
-        int checkHeaderLine(client &obj);
-		int VerifyURI(client &obj);
+        int checkHeaderLine(client &obj, std::map<std::string, std::string> Percent);
+		int checkHeaderOfreq_(client &obj, std::string copy, std::map<std::string, std::string> Percent);
+		int VerifyURI(client &obj, std::map<std::string, std::string> PercentEncoding);
 		int check_media(client &obj);
         int checkHeaders(client &obj, std::string copy);
         ~parssingOfHeader();
@@ -161,7 +161,7 @@ class client
 	// int response(int pfds_index, vector<struct pollfd> &pfds);
 	int pushToBuffer();
 	void clear();
-	int checkHeaderOfreq();
+	int checkHeaderOfreq(std::map <std::string, std::string> );
 	long long	ft_atoi(const char *str);
 	char *ft_substr(char const *s, unsigned int start, size_t len);
 	void check(void);
