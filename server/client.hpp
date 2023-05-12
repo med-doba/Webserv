@@ -61,11 +61,11 @@ class parssingOfBody
         int                     fd;
 
         parssingOfBody(/* args */);
-        void handle_post(client &obj);
-        void handling_chunked_data(client &obj);
-        void handling_form_data(client &obj);
-		void putDataTofile(string  data, client & obj);
-        void  create_file_and_put_content(std::string & bodyofRequest,std::string & headerOfRequest, int&created, std::string path);
+        void handle_post(client &obj, std::multimap<std::string, std::string>);
+        void handling_chunked_data(client &obj, std::multimap<std::string, std::string>);
+        void handling_form_data(client &obj, std::multimap<std::string, std::string>);
+		void putDataTofile(string  data, client & obj, std::multimap<std::string, std::string>);
+        void  create_file_and_put_content(std::string & bodyofRequest,std::string & headerOfRequest, int&created, std::string path, std::multimap<std::string, std::string>);
 		void clear();
 
         ~parssingOfBody();
@@ -113,10 +113,10 @@ class parssingOfHeader
         long long	ft_atoi(const char *str);
 
         int checkHeaderLine(client &obj, std::map<std::string, std::string> Percent);
-		int checkHeaderOfreq_(client &obj, std::string copy, std::map<std::string, std::string> Percent);
+		int checkHeaderOfreq_(client &obj, std::string copy, std::map<std::string, std::string> Percent, std::multimap<std::string, std::string>);
 		int VerifyURI(client &obj, std::map<std::string, std::string> PercentEncoding);
-		int check_media(client &obj);
-        int checkHeaders(client &obj, std::string copy);
+		int check_media(client &obj, std::multimap<std::string, std::string>);
+        int checkHeaders(client &obj, std::string copy, std::multimap<std::string, std::string>);
         ~parssingOfHeader();
 };
 
@@ -161,16 +161,14 @@ class client
 	// int response(int pfds_index, vector<struct pollfd> &pfds);
 	int pushToBuffer();
 	void clear();
-	int checkHeaderOfreq(std::map <std::string, std::string> );
+	int checkHeaderOfreq(std::map <std::string, std::string>,std::multimap <std::string, std::string> );
 	long long	ft_atoi(const char *str);
 	char *ft_substr(char const *s, unsigned int start, size_t len);
 	void check(void);
-	int normal_response(struct pollfd &pfds);
-	int postMethod();
-	int deleteMethod(struct pollfd &pfds);
+	int postMethod(std::multimap<std::string, std::string> mimetypes_);
 	void initResponse(std::map<std::string, std::string>);
 	int fillBody(std::map<std::string, std::string>);
-	int generateListing();
+	int generateListing(std::map<std::string, std::string>);
 	void generateUrl();
 	client();
 	client(const client &obj);

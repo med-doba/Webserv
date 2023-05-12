@@ -1,68 +1,5 @@
 #include "client.hpp"
 
-// int client::normal_response(struct pollfd &pfds)
-// {
-// 	// char c;
-
-// 	std::cout << "normal response"<< std::endl;
-// 	if (!input.is_open())
-// 	{
-// 		// //std::cout << "lol2 " << std::endl;
-// 		// input.open("../tests/pdf.pdf");
-// 		input.open("../tests/pdf.pdf");
-// 		if (!input.is_open())
-// 		{
-// 			std::cout << "couldn't open file" << std::endl;
-// 			return (1);
-// 		}
-// 		// while (input.get(c))
-// 		// {
-// 		// 	//std::cout << "loop" << std::endl;
-// 		// 	content_buffer.push_back(c);
-// 		// }
-// 		input.seekg(0, std::ios::end);
-// 		size_t size = input.tellg();
-// 		input.seekg(0, std::ios::beg);
-
-// 		// Reserve space in the buffer
-// 		std::vector<char> content(size);
-
-// 		// Read the file in chunks
-// 		input.read(&content[0], size);
-// 		response_header = "HTTP/1.1 200 OK\r\n"
-// 						"Content-Type: application/pdf\r\n"
-// 						"Content-length: " + std::to_string(content.size()) + "\r\n"
-// 						"\r\n";
-// 		response_header += std::string(content.begin(), content.end());
-// 	}
-// 	if (!response_header.empty())
-// 	{
-// 		// std::cout << "send chunks" << std::endl;
-// 		int i = send(this->client_socket, response_header.c_str(), response_header.size(), 0);
-// 		if (i < 0)
-// 		{
-// 			std::cout << "error "  << this->client_socket << std::endl;
-// 			//std::cout << "ready == " << this->ready << " socket client == " << this->client_socket << std::endl;
-// 			//std::cout << this->headerOfRequest << std::endl;
-// 			printf("errno = %d: %s\n", errno, strerror(errno));
-// 			// response_header.clear();
-// 			return (0);
-// 		}
-// 		response_header.erase(0, i);
-// 		// //std::cout << "i == " << i  << " socket == "  << this->client_socket << std::endl;
-// 	}
-// 	else
-// 	{
-// 		std::cout << "sent complete " << this->client_socket << std::endl;
-// 		int close = this->respond.close;
-// 		this->clear();
-// 		pfds.revents&= ~POLLOUT;
-// 		// std::cout << "closesendget == " << close << std::endl;
-// 		return (close);
-// 	}
-// 	return (0);
-// }
-
 int client::fillBody(std::map<std::string, std::string> mimetypes)
 {
 	std::string OpFile = this->path;
@@ -77,7 +14,7 @@ int client::fillBody(std::map<std::string, std::string> mimetypes)
 			this->respond.contenttype = it->second;
 		else
 		{
-			it = mimetypes.find(".all");
+			it = mimetypes.find(".txt");
 			this->respond.contenttype = it->second;
 		}
 	}
@@ -107,18 +44,10 @@ int client::fillBody(std::map<std::string, std::string> mimetypes)
 	// Read the file in chunks
 	input.read(&content[0], size);
 	this->respond.body = std::string(content.begin(), content.end());
-	// std::wstringstream content;
-	// content << input.rdbuf();
-
-	// std::wstring wbody;
-	// wbody.assign(content.str());
-    // std::wstring_convert<std::codecvt_utf8<wchar_t> > converter;
-    // std::string str = converter.to_bytes(wbody);
-	// this->respond.body = str;
 	return (0);
 }
 
-int client::generateListing()
+int client::generateListing(std::map<std::string, std::string> mimetypes)
 {
 	std::string listing = this->listPath;
 	std::cout << "listing == " << listing << std::endl;
@@ -154,6 +83,10 @@ int client::generateListing()
 
     closedir(directory);
 	this->respond.body = html;
+	std::map<std::string, std::string>::iterator it;
+	it = mimetypes.find(".html");
+	if (it != mimetypes.end())
+		this->respond.contenttype = it->second;
 	std::cout << "body -- " << html << std::endl;
 	return (0);
 }
@@ -169,9 +102,6 @@ void client::check(void)
 		this->flag = ERROR;
 		this->respond.type = 1;
 		this->respond.status_code = 404;
-		// this->respond.phrase = "Not Found";
-		// this->respond.content = 1;
-		// this->respond.body = "Location Not Found";
 		this->respond.close = CLOSE;
 		this->ready = 1;
 	}
@@ -255,7 +185,7 @@ client::~client()
 {
 }
 
-int client::checkHeaderOfreq(std::map<std::string, std::string> Percent)
+int client::checkHeaderOfreq(std::map<std::string, std::string> Percent,std::multimap<std::string, std::string> mimetypes_)
 {
     int pos = 0;
 	int _tmp = 0;
@@ -269,9 +199,10 @@ int client::checkHeaderOfreq(std::map<std::string, std::string> Percent)
             {
                 headerOfRequest = buffer.substr(0,pos - 1);// not include \r\n
 				std::string copyheader = headerOfRequest;
-				this->flag_res = headerParss.checkHeaderOfreq_(*this, copyheader, Percent);
+				this->flag_res = headerParss.checkHeaderOfreq_(*this, copyheader, Percent, mimetypes_);
 				if (this->flag_res < 0)
 				{
+					std::cout << "setting flag error" << std::endl; 
 					flag = ERROR;
 					return (1);
 				}
@@ -349,7 +280,10 @@ int client::checkHeaderOfreq(std::map<std::string, std::string> Percent)
     if(flag == GET || flag == CHUNKED || flag == NONCHUNKED || flag == FORM || flag == ERROR || flag == DELETE)
         return 1;
     else
+	{
+		std::cout << "ret == -2 here" << std::endl;
         return -2;
+	}
 }
 
 long long	client::ft_atoi(const char *str)
@@ -486,24 +420,24 @@ int client::pushToBuffer()
 // 	return (0);
 // }
 
-int client::postMethod()
+int client::postMethod(std::multimap<std::string, std::string> mimetypes_)
 {
 	if(this->flag == NONCHUNKED) // if has content length
 	{
 		//std::cout << "post handle1" << std::endl;
-		this->bodyParss.handle_post(*this);
+		this->bodyParss.handle_post(*this, mimetypes_);
 		this->respond.ready = 1;
 	}
 	else if(this->flag == CHUNKED)// // handle chunked data when resend request
 	{
 		//std::cout << "chunked handle1" << std::endl;
-		this->bodyParss.handling_chunked_data(*this);
+		this->bodyParss.handling_chunked_data(*this, mimetypes_);
 		this->respond.ready = 1;
 	}
 	else if(this->flag == FORM)
 	{
 		//std::cout << "form handle1" << std::endl;
-		this->bodyParss.handling_form_data(*this);
+		this->bodyParss.handling_form_data(*this, mimetypes_);
 		this->respond.ready = 1;
 	}
 	return (0);
@@ -545,7 +479,10 @@ void client::initResponse(std::map<std::string, std::string> mimetypes)
 	{
 		std::cout << "filling body == " << this->client_socket << std::endl;
 		if (this->fillBody(mimetypes) == -1)
+		{
 			this->initResponse(mimetypes);
+			return ;
+		}
 		this->respond.status_code = 200;
 		// this->respond.phrase = "OK";
 		this->respond.close = ALIVE;
@@ -585,7 +522,7 @@ void client::initResponse(std::map<std::string, std::string> mimetypes)
 	else if (this->respond.flagResponse == AUTOINDEX)
 	{
 		// std::cout << "filling body " << std::endl;
-		this->generateListing();
+		this->generateListing(mimetypes);
 		this->respond.status_code = 200;
 		// this->respond.phrase = "OK";
 		this->respond.close = ALIVE;

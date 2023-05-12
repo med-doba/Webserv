@@ -10,8 +10,8 @@ void server::fillRevMimeType()
 void server::fillMimeType()
 {
 	mimeTypes.insert(std::make_pair(".txt", "text/plain"));
-	mimeTypes.insert(std::make_pair(".html", "text/html"));
 	mimeTypes.insert(std::make_pair(".htm", "text/html"));
+	mimeTypes.insert(std::make_pair(".html", "text/html"));
 	mimeTypes.insert(std::make_pair(".css", "text/css"));
 	mimeTypes.insert(std::make_pair(".js", "application/javascript"));
 	mimeTypes.insert(std::make_pair(".json", "application/json"));
@@ -246,7 +246,7 @@ void server::monitor()
 						// if (pfds[i].fd == clients[j]->client_socket)
 						if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 0)
 						{
-							// std::cout << "ready to recv " << clients[j]->client_socket << std::endl;
+							std::cout << "ready to recv " << clients[j].client_socket << std::endl;
 							this->receive(i, j);
 							break ;
 						}
@@ -258,13 +258,14 @@ void server::monitor()
 					// 	// break ;
 					// }
 				}
-				else if (this->pfds[i].revents & POLLOUT)
+				if (this->remove == 0 && this->pfds[i].revents & POLLOUT)
 				{
+					// std::cout << "client == " << pfds[i].fd << std::endl;
 					for (size_t j = 0; j < clients.size(); j++)
 					{
 						if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 1)
 						{
-							// std::cout << "ready to send " <<  pfds[i].fd << std::endl;
+							std::cout << "ready to send " <<  pfds[i].fd << std::endl;
 							this->response(this->pfds[i], j);
 							break ;
 						}
@@ -775,7 +776,7 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 		if (ObjLocation.allow_methods[i].compare("POST") == 0)
 		{
 			std::cout << "upload sec " << std::endl;
-			ObjClient.postMethod();
+			ObjClient.postMethod(mimeTypes_);
 			return;
 		}
 	}
@@ -1035,10 +1036,11 @@ void server::receive(int pfds_index, int index)
 		this->disconnect(index);
         return ;
 	}
-    rtn = clients[index].checkHeaderOfreq(PercentEncoding);
+    rtn = clients[index].checkHeaderOfreq(PercentEncoding, mimeTypes_);
 	// //std::cout << "here tmp -- " << clients[index].tmp << std::endl;
 	// //std::cout << clients[index].headerOfRequest << std::endl;
 	// //std::cout << rtn << std::endl;
+	std::cout << "rtn == " << rtn << std::endl;
 	if(rtn == -2)
 	{
 		// cout << "r2 == " << rtn << endl;
@@ -1132,7 +1134,9 @@ void server::receive(int pfds_index, int index)
 	}
 	else if (clients[index].flag == ERROR)
 	{
+		std::cout << "error flag " << std::endl;
 		clients[index].check();
+		std::cout << "ready == " << clients[index].ready << std::endl;
 		// pfds[pfds_index].revents &= ~POLLIN;
 	}
 

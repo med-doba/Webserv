@@ -41,10 +41,8 @@ void parssingOfBody::clear()
 	close(fd);
 }
 
-void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string & headerOfRequest, int &flagResponse, std::string path)
+void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string & headerOfRequest, int &flagResponse, std::string path, std::multimap<std::string, std::string> mimetypes_)
 {
-    int rtn;
-
     if (path[path.size() - 1] == '/')
         file = path;
     else
@@ -57,24 +55,26 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
         return ;
     }
     exetention = std::to_string(rand() % 100000);
-    if( (rtn = headerOfRequest.find("mp4") ) != -1) 
-        fd = open((char*)(file.append(exetention).append(".mp4").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
-    else if((rtn = headerOfRequest.find("mp3")) != -1 )
-        fd = open((char*)(file.append(exetention).append(".mp3").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
-    else if((rtn = headerOfRequest.find("jpeg")) != -1 )
-        fd = open((char*)(file.append(exetention).append(".jpeg").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
-    else if((rtn = headerOfRequest.find("jpg")) != -1 )
-        fd = open((char*)(file.append(exetention).append(".jpg").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
-    else if((rtn = headerOfRequest.find("png")) != -1 )
-        fd = open((char*)(file.append(exetention).append(".png").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
-    else if((rtn = headerOfRequest.find("pdf")) != -1)
-        fd = open((char*)(file.append(exetention).append(".pdf").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
-    else if((rtn = headerOfRequest.find("html")) != -1)
-        fd = open((char*)(file.append(exetention).append(".html").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
-    else if((rtn = headerOfRequest.find("css")) != -1)
-        fd = open((char*)(file.append(exetention).append(".css").data()),O_CREAT | O_RDWR | O_EXCL, 0777);
-    else // is a text file such as html ..
-        fd = open((char*)(file.append(exetention).data()),O_CREAT | O_RDWR | O_EXCL, 0777);
+    file.append(exetention);
+    std::string ext;
+    std::multimap<std::string, std::string>::iterator it;
+    int pos = headerOfRequest.find("Content-Type: ");
+    if (pos != -1)
+    {
+        ext = headerOfRequest.substr(pos + 14, headerOfRequest.find('\r', pos));
+        ext.pop_back();
+        it = mimetypes_.find(ext);
+        if (it != mimetypes_.end())
+        {
+            file.append(it->second);
+        }
+        else
+        {
+            it = mimetypes_.find("text/plain");
+            file.append(it->second);
+        }
+    }
+    fd = open((char*)(file.data()),O_CREAT | O_RDWR | O_EXCL, 0777);
     if (fd < 0)
     {
         std::cout << "couldn't open file" << std::endl;
@@ -89,11 +89,11 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
     close(fd);
 }
 
-void parssingOfBody::putDataTofile(string  data, client & obj)
+void parssingOfBody::putDataTofile(string  data, client & obj, std::multimap<std::string, std::string> mimetypes_)
 {
 
     int pos = data.find("filename=\"");
-    
+    (void)mimetypes_;
     if(pos != -1)
     {    
         int t = pos + 10;
@@ -138,7 +138,7 @@ void parssingOfBody::putDataTofile(string  data, client & obj)
     }
 }
 
-void parssingOfBody::handling_form_data(client &obj)
+void parssingOfBody::handling_form_data(client &obj, std::multimap<std::string, std::string> mimetypes_)
 {
     if(obj.flag_ == 5)
     {
@@ -195,7 +195,7 @@ void parssingOfBody::handling_form_data(client &obj)
         while (it != substrings.end())
         {
             if(!it->empty())
-                putDataTofile(*it,obj);
+                putDataTofile(*it,obj, mimetypes_);
             it++;
         }
     }
@@ -204,7 +204,7 @@ void parssingOfBody::handling_form_data(client &obj)
 
 
 
-void  parssingOfBody::handling_chunked_data(client &obj)
+void  parssingOfBody::handling_chunked_data(client &obj, std::multimap<std::string, std::string> mimetypes_)
 {
     int pos = obj.buffer.find("\r\n0\r\n\r\n");
     if(pos != -1 )
@@ -240,7 +240,7 @@ void  parssingOfBody::handling_chunked_data(client &obj)
                 obj.buffer = obj.headerOfRequest;
                 obj.buffer += obj.bodyofRequest;
                 obj.flag_ = 5;
-                handling_form_data(obj);
+                handling_form_data(obj, mimetypes_);
                 return ;
             }
             if (!obj.bodyofRequest.empty())
@@ -255,7 +255,7 @@ void  parssingOfBody::handling_chunked_data(client &obj)
 					obj.respond.content = 1;
 					return;
 				}
-				create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.path);
+				create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.path, mimetypes_);
 			}
             else
 				obj.respond.flagResponse = EMPTY;
@@ -266,7 +266,7 @@ void  parssingOfBody::handling_chunked_data(client &obj)
 }
 
 
-void parssingOfBody::handle_post(client &obj)
+void parssingOfBody::handle_post(client &obj, std::multimap<std::string, std::string> mimetypes_)
 {
 	string test = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
 	if((int)test.size() >= obj.ContentLength)// finish recivng
@@ -276,7 +276,7 @@ void parssingOfBody::handle_post(client &obj)
 		//std::cout << "buffer23 size == " << obj.buffer.size()<< std::endl;
         obj.bodyofRequest = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
         if (!obj.bodyofRequest.empty())
-            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.uploadPath);
+            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.uploadPath, mimetypes_);
         else
             obj.respond.flagResponse = EMPTY;
     }

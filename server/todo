@@ -20,6 +20,8 @@ handling i should incoprate this in the normal response as well
 
 
 
+=> automate the contenttype for error in headers (pending ...)
+
 => handle if a header doesn't have a value only if that header is nessecary
 to the request method (pending ...) (mustapha will do it)
 

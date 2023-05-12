@@ -14,6 +14,7 @@ response::response()
 	content = 0;
 	flagResponse = -1;
 	ready = 0;
+	body = "";
 	contentlength = "Content-Length: ";
 }
 
@@ -41,10 +42,18 @@ void response::generate_response(std::map<int, std::string> statusPhrase)
 		}
 		for (size_t i = 0; i < this->headers.size(); i++)
 			response_req += headers[i] + del;
-		if (!contenttype.empty())
+		if (!body.empty())
 		{
-			response_req += "Content-Type: " + contenttype + del;
-			response_req += contentlength + std::to_string(body.size()) + del;
+			if (!contenttype.empty())
+			{
+				response_req += "Content-Type: " + contenttype + del;
+				response_req += contentlength + std::to_string(body.size()) + del;
+			}
+			else
+			{
+				response_req += "Content-Type: text/plain" + del;
+				response_req += contentlength + std::to_string(body.size()) + del;
+			}
 		}
 		response_req += del;
 		std::cout << response_req  << std::endl;
