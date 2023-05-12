@@ -1,5 +1,37 @@
 #include "server.hpp"
 
+void server::fillRevMimeType()
+{
+	std::map<std::string, std::string >::iterator it = mimeTypes.begin();
+	for (; it != mimeTypes.end(); it++)
+		mimeTypes_.insert(std::make_pair(it->second, it->first));
+}
+
+void server::fillMimeType()
+{
+	mimeTypes.insert(std::make_pair(".txt", "text/plain"));
+	mimeTypes.insert(std::make_pair(".html", "text/html"));
+	mimeTypes.insert(std::make_pair(".htm", "text/html"));
+	mimeTypes.insert(std::make_pair(".css", "text/css"));
+	mimeTypes.insert(std::make_pair(".js", "application/javascript"));
+	mimeTypes.insert(std::make_pair(".json", "application/json"));
+	mimeTypes.insert(std::make_pair(".xml", "application/xml"));
+	mimeTypes.insert(std::make_pair(".pdf", "application/pdf"));
+	mimeTypes.insert(std::make_pair(".zip", "application/zip"));
+	mimeTypes.insert(std::make_pair(".jpeg", "image/jpeg"));
+	mimeTypes.insert(std::make_pair(".jpg", "image/jpeg"));
+	mimeTypes.insert(std::make_pair(".png", "image/png"));
+	mimeTypes.insert(std::make_pair(".gif", "image/gif"));
+	mimeTypes.insert(std::make_pair(".mp4", "video/mp4"));
+	mimeTypes.insert(std::make_pair(".mp3", "audio/mpeg"));
+	mimeTypes.insert(std::make_pair(".mpeg", "audio/mpeg"));
+	mimeTypes.insert(std::make_pair(".sh", "application/x-sh"));
+	mimeTypes.insert(std::make_pair(".webm", "video/webm"));
+	mimeTypes.insert(std::make_pair(".webp", "video/webp"));
+	mimeTypes.insert(std::make_pair(".xhtml", "application/xhtml+xml"));
+	mimeTypes.insert(std::make_pair(".xls", "application/vnd.ms-excel"));
+}
+
 void server::fillStatusCode()
 {
 	StatusPhrase.insert(std::make_pair(100,"Continue"));
@@ -88,6 +120,8 @@ server::server()
 	this->poll_count = 0;
 	this->fillEncoding();
 	this->fillStatusCode();
+	this->fillMimeType();
+	this->fillRevMimeType();
 }
 server::server(const server &obj)
 {
@@ -967,7 +1001,7 @@ void server::response(struct pollfd &pfds, int index)
 	// std::cout << "respond2 ready == " << clients[index].respond.ready << " sock == " << clients[index].client_socket << std::endl;
 	if (clients[index].respond.ready == 1)
 	{
-		clients[index].initResponse();
+		clients[index].initResponse(mimeTypes);
 		clients[index].respond.generate_response(StatusPhrase);
 		if (clients[index].respond.send_response(clients[index], pfds) == 1)
 		{

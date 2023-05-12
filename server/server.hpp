@@ -34,6 +34,8 @@ class server
 	std::vector<serverParse>	block;
 	std::map<std::string, std::string> PercentEncoding;
 	std::map<int, std::string> StatusPhrase;
+	std::map<std::string, std::string> mimeTypes;
+	std::multimap<std::string, std::string> mimeTypes_;
 	int remove;
 	int poll_count;
 
@@ -59,6 +61,8 @@ class server
 	int DeleteFile(std::string path);
 	void fillEncoding();
 	void fillStatusCode();
+	void fillMimeType();
+	void fillRevMimeType();
 	serverParse& findServerBlock(int index);
 };
 

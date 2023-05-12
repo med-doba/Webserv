@@ -5,6 +5,7 @@ response::response()
 	type = 0;
 	redirectUrl = "";
 	status_code = 0;
+	contenttype = "";
 	// phrase = "";
 	version = "HTTP/1.1";
 	del = "\r\n";
@@ -16,31 +17,13 @@ response::response()
 	contentlength = "Content-Length: ";
 }
 
-void response::defineContentType()
-{
-	if (content == 1)
-		contenttype += "Content-Type: text/plain";
-	else if (content == 2)
-		contenttype += "Content-Type: application/pdf";
-	else if (content == 3)
-		contenttype += "Content-Type: image/png";
-	else if (content == 4)
-		contenttype += "Content-Type: image/jpg";
-	else if (content == 5)
-		contenttype += "Content-Type: text/html";
-	else if (content == 6)
-		contenttype += "Content-Type: video/mp4";
-	else if (content == 7)
-		contenttype += "Content-Type: text/css";
-}
-
 void response::generate_response(std::map<int, std::string> statusPhrase)
 {
 	std::cout << "type == " << type << std::endl;
 	if (type == 1)
 	{
 		std::map<int, std::string>::iterator it;
-		this->defineContentType();
+		// this->defineContentType();
 		response_req = version + " " + std::to_string(status_code);
 		it = statusPhrase.find(status_code);
 		if (it != statusPhrase.end())
@@ -58,11 +41,10 @@ void response::generate_response(std::map<int, std::string> statusPhrase)
 		}
 		for (size_t i = 0; i < this->headers.size(); i++)
 			response_req += headers[i] + del;
-		if (content != 0)
+		if (!contenttype.empty())
 		{
-			response_req += contenttype + del;
+			response_req += "Content-Type: " + contenttype + del;
 			response_req += contentlength + std::to_string(body.size()) + del;
-			content = 0;
 		}
 		response_req += del;
 		std::cout << response_req  << std::endl;

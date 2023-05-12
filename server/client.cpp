@@ -63,32 +63,29 @@
 // 	return (0);
 // }
 
-int client::fillBody()
+int client::fillBody(std::map<std::string, std::string> mimetypes)
 {
 	std::string OpFile = this->path;
 	size_t pos = OpFile.find_last_of('.');
+	std::map<std::string, std::string>::iterator it;
 	if (pos != std::string::npos)
 	{
 		std::string ext = &OpFile[pos];
-		if (ext.compare(".pdf") == 0)
-			this->respond.content = 2;
-		else if (ext.compare(".png") == 0)
-			this->respond.content = 3;
-		else if (ext.compare(".jpg") == 0)
-			this->respond.content = 4;
-		else if (ext.compare(".jpeg") == 0)
-			this->respond.content = 4;
-		else if (ext.compare(".html") == 0)
-			this->respond.content = 5;
-		else if (ext.compare(".mp4") == 0)
-			this->respond.content = 6;
-		else if (ext.compare(".css") == 0)
-			this->respond.content = 7;
+		std::cout << "extension -== " << ext<< std::endl;
+		it = mimetypes.find(ext);
+		if (it != mimetypes.end())
+			this->respond.contenttype = it->second;
 		else
-			this->respond.content = 1;
+		{
+			it = mimetypes.find(".all");
+			this->respond.contenttype = it->second;
+		}
 	}
 	else
-		this->respond.content = 1;
+	{
+		it = mimetypes.find(".txt");
+		this->respond.contenttype = it->second;
+	}
 	input.open(OpFile);
 	if (!input.is_open())
 	{
@@ -522,7 +519,7 @@ void client::generateUrl()
 	this->respond.redirectUrl = redirectUrl;
 }
 
-void client::initResponse()
+void client::initResponse(std::map<std::string, std::string> mimetypes)
 {
 	if (this->respond.flagResponse == NOTFOUND)
 	{
@@ -547,8 +544,8 @@ void client::initResponse()
 	else if (this->respond.flagResponse == OPFILE)
 	{
 		std::cout << "filling body == " << this->client_socket << std::endl;
-		if (this->fillBody() == -1)
-			this->initResponse();
+		if (this->fillBody(mimetypes) == -1)
+			this->initResponse(mimetypes);
 		this->respond.status_code = 200;
 		// this->respond.phrase = "OK";
 		this->respond.close = ALIVE;

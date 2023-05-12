@@ -168,8 +168,8 @@ class client
 	int normal_response(struct pollfd &pfds);
 	int postMethod();
 	int deleteMethod(struct pollfd &pfds);
-	void initResponse();
-	int fillBody();
+	void initResponse(std::map<std::string, std::string>);
+	int fillBody(std::map<std::string, std::string>);
 	int generateListing();
 	void generateUrl();
 	client();
