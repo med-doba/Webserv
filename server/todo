@@ -20,20 +20,36 @@ handling i should incoprate this in the normal response as well
 
 
 
-=> automate the contenttype for error in headers (pending ...)
+TODO :: BEGIN
 
+
+
+MUSTAPHA ::
 => handle if a header doesn't have a value only if that header is nessecary
 to the request method (pending ...) (mustapha will do it)
 
-=> if a bind fails do not exist just thorw error and continue (pending ...)
+=> extension random generation doesn't work test case : run server then send a file then rerun server and notice the file doesn't get created (mustapha will do it) (pending ...)
 
-=> handle chanked transfer if size of buffer bigger than the contentlength in the headers (done)
 
-=> handle delete required headers (done)
+HAITAM ::
+=> server hangs when contentLength is bigger the actual body (implement a timeout function) (pending ...)
 
-=> handle boundary contentLength == 0 (done)
+=> implement the range header in the response plus rather than the whole file only read as much as you're gonna send (pending ...)
 
-=> extension random generation doesn't work test case : run server then send a file then rerun server and notice the file doesn't get created (pending ...)
+=> Handle error pages (pending ...)
+
+=> automate the contenttype for error in headers (pending ...)
+
+MOHAMMED ::
+=> CGI NOT DONE (med-doba) (pending ...)
+=> error pages don't transfer (pending ...)
+
+
+
+
+
+
+=> if a bind fails do not exist just thorw error and continue (done)
 
 => check if no /r is found when looking for the chunked encoding (done)
 
@@ -47,7 +63,6 @@ specified in the Content-Type header is not supported by the server.  (done)
 
 => handle if the URI has any spaces (done)
 
-=> server hangs when contentLength is bigger the actual body (pending ...)
 
 => doba segv no listen found (done)
 
@@ -63,9 +78,19 @@ location /redir {
   return 301 /redir;
 }
 
+
 => allocates for client vector (done)
 
-=> implement the range header in the response plus rather than the whole file only read as much as you're gonna send (pending ...)
+=> check media needs to be fixed the extracted media is not correct in checkheaders (done)
+
+
+=> handle chanked transfer if size of buffer bigger than the contentlength in the headers (done)
+
+=> handle delete required headers (done)
+
+=> handle boundary contentLength == 0 (done)
+
+TODO :: end
 
    The Location response-header field is used to redirect the recipient
    to a location other than the Request-URI for completion of the
@@ -101,6 +126,9 @@ POST:
    (OK) or 204 (No Content) is the appropriate response status,
    depending on whether or not the response includes an entity that
    describes the result.
+
+
+
 
 
 

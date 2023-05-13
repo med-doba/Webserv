@@ -19,6 +19,7 @@ class miniserver
 	std::string str_port;
 	struct sockaddr_in address;
 	int addrlen;
+	int fail;
 
 	miniserver();
 	miniserver(const miniserver &obj);

@@ -3,6 +3,7 @@
 miniserver::miniserver()
 {
 	this->opt = 1;
+	this->fail = 0;
 }
 
 miniserver::miniserver(const miniserver &obj)
@@ -20,6 +21,7 @@ miniserver& miniserver::operator=(const miniserver& obj)
 		this->address = obj.address;
 		this->opt = obj.opt;
 		this->addrlen = obj.addrlen;
+		this->fail = obj.fail;
 	}
 	return (*this);
 }

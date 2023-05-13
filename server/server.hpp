@@ -27,9 +27,7 @@ class server
 {
 	public:
 	std::vector<miniserver> servers;
-	// std::vector<client *> clients;
 	std::vector<client> clients;
-	// std::map<int, client *> clients;
 	std::vector<struct pollfd> pfds;
 	std::vector<serverParse>	block;
 	std::map<std::string, std::string> PercentEncoding;
@@ -43,6 +41,7 @@ class server
 	server(const server &obj);
 	server& operator=(const server& obj);
 	~server();
+	void check_servers(std::vector<miniserver>::iterator it);
 	void lunch_servers();
 	void monitor();
 	void disconnect(int index);

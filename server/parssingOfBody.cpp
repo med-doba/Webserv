@@ -65,9 +65,7 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
         ext.pop_back();
         it = mimetypes_.find(ext);
         if (it != mimetypes_.end())
-        {
             file.append(it->second);
-        }
         else
         {
             it = mimetypes_.find("text/plain");
@@ -77,23 +75,36 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
     fd = open((char*)(file.data()),O_CREAT | O_RDWR | O_EXCL, 0777);
     if (fd < 0)
     {
-        std::cout << "couldn't open file" << std::endl;
-        flagResponse = EXIST;
+        flagResponse = CONFLICT;
         return ;
     }
     int i = write(fd,(void*)(bodyofRequest.data()),bodyofRequest.size());
 	if (i == (int)bodyofRequest.size())
 		flagResponse = CREATED;
-	//std::cout << "write i == " << i << std::endl;
-	//std::cout << "buffer size == " << bodyofRequest.size() << std::endl;
     close(fd);
 }
 
-void parssingOfBody::putDataTofile(string  data, client & obj, std::multimap<std::string, std::string> mimetypes_)
+int parssingOfBody::checkMedia(std::string file, std::map<std::string, std::string> mimetypes)
+{
+    std::map<std::string, std::string>::iterator it;
+    int pos = file.find('.');
+    if (pos != -1)
+    {
+        std::cout << &file[pos] << std::endl;
+        std::string ext = &file[pos];
+        it = mimetypes.find(ext);
+        if (it != mimetypes.end())
+            return (0);
+        else
+            return (-1);
+    }
+    return (0);
+}
+
+void parssingOfBody::putDataTofile(string  data, client & obj, std::map<std::string, std::string> mimetypes)
 {
 
     int pos = data.find("filename=\"");
-    (void)mimetypes_;
     if(pos != -1)
     {    
         int t = pos + 10;
@@ -110,10 +121,17 @@ void parssingOfBody::putDataTofile(string  data, client & obj, std::multimap<std
             return ;
         }
         file +=  data.substr(pos + 10,t - (pos + 10));
+        // std::cout << "file == " << file << std::endl;
+        // std::cout << "data == " << data << std::endl;
+        if (checkMedia(file, mimetypes) == -1)
+        {
+            obj.respond.flagResponse = MEDIANOTSUPPORTED;
+            return ;
+        }
         fd = open((char*)(file.data()),O_CREAT | O_RDWR | O_EXCL , 0777);
         if (fd < 0)
         {
-            obj.respond.flagResponse = EXIST;
+            obj.respond.flagResponse = CONFLICT;
             file.clear();
             obj.bodyofRequest.clear();
             return ;
@@ -127,10 +145,13 @@ void parssingOfBody::putDataTofile(string  data, client & obj, std::multimap<std
             obj.bodyofRequest.push_back(data[pos]);
             pos++;
         }
-        int i = write(fd,(void*)(obj.bodyofRequest.data()),obj.bodyofRequest.size());
-        if (obj.bodyofRequest.empty())
-            obj.respond.flagResponse = EMPTY;
-        else if (i == (int)obj.bodyofRequest.size())
+        if (!obj.bodyofRequest.empty())
+        {
+            int i = write(fd,(void*)(obj.bodyofRequest.data()),obj.bodyofRequest.size());
+            if (i == (int)obj.bodyofRequest.size())
+                obj.respond.flagResponse = CREATED;
+        }
+        else
             obj.respond.flagResponse = CREATED;
         file.clear();
         obj.bodyofRequest.clear();
@@ -138,7 +159,7 @@ void parssingOfBody::putDataTofile(string  data, client & obj, std::multimap<std
     }
 }
 
-void parssingOfBody::handling_form_data(client &obj, std::multimap<std::string, std::string> mimetypes_)
+void parssingOfBody::handling_form_data(client &obj, std::map<std::string, std::string> mimetypes)
 {
     if(obj.flag_ == 5)
     {
@@ -176,18 +197,9 @@ void parssingOfBody::handling_form_data(client &obj, std::multimap<std::string, 
             start_idx = end_idx + separator.length();
         }
         int size = obj.buffer.size() - (obj.headerOfRequest.size() + 3);
-        //std::cout << obj.buffer.size() << std::endl;
-        //std::cout << obj.headerOfRequest << std::endl;
         if (size > obj.ContentLength)
         {
-            //std::cout << "size == " << size << std::endl;
-            //std::cout << "content == " << obj.ContentLength << std::endl;
-            obj.respond.status_code = 400;
-            // // obj.respond.phrase = "Bad Request";
-            obj.respond.type = 1;
-            obj.respond.body = "The size of the request body does not match the Content-Length header.";
-            obj.respond.close = CLOSE;
-            obj.respond.content = 1;
+            obj.respond.flagResponse = BADREQUEST;
             return ;
         }
         substrings.erase(substrings.end() - 1);// remove "--" after last boundr
@@ -195,7 +207,7 @@ void parssingOfBody::handling_form_data(client &obj, std::multimap<std::string, 
         while (it != substrings.end())
         {
             if(!it->empty())
-                putDataTofile(*it,obj, mimetypes_);
+                putDataTofile(*it,obj, mimetypes);
             it++;
         }
     }
@@ -204,7 +216,7 @@ void parssingOfBody::handling_form_data(client &obj, std::multimap<std::string, 
 
 
 
-void  parssingOfBody::handling_chunked_data(client &obj, std::multimap<std::string, std::string> mimetypes_)
+void  parssingOfBody::handling_chunked_data(client &obj, std::map<std::string, std::string> mimetypes, std::multimap<std::string, std::string> mimetypes_)
 {
     int pos = obj.buffer.find("\r\n0\r\n\r\n");
     if(pos != -1 )
@@ -240,25 +252,15 @@ void  parssingOfBody::handling_chunked_data(client &obj, std::multimap<std::stri
                 obj.buffer = obj.headerOfRequest;
                 obj.buffer += obj.bodyofRequest;
                 obj.flag_ = 5;
-                handling_form_data(obj, mimetypes_);
+                handling_form_data(obj, mimetypes);
                 return ;
             }
-            if (!obj.bodyofRequest.empty())
-			{
-				if (obj.ContentLength < (int)obj.bodyofRequest.size())
-				{
-					obj.respond.status_code = 400;
-					// // obj.respond.phrase = "Bad Request";
-					obj.respond.type = 1;
-					obj.respond.body = "The request is invalid or malformed.";
-					obj.respond.close = CLOSE;
-					obj.respond.content = 1;
-					return;
-				}
-				create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.path, mimetypes_);
-			}
-            else
-				obj.respond.flagResponse = EMPTY;
+            if (obj.ContentLength < (int)obj.bodyofRequest.size())
+            {
+                obj.respond.flagResponse = BADREQUEST;
+                return;
+            }
+            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.path, mimetypes_);
             
             obj.flag_ = 10;
         } 
@@ -270,15 +272,9 @@ void parssingOfBody::handle_post(client &obj, std::multimap<std::string, std::st
 {
 	string test = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
 	if((int)test.size() >= obj.ContentLength)// finish recivng
-    { 
-		//std::cout << "i == " << obj.i << std::endl;
-		//std::cout << "content == "<< obj.ContentLength << std::endl;
-		//std::cout << "buffer23 size == " << obj.buffer.size()<< std::endl;
+    {
         obj.bodyofRequest = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
-        if (!obj.bodyofRequest.empty())
-            create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.uploadPath, mimetypes_);
-        else
-            obj.respond.flagResponse = EMPTY;
+        create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.uploadPath, mimetypes_);
     }
 }
 

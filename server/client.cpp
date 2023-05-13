@@ -91,6 +91,82 @@ int client::generateListing(std::map<std::string, std::string> mimetypes)
 	return (0);
 }
 
+void client::generateErrPage(std::map<std::string, std::string> mimetypes)
+{
+	std::string html;
+	int status = this->respond.status_code;
+	html = "<!DOCTYPE html>\n";
+	html += "<html>\n";
+    html += "<head>\n";
+    html += "<title>Error</title>\n";
+	html += "<style>\n";
+	html += "h1 {\n";
+	html += "font-size: 40px;\n";
+	html += "text-align: center;\n";
+	html += "}\n";
+	html += "h3 {\n";
+	html += "font-size: 15px;\n";
+	html += "text-align: center;\n";
+	html += "}\n";
+	html += "</style>\n";
+    html += "</head>\n";
+    html += "<body>\n";
+    html += "<h1>" + std::to_string(status) + " Error</h1>\n";
+    html += "<hr>\n";
+    html += "<h3>Webserv created by hmoubal, med-doba, messalih</h3>\n";
+    html += "</body>\n";
+    html += "</html>\n";
+	std::map<std::string, std::string >::iterator it;
+	it = mimetypes.find(".html");
+	this->respond.contenttype = it->second;
+	this->respond.body = html;
+}
+
+void client::findErrorPage(std::map<std::string, std::string> mimetypes,  std::vector<std::pair<int , std::string> > ErrSer)
+{
+	std::vector<std::pair<int , std::string> >::iterator it = ErrSer.begin();
+	int status = this->respond.status_code;
+	std::string fullPath = "/Users/hmoubal/Desktop/Webserv";
+	std::cout << ErrSer.size() << std::endl;
+	for (; it != ErrSer.end(); it++)
+	{
+		std::cout << "status == " << it->first << std::endl;
+		if (status == it->first)
+		{
+			this->path = fullPath + it->second;
+			if (this->fillBody(mimetypes) == -1)
+				this->generateErrPage(mimetypes);
+			return ;
+		}
+	}
+	std::cout << "manual generate " << std::endl;
+	this->generateErrPage(mimetypes);
+}
+
+void client::genereteLoadSucess(std::map<std::string, std::string> mimetypes)
+{
+	std::string html;
+	html = "<!DOCTYPE html>\n";
+	html += "<html>\n";
+    html += "<head>\n";
+    html += "<title>Upload Success</title>\n";
+	html += "<style>\n";
+	html += "h1 {\n";
+	html += "font-size: 40px;\n";
+	html += "text-align: center;\n";
+	html += "}\n";
+	html += "</style>\n";
+    html += "</head>\n";
+    html += "<body>\n";
+    html += "<h1>Successful upload</h1>\n";
+    html += "</body>\n";
+    html += "</html>\n";
+	std::map<std::string, std::string >::iterator it;
+	it = mimetypes.find(".html");
+	this->respond.contenttype = it->second;
+	this->respond.body = html;
+}
+
 void client::check(void)
 {
 	int res;
@@ -99,10 +175,8 @@ void client::check(void)
 	if (res != -1)
 	{
 		std::cout << "favsock == " << client_socket << std::endl;
-		this->flag = ERROR;
-		this->respond.type = 1;
-		this->respond.status_code = 404;
-		this->respond.close = CLOSE;
+		this->respond.flagResponse = NOTFOUND;
+		this->respond.ready = 1;
 		this->ready = 1;
 	}
 	else
@@ -202,24 +276,18 @@ int client::checkHeaderOfreq(std::map<std::string, std::string> Percent,std::mul
 				this->flag_res = headerParss.checkHeaderOfreq_(*this, copyheader, Percent, mimetypes_);
 				if (this->flag_res < 0)
 				{
-					std::cout << "setting flag error" << std::endl; 
 					flag = ERROR;
 					return (1);
 				}
-                // if(headerParss.checkHeaderOfreq_(headerOfRequest,tmp) == -2)
-                //     return -2;
 				if (this->tmp == POST)
 				{
 					i = copyheader.find("Transfer-Encoding: chunked");   // find way to check if boundry
 					if(i != -1)
 					{
-						//std::cout << "lol" << std::endl;
 						i = pos  + 2;
 						pos = copyheader.find("Content-Length");
-						//std::cout << copyheader<< std::endl;
 						if(pos != -1)
 							ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
-
 						flag = CHUNKED;
 						return 1;
 					}
@@ -231,9 +299,6 @@ int client::checkHeaderOfreq(std::map<std::string, std::string> Percent,std::mul
 						{
 							flag = FORM;
 							ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
-							// if(ContentLength == 0)
-							//     return -2;
-
 							i = headerOfRequest.size() + 3;// after herder
 							bytes_read -= i;
 							_tmp = j + 9;
@@ -244,12 +309,9 @@ int client::checkHeaderOfreq(std::map<std::string, std::string> Percent,std::mul
 							char *strtmp = ft_substr(temp,0,_tmp);
 							boundary.append("--").append(strtmp);// free boundry and temp?
 							free(strtmp);
-							// //std::cout << "=> " <<  boundary << std::endl;
 							return 1;
 						}
 						ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
-						// if(ContentLength == 0)
-						//     return -2;
 						flag = NONCHUNKED;
 						i = headerOfRequest.size();
 						return  1;
@@ -265,12 +327,6 @@ int client::checkHeaderOfreq(std::map<std::string, std::string> Percent,std::mul
 					flag = DELETE;
 					return (1);
 				}
-                // else
-                // {
-                //     // without body
-                //     flag = GET;
-                //     return 1;
-                // }
             }
             --pos;
         }
@@ -280,10 +336,7 @@ int client::checkHeaderOfreq(std::map<std::string, std::string> Percent,std::mul
     if(flag == GET || flag == CHUNKED || flag == NONCHUNKED || flag == FORM || flag == ERROR || flag == DELETE)
         return 1;
     else
-	{
-		std::cout << "ret == -2 here" << std::endl;
         return -2;
-	}
 }
 
 long long	client::ft_atoi(const char *str)
@@ -352,92 +405,21 @@ int client::pushToBuffer()
     return this->bytes_read;
 }
 
-// int client::deleteMethod(struct pollfd &pfds)
-// {
-// 	//std::cout << "hello from delete"  << std::endl;
-// 	//std::cout << "URI -- " << URI << std::endl;
-// 	std::string str;
-// 	if (URI.size() <= 7)
-// 		respond.flagResponse = FORBIDEN;
-// 	else
-// 	{
-// 		for (int i = 0; i < 7; i++)
-// 			str.push_back(URI[i]);
-// 		if (str.compare("upload/") == 0)
-// 		{
-// 			int i = remove((char *)URI.data());
-// 			if (i  == 0)
-// 			{
-// 				//std::cout << "removed successfully" << std::endl;
-// 				this->respond.flagResponse = DELETED;
-// 			}
-// 			else
-// 			{
-// 				//std::cout << "error on remove" << std::endl;
-// 				this->respond.flagResponse = NOTFOUND;
-// 			}
-// 		}
-// 		else
-// 			respond.flagResponse = FORBIDEN;
-// 	}
-// 	this->respond.ready = 1;
-// 	if (this->respond.ready == 1)
-// 	{
-// 		if (this->respond.flagResponse == DELETED)
-// 		{
-// 			this->respond.status_code = 204;
-// 			this->respond.phrase = "No Content";
-// 			this->respond.type = 1;
-// 			// this->respond.content = 1;
-// 			// this->respond.body = "Resource Already Exist";
-// 		}
-// 		if (this->respond.flagResponse == NOTFOUND)
-// 		{
-// 			this->respond.status_code = 404;
-// 			this->respond.phrase = "Not Found";
-// 			this->respond.type = 1;
-// 			this->respond.content = 1;
-// 			this->respond.body = "Resource Doesn't Exist";
-// 		}
-// 		if (this->respond.flagResponse == FORBIDEN)
-// 		{
-// 			this->respond.status_code = 403;
-// 			this->respond.phrase = "Forbidden";
-// 			this->respond.type = 1;
-// 			this->respond.content = 1;
-// 			this->respond.body = "You Don't Have Permession To Do That";
-// 		}
-// 		this->respond.generate_response();
-// 		int i = this->respond.send_response(*this ,pfds);
-// 		if (i == 0)
-// 		{
-// 			this->clear();
-// 			// pfds.revents &= ~POLLOUT;
-// 		}
-// 		else if (i == CLOSE)
-// 			return (CLOSE);
-// 	}
-// 	return (0);
-// }
-
-int client::postMethod(std::multimap<std::string, std::string> mimetypes_)
+int client::postMethod(std::multimap<std::string, std::string> mimetypes_, std::map<std::string, std::string> mimetypes)
 {
 	if(this->flag == NONCHUNKED) // if has content length
 	{
-		//std::cout << "post handle1" << std::endl;
 		this->bodyParss.handle_post(*this, mimetypes_);
 		this->respond.ready = 1;
 	}
 	else if(this->flag == CHUNKED)// // handle chunked data when resend request
 	{
-		//std::cout << "chunked handle1" << std::endl;
-		this->bodyParss.handling_chunked_data(*this, mimetypes_);
+		this->bodyParss.handling_chunked_data(*this, mimetypes, mimetypes_);
 		this->respond.ready = 1;
 	}
 	else if(this->flag == FORM)
 	{
-		//std::cout << "form handle1" << std::endl;
-		this->bodyParss.handling_form_data(*this, mimetypes_);
+		this->bodyParss.handling_form_data(*this, mimetypes);
 		this->respond.ready = 1;
 	}
 	return (0);
@@ -445,33 +427,114 @@ int client::postMethod(std::multimap<std::string, std::string> mimetypes_)
 
 void client::generateUrl()
 {
+	std::string redirectUrl;
 	int pos = this->headerOfRequest.find("Host: ");
 	std::string line = this->headerOfRequest.substr(pos + 6, this->headerOfRequest.find('\r', pos + 6) - (pos + 6));
 	std::string host = line.substr(0, line.find(':'));
 	std::string port = line.substr(line.find(':') + 1);
-	std::string redirectUrl = "http://" + host + ":" + port + this->redirpath;
+	if (this->redirpath[0] == '/')
+		redirectUrl = "http://" + host + ":" + port + this->redirpath;
+	else
+		redirectUrl = this->redirpath + "/";
 	this->respond.redirectUrl = redirectUrl;
 }
 
-void client::initResponse(std::map<std::string, std::string> mimetypes)
+void client::initResponse(std::map<std::string, std::string> mimetypes, std::vector<std::pair<int , std::string> > ErrSer)
 {
 	if (this->respond.flagResponse == NOTFOUND)
 	{
 		this->respond.status_code = 404;
-		// this->respond.phrase = "Not Found";
-		this->respond.body = "Resource Not Found In Root";
-		this->respond.content = 1;
-		this->respond.close = ALIVE;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.close = CLOSE;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == LOOP)
+	{
+		this->respond.status_code = 508;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.close = CLOSE;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == TOOLARGE)
+	{
+		this->respond.status_code = 413;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.close = CLOSE;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == TOOLONG)
+	{
+		this->respond.status_code = 414;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.close = CLOSE;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == MEDIANOTSUPPORTED)
+	{
+		this->respond.status_code = 415;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.close = CLOSE;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == NOTVALIDRANGE)
+	{
+		this->respond.status_code = 416;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.close = CLOSE;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == NOTIMPLEMENTED)
+	{
+		this->respond.status_code = 501;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.close = CLOSE;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == LENGTHREQUIRED)
+	{
+		this->respond.status_code = 411;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.close = CLOSE;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == METHODNOTALLOWED)
+	{
+		this->respond.status_code = 405;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.headers.push_back("Allow: GET, POST, DELETE");
+		this->respond.close = CLOSE;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == NOTSUPPORTED)
+	{
+		this->respond.status_code = 505;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.close = CLOSE;
+		this->respond.flagResponse = -1;
+		this->respond.type = 1;
+	}
+	else if (this->respond.flagResponse == BADREQUEST)
+	{
+		this->respond.status_code = 400;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.close = CLOSE;
 		this->respond.flagResponse = -1;
 		this->respond.type = 1;
 	}
 	else if (this->respond.flagResponse == CONFLICT)
 	{
 		this->respond.status_code = 409;
-		// this->respond.phrase = "Conflict";
-		this->respond.body = "No / At The End Of The URI";
-		this->respond.content = 1;
-		this->respond.close = ALIVE;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.close = CLOSE;
 		this->respond.flagResponse = -1;
 		this->respond.type = 1;
 	}
@@ -480,108 +543,72 @@ void client::initResponse(std::map<std::string, std::string> mimetypes)
 		std::cout << "filling body == " << this->client_socket << std::endl;
 		if (this->fillBody(mimetypes) == -1)
 		{
-			this->initResponse(mimetypes);
+			this->initResponse(mimetypes, ErrSer);
 			return ;
 		}
 		this->respond.status_code = 200;
-		// this->respond.phrase = "OK";
 		this->respond.close = ALIVE;
-		this->respond.headers.push_back("Cache-Control: no-cache, no-store");
-		this->respond.headers.push_back("Pragma: no-cache");
-		this->respond.headers.push_back("Expires: 0");
-		// this->respond.body = "Resource Not Found In Root";
-		// this->respond.content = 1;
 		this->respond.flagResponse = -1;
 		this->respond.type = 1;
 	}
 	else if (this->respond.flagResponse == REDIRECT)
 	{
 		this->generateUrl();
-		this->respond.status_code = 301;
-		// this->respond.phrase = "Moved Permanently";
+		if (this->respond.status_code == 0)
+			this->respond.status_code = 301;
 		this->respond.close = ALIVE;
 		this->respond.headers.push_back("Cache-Control: no-cache, no-store");
 		this->respond.headers.push_back("Pragma: no-cache");
 		this->respond.headers.push_back("Expires: 0");
 		this->respond.headers.push_back("Location: " + this->respond.redirectUrl);
-		// this->respond.body = "Resource Not Found In Root";
-		// this->respond.content = 1;
 		this->respond.flagResponse = -1;
 		this->respond.type = 1;
 	}
 	else if (this->respond.flagResponse == FORBIDEN)
 	{
 		this->respond.status_code = 403;
-		// this->respond.phrase = "Forbidden";
+		this->findErrorPage(mimetypes, ErrSer);
 		this->respond.type = 1;
-		this->respond.close = ALIVE;
-		this->respond.content = 1;
+		this->respond.close = CLOSE;
 		this->respond.flagResponse = -1;
-		this->respond.body = "You Don't Have Permession To Do That";
 	}
 	else if (this->respond.flagResponse == AUTOINDEX)
 	{
-		// std::cout << "filling body " << std::endl;
 		this->generateListing(mimetypes);
 		this->respond.status_code = 200;
-		// this->respond.phrase = "OK";
 		this->respond.close = ALIVE;
-		this->respond.headers.push_back("Cache-Control: no-cache, no-store");
-		this->respond.headers.push_back("Pragma: no-cache");
-		this->respond.headers.push_back("Expires: 0");
-		// this->respond.body = "Resource Not Found In Root";
-		this->respond.content = 5;
 		this->respond.flagResponse = -1;
 		this->respond.type = 1;
 	}
 	else if (this->respond.flagResponse == CREATED)
 	{
+		this->genereteLoadSucess(mimetypes);
 		this->respond.status_code = 201;
-		// this->respond.phrase = "created";
 		this->respond.type = 1;
 		this->respond.close = ALIVE;
-		this->respond.content = 1;
-		this->respond.body = "successfully uploaded";
-		this->respond.flagResponse = -1;
-	}
-	else if (this->respond.flagResponse == EMPTY)
-	{
-		this->respond.status_code = 204;
-		// this->respond.phrase = "No Content";
-		this->respond.type = 1;
-		this->respond.close = ALIVE;
-		this->respond.flagResponse = -1;
-		// this->respond.content = 1;
-		// this->respond.body = "No Body Found";
-	}
-	else if (this->respond.flagResponse == EXIST)
-	{
-		this->respond.status_code = 409;
-		// this->respond.phrase = "Conflict";
-		this->respond.type = 1;
-		this->respond.close = ALIVE;
-		this->respond.content = 1;
-		this->respond.body = "Resource Already Exist";
 		this->respond.flagResponse = -1;
 	}
 	else if (this->respond.flagResponse == INTERNALERR)
 	{
 		this->respond.status_code = 500;
-		// this->respond.phrase = "Internal Server Error";
+		this->findErrorPage(mimetypes, ErrSer);
 		this->respond.type = 1;
 		this->respond.close = CLOSE;
-		this->respond.content = 1;
-		this->respond.body = "Internal Server Error";
 		this->respond.flagResponse = -1;
 	}
 	else if (this->respond.flagResponse == DELETED)
 	{
 		this->respond.close = ALIVE;
 		this->respond.status_code = 204;
-		// this->respond.phrase = "No Content";
 		this->respond.type = 1;
 		this->respond.flagResponse = -1;
-		// this->respond.content = 1;
-		// this->respond.body = "Resource Already Exist";
+	}
+	else if (this->respond.flagResponse == CGI)
+	{
+		this->respond.close = ALIVE;
+		this->respond.status_code = 200;
+		this->respond.body = "CGI IN PROGRESS";
+		this->respond.type = 1;
+		this->respond.flagResponse = -1;
 	}
 }

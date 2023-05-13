@@ -61,38 +61,16 @@ int parssingOfHeader::check_media(client &obj, std::multimap<std::string,std::st
 	{
         int i = obj.headerOfRequest.find(';', pos);
         std::string check = obj.headerOfRequest.substr(pos + 14 , i - pos - 14);
-        // std::cout << "check == %" << (int)check[check.size() - 1] << "%"<< std::endl;
-        // std::cout << "check == " << check.size() << std::endl;
         if (check.compare("multipart/form-data") == 0)
             return (0);
-		media = obj.headerOfRequest.substr(pos + 14, obj.headerOfRequest.find('\r', pos + 14));
-        media.pop_back();
-        // std::cout << "media == %" << media << "%"<< std::endl;
-        // std::cout << "media == " << media.size() << std::endl;
-        //std::cout << "asdhaksdka" << std::endl;
+		media = obj.headerOfRequest.substr(pos + 14, obj.headerOfRequest.find('\r', pos) - (pos + 14));
         std::multimap<std::string, std::string>::iterator it = mimetypes_.find(media);
         if (it != mimetypes_.end())
-        {
-            std::cout << "found type" << std::endl;
             return (0);
-        }
         else
         {
-            std::cout << "not found type" << std::endl; 
-            obj.respond.status_code = 415;
-            // // // obj.respond.phrase = "Unsupported Media Type";
-            // obj.respond.type = 1;
-            obj.respond.body = "Unsupported media type. Please use a supported type.";
-            obj.respond.contenttype = "text/plain";
-            // obj.respond.close = CLOSE;
-            // obj.respond.content = 1;
-            // obj.flag = ERROR;
-            obj.respond.type = 1;
+            obj.respond.flagResponse = MEDIANOTSUPPORTED;
             obj.respond.ready = 1;
-            // // obj.respond.phrase = "Bad Request";
-            // obj.respond.content = 1;
-            // obj.respond.body = "The request is invalid or malformed.";
-            obj.respond.close = CLOSE;
             return (-1);
         }
 	}
@@ -124,24 +102,14 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy, std::multimap<
             i++;
         if(str.substr(k,i - k).size() == 0)// if has empty value
         {
-            obj.respond.type = 1;
-            obj.respond.status_code = 400;
+            obj.respond.flagResponse = BADREQUEST;
             obj.respond.ready = 1;
-            // // obj.respond.phrase = "Bad Request";
-            obj.respond.content = 1;
-            obj.respond.body = "The request is invalid or malformed.";
-            obj.respond.close = CLOSE;
             return -2;
         }
         if(str[i] != '\r' && str[i] != '\n' && str[i + 1] == '\n')// if line dont end by '\r'
         {
-            obj.respond.type = 1;
-            obj.respond.status_code = 400;
+            obj.respond.flagResponse = BADREQUEST;
             obj.respond.ready = 1;
-            // // obj.respond.phrase = "Bad Request";
-            obj.respond.content = 1;
-            obj.respond.body = "The request is invalid or malformed.";
-            obj.respond.close = CLOSE;
             return -2;
         }
         i++;
@@ -150,13 +118,8 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy, std::multimap<
 	i = str.find("Host: ");
 	if(i == -1)
 	{
-		obj.respond.status_code = 400;
-		// obj.respond.phrase = "Bad Request";
-		obj.respond.type = 1;
+        obj.respond.flagResponse = BADREQUEST;
         obj.respond.ready = 1;
-		obj.respond.body = "No Host Header Found";
-		obj.respond.close = CLOSE;
-        obj.respond.content = 1;
 		return -4;
 	}
     if(obj.tmp == POST)// when upload to to server sould present this headers
@@ -164,25 +127,15 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy, std::multimap<
         i = str.find("Content-Length: ");
         if(i == -1)
         {
-           obj.respond.type = 1;
-           obj.respond.status_code = 411;
-           obj.respond.ready = 1;
-           // obj.respond.phrase = "Length Required";
-           obj.respond.content = 1;
-           obj.respond.body = "No Content-Length Header Found";
-           obj.respond.close = CLOSE;
+            obj.respond.flagResponse = LENGTHREQUIRED;
+            obj.respond.ready = 1;
             return -5;
         }
         i = str.find("Content-Type: ");
         if(i == -1)
         {
-            obj.respond.type = 1;
-            obj.respond.status_code = 400;
+            obj.respond.flagResponse = BADREQUEST;
             obj.respond.ready = 1;
-            // obj.respond.phrase = "Bad Request";
-            obj.respond.content = 1;
-            obj.respond.body = "No Content-Type Header Found";
-            obj.respond.close = CLOSE;
             return -6;
         }
         else
@@ -193,25 +146,15 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy, std::multimap<
         i = str.find("If-Modified-Since: ");
         if(i != -1)
         {
-           obj.respond.type = 1;
-           obj.respond.ready = 1;
-           obj.respond.status_code = 405;
-           // obj.respond.phrase = "Requested Range Not Satisfiable";
-           obj.respond.content = 1;
-           obj.respond.body = "The request has a malformed header";
-           obj.respond.close = CLOSE;
+            obj.respond.flagResponse = BADREQUEST;
+            obj.respond.ready = 1;
             return -7;
         }
         i = str.find("Range: ");
         if(i != -1)
         {
-           obj.respond.type = 1;
-           obj.respond.ready = 1;
-           obj.respond.status_code = 416;
-           // obj.respond.phrase = "Bad Request";
-           obj.respond.content = 1;
-           obj.respond.body = "The request has a malformed header";
-           obj.respond.close = CLOSE;
+            obj.respond.flagResponse = NOTVALIDRANGE;
+            obj.respond.ready = 1;
             return -8;
         }
         i = str.find("Transfer-Encoding: ");
@@ -220,13 +163,8 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy, std::multimap<
             std::string type = str.substr(i + 19, str.find('\r', i) - (i + 19));
             if (type.compare("chunked") != 0)
             {
-                obj.respond.status_code = 501;
+                obj.respond.flagResponse = NOTIMPLEMENTED;
                 obj.respond.ready = 1;
-                // obj.respond.phrase = "Not Implemented";
-                obj.respond.type = 1;
-                obj.respond.body = "Server Only Handles Chunked Encoding";
-                obj.respond.close = CLOSE;
-                obj.respond.content = 1;
                 return (-1);
             }
         }
@@ -239,65 +177,45 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy, std::multimap<
 			int ContentLength = ft_atoi(copy.substr(i + 16,copy.size()).c_str());
 			if (ContentLength > 0)
             {
-                obj.respond.type = 1;
-                obj.respond.status_code = 400;
+                obj.respond.flagResponse = BADREQUEST;
                 obj.respond.ready = 1;
-                // obj.respond.phrase = "Bad Request";
-                obj.respond.content = 1;
-                obj.respond.body = "The request has a malformed header";
-                obj.respond.close = CLOSE;
 				return -9;
             }
 		}
         i = str.find("Transfer-Encoding: ");
 		if (i != -1)
         {
-            obj.respond.type = 1;
-            obj.respond.status_code = 400;
+            obj.respond.flagResponse = BADREQUEST;
             obj.respond.ready = 1;
-            // obj.respond.phrase = "Bad Request";
-            obj.respond.content = 1;
-            obj.respond.body = "Invalid request: GET requests must not have a body with Transfer-Encoding.";
-            obj.respond.close = CLOSE;
 			return (-10);
         }
         i = str.find("Content-Type: ");
         if(i != -1)
         {
-            obj.respond.type = 1;
-            obj.respond.status_code = 400;
+            obj.respond.flagResponse = BADREQUEST;
             obj.respond.ready = 1;
-            // obj.respond.phrase = "Bad Request";
-            obj.respond.content = 1;
-            obj.respond.body = "The request contained a Content-Type header, but it should not be included in a GET request.";
-            obj.respond.close = CLOSE;
             return -11;
         }
     }
     else if(obj.tmp == DELETE)//delete method
     {
-        i = str.find("If-Modified-Since: ");
-        if(i != -1)
-        {
-			obj.respond.type = 1;
-			obj.respond.status_code = 405;
-            obj.respond.ready = 1;
-			// obj.respond.phrase = "Method Not Allowed";
-			obj.respond.content = 1;
-			obj.respond.body = "The request has a malformed header";
-			obj.respond.close = CLOSE;
-            return -12;
-        }
+        // i = str.find("If-Modified-Since: ");
+        // if(i != -1)
+        // {
+		// 	obj.respond.type = 1;
+		// 	obj.respond.status_code = 405;
+        //     obj.respond.ready = 1;
+		// 	// obj.respond.phrase = "Method Not Allowed";
+		// 	obj.respond.content = 1;
+		// 	obj.respond.body = "The request has a malformed header";
+		// 	obj.respond.close = CLOSE;
+        //     return -12;
+        // }
         i = str.find("Content-Type: ");
         if(i != -1)
         {
-            obj.respond.type = 1;
-            obj.respond.status_code = 400;
+            obj.respond.flagResponse = BADREQUEST;
             obj.respond.ready = 1;
-            // obj.respond.phrase = "Bad Request";
-            obj.respond.content = 1;
-            obj.respond.body = "Content-Type Header Found";
-            obj.respond.close = CLOSE;
             return -6;
         }
         i = str.find("Content-Length: ");
@@ -307,26 +225,16 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy, std::multimap<
 			//std::cout << "content == "<< ContentLength<< std::endl;
 			if (ContentLength > 0)
             {
-                obj.respond.type = 1;
-                obj.respond.status_code = 400;
+                obj.respond.flagResponse = BADREQUEST;
                 obj.respond.ready = 1;
-                // obj.respond.phrase = "Bad Request";
-                obj.respond.content = 1;
-                obj.respond.body = "The request has a malformed header";
-                obj.respond.close = CLOSE;
 				return -9;
             }
 		}
         i = str.find("Transfer-Encoding: ");
 		if (i != -1)
         {
-            obj.respond.type = 1;
-            obj.respond.status_code = 400;
+            obj.respond.flagResponse = BADREQUEST;
             obj.respond.ready = 1;
-            // obj.respond.phrase = "Bad Request";
-            obj.respond.content = 1;
-            obj.respond.body = "Invalid request: Delete requests must not have a body with Transfer-Encoding.";
-            obj.respond.close = CLOSE;
 			return (-10);
         }
     }
@@ -340,13 +248,8 @@ int parssingOfHeader::VerifyURI(client &obj, std::map<std::string, std::string> 
 	std::string compare = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
     if (obj.URI.size() > 2048)
     {
-        obj.respond.type = 1;
-        obj.respond.status_code = 414;
+        obj.respond.flagResponse = TOOLONG;
         obj.respond.ready = 1;
-        // obj.respond.phrase = "Request-URI Too Long";
-        obj.respond.content = 1;
-        obj.respond.body = "Request-URI is bigger than 2048";
-        obj.respond.close = CLOSE;
         return -1;
     }
 	for (size_t i = 0; i < obj.URI.size(); i++)
@@ -357,13 +260,8 @@ int parssingOfHeader::VerifyURI(client &obj, std::map<std::string, std::string> 
 				break ;
 			if (obj.URI[i] != compare[j] && j == compare.size() - 1)
 			{
-				obj.respond.type = 1;
-				obj.respond.status_code = 400;
+                obj.respond.flagResponse = BADREQUEST;
                 obj.respond.ready = 1;
-				// obj.respond.phrase = "Bad Request";
-				obj.respond.content = 1;
-				obj.respond.body = "Character Not Allowed In The URI";
-				obj.respond.close = CLOSE;
 				return -1;
 			}
 		}
@@ -408,15 +306,8 @@ int parssingOfHeader::checkHeaderLine(client &obj, std::map<std::string, std::st
     if( strcmp(temp,"GET") != 0 && strcmp(temp,"POST") != 0 && strcmp(temp,"DELETE") != 0)
     {
         free(temp);
-        obj.respond.type = 1;
+        obj.respond.flagResponse = METHODNOTALLOWED;
         obj.respond.ready = 1;
-        // obj.respond.status_code = 501;
-        // // obj.respond.phrase = "Not Implemented";
-		obj.respond.status_code = 405;
-        // obj.respond.phrase = "Method Not Allowed";
-        obj.respond.headers.push_back("Allow: GET, POST, DELETE");
-        // respond.body = "No Host Header Found";
-        // respond.close = CLOSE;
         return -1;
     }
     free(temp);
@@ -429,13 +320,8 @@ int parssingOfHeader::checkHeaderLine(client &obj, std::map<std::string, std::st
     if(temp[0] != '/')
     {
         free(temp);
-        obj.respond.type = 1;
+        obj.respond.flagResponse = BADREQUEST;
         obj.respond.ready = 1;
-        obj.respond.status_code = 400;
-        // obj.respond.phrase = "Bad Request";
-        obj.respond.content = 1;
-        obj.respond.body = "The request has a malformed header";
-        obj.respond.close = CLOSE;
         return -2;
     }
     obj.URI.assign(&temp[0]);
@@ -452,12 +338,8 @@ int parssingOfHeader::checkHeaderLine(client &obj, std::map<std::string, std::st
     if( strcmp(temp,"HTTP/1.1\r\n") != 0 && strcmp(temp,"HTTP/1.1\n\n") != 0)
     {
         free(temp);
-        obj.respond.type = 1;
-        obj.respond.status_code = 505;
+        obj.respond.flagResponse = NOTSUPPORTED;
         obj.respond.ready = 1;
-        // obj.respond.phrase = "HTTP Version Not Supported";
-        // respond.body = "No Host Header Found";
-        // respond.close = CLOSE;
         return -3;
     }
     free(temp);

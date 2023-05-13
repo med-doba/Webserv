@@ -42,7 +42,17 @@ enum {
 	AUTOINDEX,
 	CONFLICT,
 	INTERNALERR,
-	CGI
+	CGI,
+	BADREQUEST,
+	METHODNOTALLOWED,
+	NOTSUPPORTED,
+	TOOLONG,
+	LENGTHREQUIRED,
+	NOTVALIDRANGE,
+	NOTIMPLEMENTED,
+	MEDIANOTSUPPORTED,
+	TOOLARGE,
+	LOOP
 };
 
 using std::string;
@@ -62,10 +72,11 @@ class parssingOfBody
 
         parssingOfBody(/* args */);
         void handle_post(client &obj, std::multimap<std::string, std::string>);
-        void handling_chunked_data(client &obj, std::multimap<std::string, std::string>);
-        void handling_form_data(client &obj, std::multimap<std::string, std::string>);
-		void putDataTofile(string  data, client & obj, std::multimap<std::string, std::string>);
+        void handling_chunked_data(client &obj, std::map<std::string, std::string>, std::multimap<std::string, std::string>);
+        void handling_form_data(client &obj, std::map<std::string, std::string>);
+		void putDataTofile(string  data, client & obj, std::map<std::string, std::string>);
         void  create_file_and_put_content(std::string & bodyofRequest,std::string & headerOfRequest, int&created, std::string path, std::multimap<std::string, std::string>);
+		int checkMedia(std::string file, std::map<std::string, std::string> mimetypes);
 		void clear();
 
         ~parssingOfBody();
@@ -87,7 +98,6 @@ class response
 		std::string contentlength;
 		std::string contenttype;
 		std::string redirectUrl;
-		int content;
 		int flagResponse;
 		int ready;
 
@@ -133,7 +143,6 @@ class client
 	std::string headerOfRequest;
 	std::string bodyofRequest;
 	std::ofstream file;
-	// std::vector<char> content_buffer;
 	std::string URI;
 	int bytes_read;
 	int flag;
@@ -158,17 +167,19 @@ class client
 
 	int extractheader();
 	void openfile();
-	// int response(int pfds_index, vector<struct pollfd> &pfds);
 	int pushToBuffer();
 	void clear();
 	int checkHeaderOfreq(std::map <std::string, std::string>,std::multimap <std::string, std::string> );
 	long long	ft_atoi(const char *str);
 	char *ft_substr(char const *s, unsigned int start, size_t len);
 	void check(void);
-	int postMethod(std::multimap<std::string, std::string> mimetypes_);
-	void initResponse(std::map<std::string, std::string>);
+	int postMethod(std::multimap<std::string, std::string> ,std::map<std::string, std::string> );
+	void initResponse(std::map<std::string, std::string>, std::vector<std::pair<int , std::string> > );
 	int fillBody(std::map<std::string, std::string>);
 	int generateListing(std::map<std::string, std::string>);
+	void genereteLoadSucess(std::map<std::string, std::string> );
+	void findErrorPage(std::map<std::string, std::string> mimetypes,  std::vector<std::pair<int , std::string> > );
+	void generateErrPage(std::map<std::string, std::string> mimetypes);
 	void generateUrl();
 	client();
 	client(const client &obj);

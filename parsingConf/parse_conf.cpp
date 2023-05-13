@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_conf.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/10 15:13:15 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/13 20:19:08 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,18 +167,18 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 		}
 		// print_vector_of_structs(bind_info);
 		// classconfig.ft_show(block);
-		for (size_t i = 0; i <  block.size(); i++)
-		{
-			std::cout << "server block " << i << std::endl;
-			print_vector(block[i].ErrorPages);
-			std::cout << "location block" << std::endl;
-			for (size_t j = 0; j < block[i].obj_location.size(); j++)
-			{
-				print_vector(block[i].obj_location[j].ErrorPages);
-			}
-			// std::cout << "location block" << std::endl;
-			std::cout << "//\\//\\//\\//\\//\\//\\" << std::endl;
-		}
+		// for (size_t i = 0; i <  block.size(); i++)
+		// {
+		// 	std::cout << "server block " << i << std::endl;
+		// 	print_vector(block[i].ErrorPages);
+		// 	std::cout << "location block" << std::endl;
+		// 	for (size_t j = 0; j < block[i].obj_location.size(); j++)
+		// 	{
+		// 		print_vector(block[i].obj_location[j].ErrorPages);
+		// 	}
+		// 	// std::cout << "location block" << std::endl;
+		// 	std::cout << "//\\//\\//\\//\\//\\//\\" << std::endl;
+		// }
 	}
 	else
 		throw(std::runtime_error("Config File Not Found"));
