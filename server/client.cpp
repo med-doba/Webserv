@@ -23,7 +23,8 @@ int client::fillBody(std::map<std::string, std::string> mimetypes)
 		it = mimetypes.find(".txt");
 		this->respond.contenttype = it->second;
 	}
-	input.open(OpFile);
+	std::cout << "file == " << OpFile << std::endl;
+	input.open(OpFile , std::ios::binary);
 	if (!input.is_open())
 	{
 		std::cout << "couldn't open file" << std::endl;
@@ -31,19 +32,25 @@ int client::fillBody(std::map<std::string, std::string> mimetypes)
 		this->respond.flagResponse = INTERNALERR;
 		return (-1);
 	}
-	input.seekg(0, std::ios::end);
-	size_t size = input.tellg();
-	input.seekg(0, std::ios::beg);
+	std::stringstream ss;
+	ss << input.rdbuf();
+	input.close();
+	std::string file = ss.str();
+	this->respond.body = file;
+	return (0);
+	// input.seekg(0, std::ios::end);
+	// size_t size = input.tellg();
+	// input.seekg(0, std::ios::beg);
 
-	// Reserve space in the buffer
-	if (size == 0)
-		return (0);
-	std::cout << "size === " << size << std::endl;
-	std::vector<char> content(size);
+	// // Reserve space in the buffer
+	// if (size == 0)
+	// 	return (0);
+	// std::cout << "size === " << size << std::endl;
+	// std::vector<char> content(size);
 
-	// Read the file in chunks
-	input.read(&content[0], size);
-	this->respond.body = std::string(content.begin(), content.end());
+	// // Read the file in chunks
+	// input.read(&content[0], size);
+	// this->respond.body = std::string(content.begin(), content.end());
 	return (0);
 }
 
@@ -207,6 +214,7 @@ void client::clear()
 
 client::client()
 {
+	flagTimeout = -1;
     total_bytes_received  = 0;
     i  = flag = flag_  = j = 0;
     tmp = 0;
@@ -251,6 +259,8 @@ client& client::operator=(const client& obj)
 		this->redirpath = obj.redirpath;
 		this->uploadPath = obj.uploadPath;
 		this->listPath = obj.listPath;
+		this->timeout = obj.timeout;
+		this->flagTimeout = obj.flagTimeout;
 	}
 	return (*this);
 }
@@ -439,7 +449,7 @@ void client::generateUrl()
 	this->respond.redirectUrl = redirectUrl;
 }
 
-void client::initResponse(std::map<std::string, std::string> mimetypes, std::vector<std::pair<int , std::string> > ErrSer)
+void client::initResponse(std::map<std::string, std::string> mimetypes, std::vector<std::pair<int , std::string> >& ErrSer)
 {
 	if (this->respond.flagResponse == NOTFOUND)
 	{
@@ -608,6 +618,14 @@ void client::initResponse(std::map<std::string, std::string> mimetypes, std::vec
 		this->respond.close = ALIVE;
 		this->respond.status_code = 200;
 		this->respond.body = "CGI IN PROGRESS";
+		this->respond.type = 1;
+		this->respond.flagResponse = -1;
+	}
+	else if (this->respond.flagResponse == TIMEOUT)
+	{
+		this->respond.status_code = 504;
+		this->findErrorPage(mimetypes, ErrSer);
+		this->respond.close = CLOSE;
 		this->respond.type = 1;
 		this->respond.flagResponse = -1;
 	}

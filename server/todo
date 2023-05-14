@@ -32,22 +32,21 @@ to the request method (pending ...) (mustapha will do it)
 
 
 HAITAM ::
-=> server hangs when contentLength is bigger the actual body (implement a timeout function) (pending ...)
 
 => implement the range header in the response plus rather than the whole file only read as much as you're gonna send (pending ...)
 
-=> Handle error pages (pending ...)
-
-=> automate the contenttype for error in headers (pending ...)
 
 MOHAMMED ::
 => CGI NOT DONE (med-doba) (pending ...)
-=> error pages don't transfer (pending ...)
 
 
 
 
+=> server hangs when contentLength is bigger the actual body (implement a timeout function) (done)
 
+=> Handle error pages (done)
+
+=> automate the contenttype for error in headers (done)
 
 => if a bind fails do not exist just thorw error and continue (done)
 

@@ -245,6 +245,36 @@ void server::lunch_servers()
 		throw(std::runtime_error("Can't Bind To A Single Server"));
 }
 
+int server::timeoutCheck()
+{
+	clock_t hangtime;
+	for (size_t i = 0; i < clients.size(); i++)
+	{
+		if (clients[i].flagTimeout != -1)
+		{
+			hangtime = clock() - clients[i].timeout;
+			if (((float)hangtime / CLOCKS_PER_SEC) > 5)
+				return (i);
+		}
+	}
+	return (-1);
+}
+
+void server::ClientHang(int index)
+{
+	for (size_t i = 0; i < pfds.size(); i++)
+	{
+		if (clients[index].client_socket == pfds[i].fd)
+		{
+			clients[index].respond.ready = 1;
+			clients[index].ready = 1;
+			clients[index].respond.flagResponse = TIMEOUT;
+			return ;
+		}
+	}
+	
+}
+
 void server::monitor()
 {
 	while (1)
@@ -255,7 +285,10 @@ void server::monitor()
 		{
 			for (size_t i = 0; i < this->pfds.size(); i++)
 			{
-				if (this->pfds[i].revents & POLLIN)
+				int cli = timeoutCheck();
+				if (cli != -1)
+					ClientHang(cli);
+				if (this->remove == 0 && this->pfds[i].revents & POLLIN)
 				{
 					for (size_t j = 0; j < servers.size(); j++)
 					{
@@ -419,8 +452,11 @@ serverParse& server::findServerBlock(int index)
 		}
 		i++;
 	}
-	clients[index].respond.ready = 1;
-	clients[index].respond.flagResponse = BADREQUEST;
+	if (clients[index].respond.ready != 1)
+	{
+		clients[index].respond.ready = 1;
+		clients[index].respond.flagResponse = BADREQUEST;
+	}
 	return (block[0]);
 }
 
@@ -773,9 +809,9 @@ void server::DeleteBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 void server::response(struct pollfd &pfds, int index)
 {
 	int loc = -1;
+	clients[index].flagTimeout = -1;
 	serverParse objServer;
-	if (clients[index].respond.ready != 1)
-		objServer = findServerBlock(index);
+	objServer = findServerBlock(index);
 	if (clients[index].respond.ready != 1)
 		loc = checkLocation(clients[index], objServer);
 	if (loc != -1 && clients[index].respond.ready != 1)
@@ -806,6 +842,8 @@ void server::receive(int pfds_index, int index)
 {
     int rtn;
 	(void)pfds_index;
+	clients[index].flagTimeout = 1;
+	clients[index].timeout = clock();
     rtn = clients[index].pushToBuffer();
     if(rtn == 0 || rtn == -1)
 	{
@@ -815,7 +853,10 @@ void server::receive(int pfds_index, int index)
 	}
     rtn = clients[index].checkHeaderOfreq(PercentEncoding, mimeTypes_);
 	if(rtn == -2)
+	{
+		std::cout << "gets out from here" << std::endl;
 		return ;
+	}
 	if(clients[index].flag == NONCHUNKED) // if has content lenght
 	{
 		string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].buffer.size() - clients[index].headerOfRequest.size() + 3);

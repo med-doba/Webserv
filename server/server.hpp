@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <ctime>
 #include <fcntl.h>
 #include <cstring>
 #include <string>
@@ -62,6 +63,8 @@ class server
 	void fillStatusCode();
 	void fillMimeType();
 	void fillRevMimeType();
+	int timeoutCheck();
+	void ClientHang(int index);
 	serverParse& findServerBlock(int index);
 };
 

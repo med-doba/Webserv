@@ -52,7 +52,8 @@ enum {
 	NOTIMPLEMENTED,
 	MEDIANOTSUPPORTED,
 	TOOLARGE,
-	LOOP
+	LOOP,
+	TIMEOUT
 };
 
 using std::string;
@@ -164,6 +165,8 @@ class client
 	int len;
 	int flag_res;
 	int ContentLength;
+	int flagTimeout;
+	clock_t timeout;
 
 	int extractheader();
 	void openfile();
@@ -174,7 +177,7 @@ class client
 	char *ft_substr(char const *s, unsigned int start, size_t len);
 	void check(void);
 	int postMethod(std::multimap<std::string, std::string> ,std::map<std::string, std::string> );
-	void initResponse(std::map<std::string, std::string>, std::vector<std::pair<int , std::string> > );
+	void initResponse(std::map<std::string, std::string>, std::vector<std::pair<int , std::string> > &);
 	int fillBody(std::map<std::string, std::string>);
 	int generateListing(std::map<std::string, std::string>);
 	void genereteLoadSucess(std::map<std::string, std::string> );
