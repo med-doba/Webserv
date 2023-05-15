@@ -591,6 +591,20 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 			{
 				if (ObjLocation.autoindex[1].compare("off") == 0)
 				{
+					for (size_t i = 1; i < ObjServer.index.size(); i++)
+					{
+						std::string testPath = root + ObjServer.index[i];
+						if (access(testPath.data(), F_OK) == 0)
+						{
+							ObjClient.respond.ready = 1;
+							ObjClient.respond.flagResponse = REDIRECT;
+							std::string path = ObjLocation.path;
+							if (path[path.size() - 1] == '/')
+								path.pop_back();
+							ObjClient.redirpath = path + "/" + ObjServer.index[i];
+							return;
+						}
+					}
 					ObjClient.respond.ready = 1;
 					ObjClient.respond.flagResponse = FORBIDEN;
 					return ;
