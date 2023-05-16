@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 14:17:23 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/15 22:25:35 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/16 16:39:36 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <string.h>
 
 size_t	ft_strlen(char	*str)
 {
@@ -41,7 +42,7 @@ char**	ft_enviroment(cgi &cgi_obj, char *methode)
 	// 	rtn[] = strdup("CONTENT_LENGTH=");
 
 	// }
-
+	(void)cgi_obj;
 	if (!strcmp(methode, "GET"))
 	{
 		rtn[0] = strdup("REQUEST_METHOD=GET");//php/py
@@ -65,72 +66,79 @@ char**	ft_enviroment(cgi &cgi_obj, char *methode)
 void	ft_cgi(std::string	fileName)
 {
 	std::ifstream	file(fileName);
-	std::string	path("/usr/local/bin/python3"), methode("GET");
+	std::string		path;
+	std::string		methode;
 	cgi	cgi_obj;
 	char	request_body[0];
 	char	**envp;
+	pid_t	pid;
 
 	if (file.is_open())
 	{
+		//check extention of file
+		if (path.substr(path.length() - 4) == ".php")
+			path = "php-cgi";
+		else if (path.substr(path.length() - 3) == ".py")
+			path = "/usr/local/bin/python3";
+		else
+			return (std::cerr << "Error: extention file not supported\n", exit(1));
+
 		if (methode == "GET")
 		{
-			// Get the query string from the environment variables
-			std::string queryString = cgi_obj.QUERY_STRING;
-
 			// Parse the query string
+			const char* queryParameters = strchr((const char *)cgi_obj.REQUEST_URI.c_str(), '?');
+			if (queryParameters != NULL)
+			{
+				queryParameters++;
+				cgi_obj.QUERY_STRING = queryParameters;
+			}
 
 			envp = ft_enviroment(cgi_obj, (char *)"GET");
 
 			// Generate the HTML response using the parameters received
 		}
 
-		// else if (methode == "POST")
-		// {
-		// 	std::string	scontent_length = cgi_obj.CONTENT_LENGTH;
-		// 	int			content_length = std::stoi(cgi_obj.CONTENT_LENGTH);
+		else if (methode == "POST")
+		{
+			std::string	scontent_length = cgi_obj.CONTENT_LENGTH;
+			int			content_length = std::stoi(cgi_obj.CONTENT_LENGTH);
 
-		// 	request_body[content_length];
-		// 	read(STDIN_FILENO, request_body, content_length);
+			request_body[content_length];
+			read(STDIN_FILENO, request_body, content_length);
 
-		// 	envp = ft_enviroment(cgi_obj, "POST");
-		// }
+			envp = ft_enviroment(cgi_obj, "POST");
+		}
 
-		pid_t	pid = fork();
-		// std::cout << "fd = " << fd << std::endl;
+		pid = fork();
+		if(pid == -1)
+			return (std::cerr << "Error: fork failed to creat a new process\n", exit(1));
 
 		if (!pid)
 		{
-
 			int	fd = open("output_cgi", O_CREAT | O_RDWR, 0777);
+
+			if (fd == -1)
+				return (std::cerr << "Error: fd file\n", exit(1));
 			dup2(fd, STDOUT_FILENO);
-			// write(1, "has", 3);
-			// std::cout << "fd = " << fd << std::endl;
-			// int	tmp_in = dup(1);
-			char	*argv[] = {strdup("/usr/local/bin/python3"), (char *)fileName.c_str(), NULL};
-			// char	*argv[] = {(char *)fileName.c_str(), NULL};
-			// for (int i = 0; i < 3; i++)
-			// {
-			// 	std::cout << "argv == " << argv[i] << std::endl;
-			// }
 
-			// puts("lol");
-
+			char	*argv[] = {strdup(path.c_str()), (char *)fileName.c_str(), NULL};
 			if (execve(path.c_str(), argv, envp) == -1)
 				return (std::cerr << "error execve\n", exit(1));
 		}
 
 		waitpid(-1, NULL, 0);
+		// test fhe stdout and stdin is workin clean
+		std::cout << "meddo" << std::endl;
 	}
 	else
 		std::cerr << "error: file not open" << std::endl;
-	// std::cout << "Content-type: text/html" << std::endl << std::endl;
+	std::cout << "Content-type: text/html" << std::endl << std::endl;
 }
 
-int	main(int ac, char	**av)
+int	main(int ac, char **av)
 {
 	if(ac == 2)
 	{
-		// av[1] = "file.py";
 		ft_cgi(av[1]);
 	}
 	return 0;

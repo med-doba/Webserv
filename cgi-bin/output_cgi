@@ -1,8 +1,11 @@
-Content-type: text/html
+Content-type:text/html
 
-<h1>Query String Parameters:</h1>
-<p>moha: eddo</p>
-<p>last_name: badr</p>
-2>Hello None None</h2>
+
+<html>
+<head>
+<title>Hello World - First CGI Program</title>
+</head>
+<body>
+<h2>Hello World! This is my first CGI program</h2>
 </body>
 </html>
