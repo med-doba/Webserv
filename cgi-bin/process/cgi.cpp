@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/17 16:15:51 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/17 19:35:17 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,18 @@ cgi::cgi(/* args */)
 {
 	this->executable = "/usr/bin/python3";
 	// this->QUERY_STRING="name=moha&amigo=zenon&team=hmoubal";
-	this->CONTENT_TYPE= "text/plain";
+	this->CONTENT_TYPE= "text/plain";//yo
 	this->REQUEST_METHOD  = "GET";
 	this->REQUEST_URI = "cgi-bin/scripts_cgi/file.py/sdfsd/asfa?name=eddcaso&amigo=zenon&team=hmoubal";
 	// this->PATH_INFO = "/path/info";
 	// this->SCRIPT_NAME = "../scripts_cgi/file.py";
+	// this->CONTENT_LENGTH = "0";
+	//
+	// REQUEST_METHOD
+	// CONTENT_LENGTH
+	// SCRIPT_NAME
+	// REQUEST_URI
+	// executable
 }
 
 cgi::~cgi()
@@ -74,7 +81,7 @@ void cgi::ft_environment()
 void	cgi::ft_cgi(std::string	fileName)
 {
 	std::ifstream	file(fileName);
-	// char	request_body[0];
+	char	request_body[0];
 	pid_t	pid;
 
 	if (file.is_open())
@@ -95,16 +102,26 @@ void	cgi::ft_cgi(std::string	fileName)
 			ft_environment();
 		}
 
-		// else if (this->REQUEST_METHOD == "POST")
-		// {
-		// 	std::string	scontent_length = this->.CONTENT_LENGTH;
-		// 	int			content_length = std::stoi(this->.CONTENT_LENGTH);
-
-		// 	request_body[content_length];
-		// 	read(STDIN_FILENO, request_body, content_length);
-
-		// 	envp = ft_environment();
-		// }
+		else if (this->REQUEST_METHOD == "POST")
+		{
+			std::string	scontent_length = this->CONTENT_LENGTH;
+			int			content_length = std::stoi(this->CONTENT_LENGTH);
+			if (content_length > 0)
+			{
+				int	fds[2];
+				if (pipe(fds) == -1)
+					return (std::cerr << "Error: pipe failed\n", exit(1));
+				// pid_t	pid_post = fork();
+				// 	return (std::cerr << "Error: fork failed to creat a new process\n", exit(1));
+				// if (pid_post == -1)
+				write(fds[1], this->POST_DATA.data(), content_length);
+				int	std_in = dup(0);
+				dup2(fds[0], STDIN_FILENO);
+				// request_body[content_length];
+				// read(STDIN_FILENO, request_body, content_length);
+			}
+			ft_environment();
+		}
 
 		pid = fork();
 		if(pid == -1)
