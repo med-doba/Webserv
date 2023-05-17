@@ -213,26 +213,26 @@ void server::lunch_servers()
 	{
 		if ((servers[i].socket_server = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		{
-			// perror("socket failed");
+			perror("socket failed");
 			servers[i].fail = -1;
 			continue;
 		}
 		if (setsockopt(servers[i].socket_server, SOL_SOCKET, SO_REUSEADDR, &(servers[i].opt), sizeof(servers[i].opt)))
 		{
-			// perror("setsockopt");
+			perror("setsockopt");
 			servers[i].fail = -1;
 			continue;
 		}
 		if (bind(servers[i].socket_server, (struct sockaddr*)&(servers[i].address), servers[i].addrlen) < 0)
 		{
-			// perror("bind failed");
+			perror("bind failed");
 			servers[i].fail = -1;
 			continue;
 		}
 		fcntl(servers[i].socket_server, F_SETFL, O_NONBLOCK);
 		if (listen(servers[i].socket_server, BACKLOG) < 0)
 		{
-			// perror("listen");
+			perror("listen");
 			servers[i].fail = -1;
 			continue;
 		}
@@ -599,6 +599,43 @@ std::string server::trim_path(client &ObjClient, locationParse ObjLocation)
 	return (root);
 }
 
+void server::fillCGI(client &ObjClient, serverParse ObjServer, int loc)
+{
+	locationParse ObjLocation = ObjServer.obj_location[loc];
+	ObjClient.obj.executable = "." + ObjLocation.cgi[2];
+	ObjClient.obj.CONTENT_TYPE = "text/plain";
+	std::string tmp = ObjClient.URI.substr(ObjLocation.path.size());
+	int pos = tmp.find("/cgi-bin");
+	if (pos != -1)
+		ObjClient.obj.REQUEST_URI = tmp.substr(1);
+	else
+		ObjClient.obj.REQUEST_URI = "cgi-bin" + tmp;
+	pos = ObjClient.obj.REQUEST_URI.find(".py");
+	if (pos != -1)
+	{
+		ObjClient.obj.SCRIPT_NAME = ObjClient.obj.REQUEST_URI.substr(0, pos + 3);
+	}
+	else
+	{
+		pos = ObjClient.obj.REQUEST_URI.find(".php");
+		if (pos != -1)
+			ObjClient.obj.SCRIPT_NAME = ObjClient.obj.REQUEST_URI.substr(0, pos + 4);
+	}
+	ObjClient.obj.SCRIPT_FILENAME = ObjClient.obj.SCRIPT_NAME;
+	if (ObjClient.tmp == GET)
+	{
+		ObjClient.obj.REQUEST_METHOD = "GET";
+		ObjClient.obj.CONTENT_LENGTH = "0";
+	}
+	else if (ObjClient.tmp == POST)
+	{
+		ObjClient.obj.REQUEST_METHOD = "POST";
+		ObjClient.obj.CONTENT_LENGTH = "0";
+		ObjClient.obj.POST_DATA = "";
+	}
+	std::cout << "URI in CGI == " << ObjClient.obj.SCRIPT_NAME << std::endl;
+}
+
 void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 {
 	struct stat info;
@@ -636,6 +673,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 						int ret = checkExtension(ObjClient.redirpath, ObjLocation);
 						if (ret == 1)
 						{
+							this->fillCGI(ObjClient, ObjServer, loc);
 							ObjClient.respond.flagResponse = CGIPRO;
 							return;
 						}
@@ -666,6 +704,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 							int ret = checkExtension(ObjClient.redirpath, ObjLocation);
 							if (ret == 1)
 							{
+								this->fillCGI(ObjClient, ObjServer, loc);
 								ObjClient.respond.flagResponse = CGIPRO;
 								return;
 							}
@@ -720,6 +759,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 			int ret = checkExtension(ObjClient.path, ObjLocation);
 			if (ret == 1)
 			{
+				this->fillCGI(ObjClient, ObjServer, loc);
 				ObjClient.respond.flagResponse = CGIPRO;
 				return;
 			}
@@ -789,6 +829,7 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 						int ret = checkExtension(ObjClient.path, ObjLocation);
 						if (ret == 1)
 						{
+							this->fillCGI(ObjClient, ObjServer, loc);
 							ObjClient.respond.flagResponse = CGIPRO;
 							return;
 						}
@@ -815,6 +856,7 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 		int ret = checkExtension(ObjClient.path, ObjLocation);
 		if (ret == 1)
 		{
+			this->fillCGI(ObjClient, ObjServer, loc);
 			ObjClient.respond.flagResponse = CGIPRO;
 			return;
 		}

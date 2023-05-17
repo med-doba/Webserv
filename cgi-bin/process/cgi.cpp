@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/17 16:15:51 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/17 19:18:59 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,6 @@
 
 cgi::cgi(/* args */)
 {
-	this->executable = "/usr/bin/python3";
-	// this->QUERY_STRING="name=moha&amigo=zenon&team=hmoubal";
-	this->CONTENT_TYPE= "text/plain";
-	this->REQUEST_METHOD  = "GET";
-	this->REQUEST_URI = "cgi-bin/scripts_cgi/file.py/sdfsd/asfa?name=eddcaso&amigo=zenon&team=hmoubal";
-	// this->PATH_INFO = "/path/info";
-	// this->SCRIPT_NAME = "../scripts_cgi/file.py";
 }
 
 cgi::~cgi()
@@ -32,12 +25,13 @@ void cgi::ft_environment()
 	int		index;
 	std::string	tmp;
 
-	envp = (char	**)malloc(sizeof(char *) * 8);
+	envp = (char	**)malloc(sizeof(char *) * 10);
 
 	index = 0;
 
 	envp[index] = strdup("SERVER_PROTOCOL=HTTP/1.1");
 	envp[++index] = strdup("GATEWAY_INTERFACE=CGI/1.1");
+	envp[++index] = strdup("REDIRECT_STATUS=200");
 	//
 	tmp = "PATH_INFO=" + this->PATH_INFO;
 	envp[++index] = strdup(tmp.data());
@@ -46,6 +40,9 @@ void cgi::ft_environment()
 	envp[++index] = strdup(tmp.data());
 	//
 	tmp = "CONTENT_TYPE=" + this->CONTENT_TYPE;
+	envp[++index] = strdup(tmp.data());
+
+	tmp = "SCRIPT_FILENAME=" + this->SCRIPT_FILENAME;
 	envp[++index] = strdup(tmp.data());
 	//
 
@@ -105,7 +102,6 @@ void	cgi::ft_cgi(std::string	fileName)
 
 		// 	envp = ft_environment();
 		// }
-
 		pid = fork();
 		if(pid == -1)
 			return (std::cerr << "Error: fork failed to creat a new process\n", exit(1));

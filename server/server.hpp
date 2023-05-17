@@ -64,6 +64,7 @@ class server
 	void fillMimeType();
 	void fillRevMimeType();
 	int timeoutCheck();
+	void fillCGI(client &ObjClient, serverParse ObjServer, int loc);
 	void ClientHang(int index);
 	int checkExtension(std::string pathCgi, locationParse ObjLocation);
 	std::string trim_path(client &ObjClient, locationParse ObjLocation);

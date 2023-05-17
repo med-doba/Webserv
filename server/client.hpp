@@ -186,6 +186,7 @@ class client
 	void findErrorPage(std::map<std::string, std::string> mimetypes,  std::vector<std::pair<int , std::string> > );
 	void generateErrPage(std::map<std::string, std::string> mimetypes);
 	void generateUrl();
+	void fillCGI();
 	client();
 	client(const client &obj);
 	client& operator=(const client& obj);
