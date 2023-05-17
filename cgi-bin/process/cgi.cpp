@@ -6,7 +6,7 @@
 /*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/17 20:20:35 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/17 21:59:51 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,8 +168,8 @@ void	cgi::ft_cgi(std::string	fileName)
 			output.close();
 			std::string file = ss.str();
 			this->body = file;
-			// if (std::remove("output_cgi"))
-			// 	return (std::cerr << "error remove\n", exit(1));
+			if (std::remove("output_cgi"))
+				return (std::cerr << "error remove\n", exit(1));
 		}
 		else
 			return (std::cerr << "error file not open\n", exit(1));

@@ -603,6 +603,7 @@ void server::fillCGI(client &ObjClient, serverParse ObjServer, int loc)
 {
 	locationParse ObjLocation = ObjServer.obj_location[loc];
 	ObjClient.obj.executable = "." + ObjLocation.cgi[2];
+	std::cout << "executable == " << ObjClient.obj.executable << std::endl;
 	ObjClient.obj.CONTENT_TYPE = "text/plain";
 	std::string tmp = ObjClient.URI.substr(ObjLocation.path.size());
 	int pos = tmp.find("/cgi-bin");
@@ -630,11 +631,15 @@ void server::fillCGI(client &ObjClient, serverParse ObjServer, int loc)
 	else if (ObjClient.tmp == POST)
 	{
 		ObjClient.obj.REQUEST_METHOD = "POST";
-		ObjClient.obj.CONTENT_LENGTH = "100";
-		// int pos = ObjClient.buffer
-		ObjClient.obj.POST_DATA = "param1=ashd&param2=asdkb";
+		int ps = ObjClient.headerOfRequest.find("Content-Length: ");
+		if (ps != -1)
+		{
+			int ps2 = ObjClient.headerOfRequest.find('\r', ps);
+			std::string length = ObjClient.headerOfRequest.substr(ps + 16, ps2 - (ps + 16));
+			ObjClient.obj.CONTENT_LENGTH = length;
+		}
+		ObjClient.obj.POST_DATA = ObjClient.buffer.substr(ObjClient.headerOfRequest.size() + 3);
 	}
-	std::cout << "URI in CGI == " << ObjClient.obj.SCRIPT_NAME << std::endl;
 }
 
 void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
@@ -643,6 +648,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 	std::string root;
 	locationParse ObjLocation = ObjServer.obj_location[loc];
 	root = trim_path(ObjClient, ObjLocation);
+	std::cout << "root get == " << root << std::endl;
 	if (access(root.data(), F_OK) != 0)
 	{
 		ObjClient.respond.ready = 1;
@@ -801,8 +807,8 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 	std::string resourseRequested = ObjClient.URI.substr(ObjLocation.path.size());
 	if (resourseRequested[0] == '/')
 		resourseRequested = resourseRequested.substr(1);
-	std::cout << "root == " << root << std::endl;
 	root = root + "/" + resourseRequested;
+	std::cout << "root post == " << root << std::endl;
 	if (access(root.data(), F_OK) != 0)
 	{
 		ObjClient.respond.ready = 1;
