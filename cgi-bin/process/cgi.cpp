@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/17 04:03:09 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/17 16:15:51 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,12 @@
 cgi::cgi(/* args */)
 {
 	this->executable = "/usr/bin/python3";
-	this->QUERY_STRING="name=moha&amigo=zenon&team=hmoubal";
+	// this->QUERY_STRING="name=moha&amigo=zenon&team=hmoubal";
 	this->CONTENT_TYPE= "text/plain";
 	this->REQUEST_METHOD  = "GET";
-	this->REQUEST_URI = "/cgi-bin/scripts_cgi/file.py/sdfsd/asfa?name=moha&amigo=zenon&team=hmoubal";
-	this->PATH_INFO = "/path/info";
-	this->SCRIPT_NAME = "../scripts_cgi/file.py";
+	this->REQUEST_URI = "cgi-bin/scripts_cgi/file.py/sdfsd/asfa?name=eddcaso&amigo=zenon&team=hmoubal";
+	// this->PATH_INFO = "/path/info";
+	// this->SCRIPT_NAME = "../scripts_cgi/file.py";
 }
 
 cgi::~cgi()
@@ -29,7 +29,6 @@ cgi::~cgi()
 
 void cgi::ft_environment()
 {
-	// char	**rtn;
 	int		index;
 	std::string	tmp;
 
@@ -70,44 +69,30 @@ void cgi::ft_environment()
 	// envp[] =  strdup("HTTP_USER_AGENT=");
 
 	envp[++index] = NULL;
-
-	// return rtn;
 }
 
 void	cgi::ft_cgi(std::string	fileName)
 {
 	std::ifstream	file(fileName);
-	// std::string		path;
-	// std::string		methode;
 	// char	request_body[0];
-	// char	**envp;
 	pid_t	pid;
 
 	if (file.is_open())
 	{
-		// path = this->executable;
-		//check extention of file
-		// if (path.substr(path.length() - 4) == ".php")
-		// 	path = "php-cgi";
-		// else if (path.substr(path.length() - 3) == ".py")
-		// 	path = "/usr/local/bin/python3";
-		// else
-		// 	return (std::cerr << "Error: extention file not supported\n", exit(1));
-
 		if (this->REQUEST_METHOD == "GET")
 		{
-			// Parse the query string
-			// const char* queryParameters = strchr((const char *)this->REQUEST_URI.c_str(), '?');
-			// if (queryParameters != NULL)
-			// {
-			// 	queryParameters++;
-			// 	this->QUERY_STRING = queryParameters;
-			// 	//add path info
-			// }
-
+			const char* queryParameters = strchr((const char *)this->REQUEST_URI.c_str(), '?');
+ 			if (queryParameters != NULL)
+			{
+				queryParameters++;
+				this->QUERY_STRING = queryParameters;
+			}
+			std::string tmp_path_info = REQUEST_URI.substr(this->SCRIPT_NAME.size());
+			size_t pos = tmp_path_info.find('?');
+			if (pos != std::string::npos)
+				tmp_path_info.erase(pos);
+			this->PATH_INFO = tmp_path_info;
 			ft_environment();
-
-			// Generate the HTML response using the parameters received
 		}
 
 		// else if (this->REQUEST_METHOD == "POST")
@@ -153,10 +138,10 @@ void	cgi::ft_cgi(std::string	fileName)
 		}
 		else
 			return (std::cerr << "error file not open\n", exit(1));
+
 		// test fhe stdout and stdin is workin clean
-		// std::cout << "meddo" << std::endl;
+		// Generate the HTML response using the parameters received
 	}
 	else
 		std::cerr << "error: file not open" << std::endl;
-	// std::cout << "Content-type: text/html" << std::endl << std::endl;
 }

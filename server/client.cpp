@@ -619,7 +619,7 @@ void client::initResponse(std::map<std::string, std::string> mimetypes, std::vec
 		this->respond.close = ALIVE;
 		this->obj.SCRIPT_NAME = "cgi-bin/scripts_cgi/file.py";
 		this->obj.ft_cgi(this->obj.SCRIPT_NAME);
-		this->respond.contenttype = "text/html";
+		this->respond.contenttype = "text/plain";
 		this->respond.status_code = 200;
 		this->respond.body = this->obj.body;
 		this->respond.type = 1;

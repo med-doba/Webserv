@@ -9,13 +9,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/uio.h>
-#include <unistd.h>
 #include <string.h>
-#include <fstream>
 #include <string>
 #include <sstream>
-#include <iostream>
-#include <vector>
 #include <algorithm>
 
 class cgi

@@ -10,6 +10,7 @@ import sys
 # Access environment variables
 request_method = os.environ.get("REQUEST_METHOD")
 query_string = os.environ.get("QUERY_STRING")
+path_info = os.environ.get("PATH_INFO")
 
 # Check if the request method is GET
 # print(query_string)
@@ -33,3 +34,4 @@ for key, value in query_params.items():
 print("<h1>Query String Parameters:</h1>")
 for key, value in query_params.items():
     print("<p>{}: {}</p>".format(key, value))
+print("<p>PATH_INFO: {}</p>".format(path_info))
