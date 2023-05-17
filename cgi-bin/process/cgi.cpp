@@ -6,7 +6,7 @@
 /*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/17 19:38:50 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/17 20:20:35 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void cgi::ft_environment()
 	int		index;
 	std::string	tmp;
 
-	envp = (char	**)malloc(sizeof(char *) * 10);
+	envp = (char	**)malloc(sizeof(char *) * 11);
 
 	index = 0;
 
@@ -49,8 +49,9 @@ void cgi::ft_environment()
 	if (!REQUEST_METHOD.compare("POST"))
 	{
 		envp[++index] = strdup("REQUEST_METHOD=POST");
-		envp[++index] = strdup("CONTENT_LENGTH=");
-		envp[++index] = strdup("POST_DATA=?");
+		tmp = "CONTENT_LENGTH=" + this->CONTENT_LENGTH;
+		envp[++index] = strdup(tmp.data());
+		// envp[++index] = strdup("POST_DATA=?");
 	}
 
 	else if (!REQUEST_METHOD.compare("GET"))
@@ -71,8 +72,10 @@ void cgi::ft_environment()
 void	cgi::ft_cgi(std::string	fileName)
 {
 	std::ifstream	file(fileName);
-	char	request_body[0];
+	// char	request_body[0];
 	pid_t	pid;
+	int	fds[2];
+	// int std_in;
 
 	if (file.is_open())
 	{
@@ -92,26 +95,26 @@ void	cgi::ft_cgi(std::string	fileName)
 			ft_environment();
 		}
 
-		else if (this->REQUEST_METHOD == "POST")
-		{
-			std::string	scontent_length = this->CONTENT_LENGTH;
-			int			content_length = std::stoi(this->CONTENT_LENGTH);
-			if (content_length > 0)
-			{
-				int	fds[2];
-				if (pipe(fds) == -1)
-					return (std::cerr << "Error: pipe failed\n", exit(1));
-				// pid_t	pid_post = fork();
-				// 	return (std::cerr << "Error: fork failed to creat a new process\n", exit(1));
-				// if (pid_post == -1)
-				write(fds[1], this->POST_DATA.data(), content_length);
-				int	std_in = dup(0);
-				dup2(fds[0], STDIN_FILENO);
-				// request_body[content_length];
-				// read(STDIN_FILENO, request_body, content_length);
-			}
-			ft_environment();
-		}
+		// else if (this->REQUEST_METHOD == "POST")
+		// {
+		// 	std::string	scontent_length = this->CONTENT_LENGTH;
+		// 	int			content_length = std::stoi(this->CONTENT_LENGTH);
+		// 	if (content_length > 0)
+		// 	{
+		// 		int	fds[2];
+		// 		if (pipe(fds) == -1)
+		// 			return (std::cerr << "Error: pipe failed\n", exit(1));
+		// 		// pid_t	pid_post = fork();
+		// 		// 	return (std::cerr << "Error: fork failed to creat a new process\n", exit(1));
+		// 		// if (pid_post == -1)
+		// 		write(fds[1], this->POST_DATA.data(), content_length);
+		// 		std_in = dup(0);
+		// 		dup2(fds[0], STDIN_FILENO);
+		// 		// request_body[content_length];
+		// 		// read(STDIN_FILENO, request_body, content_length);
+		// 	}
+		// 	ft_environment();
+		// }
 
 		pid = fork();
 		if(pid == -1)
@@ -119,6 +122,31 @@ void	cgi::ft_cgi(std::string	fileName)
 
 		if (!pid)
 		{
+				if (this->REQUEST_METHOD == "POST")
+				{
+					std::string	scontent_length = this->CONTENT_LENGTH;
+					int			content_length = std::stoi(this->CONTENT_LENGTH);
+					if (content_length > 0)
+					{
+						if (pipe(fds) == -1)
+							return (std::cerr << "Error: pipe failed\n", exit(1));
+						std::cout << "hererere" << std::endl;
+						// int fd = open("input_cgi" ,  O_CREAT | O_RDWR | O_TRUNC, 0777);
+						// if (fd < 0)
+						// 	return (std::cerr << "error open\n", exit(1));
+						// pid_t	pid_post = fork();
+						// 	return (std::cerr << "Error: fork failed to creat a new process\n", exit(1));
+						// if (pid_post == -1)
+						write(fds[1], this->POST_DATA.data(), this->POST_DATA.size());
+						close(fds[1]);
+						// std_in = dup(0);
+						dup2(fds[0], STDIN_FILENO);
+						close(fds[0]);
+						// request_body[content_length];
+						// read(STDIN_FILENO, request_body, content_length);
+					}
+					ft_environment();
+				}
 			int	fd = open("output_cgi", O_CREAT | O_RDWR | O_TRUNC, 0777);
 
 			std::cout << "ext == " << this->executable << " filename == " << fileName << std::endl;
@@ -140,8 +168,8 @@ void	cgi::ft_cgi(std::string	fileName)
 			output.close();
 			std::string file = ss.str();
 			this->body = file;
-			if (std::remove("output_cgi"))
-				return (std::cerr << "error remove\n", exit(1));
+			// if (std::remove("output_cgi"))
+			// 	return (std::cerr << "error remove\n", exit(1));
 		}
 		else
 			return (std::cerr << "error file not open\n", exit(1));

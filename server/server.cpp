@@ -630,8 +630,9 @@ void server::fillCGI(client &ObjClient, serverParse ObjServer, int loc)
 	else if (ObjClient.tmp == POST)
 	{
 		ObjClient.obj.REQUEST_METHOD = "POST";
-		ObjClient.obj.CONTENT_LENGTH = "0";
-		ObjClient.obj.POST_DATA = "";
+		ObjClient.obj.CONTENT_LENGTH = "100";
+		// int pos = ObjClient.buffer
+		ObjClient.obj.POST_DATA = "param1=ashd&param2=asdkb";
 	}
 	std::cout << "URI in CGI == " << ObjClient.obj.SCRIPT_NAME << std::endl;
 }
