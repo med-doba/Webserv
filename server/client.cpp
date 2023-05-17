@@ -615,6 +615,7 @@ void client::initResponse(std::map<std::string, std::string> mimetypes, std::vec
 	}
 	else if (this->respond.flagResponse == CGI)
 	{
+		// data to fill to cgi
 		this->respond.close = ALIVE;
 		this->respond.status_code = 200;
 		this->respond.body = "CGI IN PROGRESS";

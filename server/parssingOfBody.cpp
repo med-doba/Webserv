@@ -61,8 +61,7 @@ void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string &
     int pos = headerOfRequest.find("Content-Type: ");
     if (pos != -1)
     {
-        ext = headerOfRequest.substr(pos + 14, headerOfRequest.find('\r', pos));
-        ext.pop_back();
+        ext = headerOfRequest.substr(pos + 14, headerOfRequest.find('\r', pos) - (pos + 14));
         it = mimetypes_.find(ext);
         if (it != mimetypes_.end())
             file.append(it->second);

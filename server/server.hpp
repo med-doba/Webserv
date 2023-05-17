@@ -65,6 +65,8 @@ class server
 	void fillRevMimeType();
 	int timeoutCheck();
 	void ClientHang(int index);
+	int checkExtension(std::string pathCgi, locationParse ObjLocation);
+	std::string trim_path(client &ObjClient, locationParse ObjLocation);
 	serverParse& findServerBlock(int index);
 };
 

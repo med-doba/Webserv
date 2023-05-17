@@ -59,11 +59,15 @@ int parssingOfHeader::check_media(client &obj, std::multimap<std::string,std::st
 	int pos = obj.headerOfRequest.find("Content-Type: ");
 	if (pos != -1)
 	{
-        int i = obj.headerOfRequest.find(';', pos);
+        int i = obj.headerOfRequest.find('\r', pos);
         std::string check = obj.headerOfRequest.substr(pos + 14 , i - pos - 14);
-        if (check.compare("multipart/form-data") == 0)
+		int ps = check.find(';');
+		if (ps != -1)
+			check = check.substr(0, ps);
+        if (check.compare("multipart/form-data") == 0 || check.compare("application/x-www-form-urlencoded") == 0)
             return (0);
 		media = obj.headerOfRequest.substr(pos + 14, obj.headerOfRequest.find('\r', pos) - (pos + 14));
+		std::cout << "media == " << media << std::endl;
         std::multimap<std::string, std::string>::iterator it = mimetypes_.find(media);
         if (it != mimetypes_.end())
             return (0);

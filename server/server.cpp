@@ -545,15 +545,56 @@ void server::checkRedirection(client &ObjClient, serverParse obj, int loc)
 	}
 }
 
+int server::checkExtension(std::string pathCgi, locationParse ObjLocation)
+{
+	int pos = pathCgi.find('.');
+	std::string ext;
+	if (pos != -1)
+	{
+		int pos2 = pathCgi.find('?', pos);
+		if (pos2 != -1)
+			ext = pathCgi.substr(pos,pos2 - pos);
+		else
+			ext = pathCgi.substr(pos);
+		std::cout << "extentsion gci == " << ext << std::endl;
+		if (ext.compare(".py") == 0 || ext.compare(".php") == 0)
+		{
+			if (ObjLocation.cgi.size() != 0)
+			{
+				if (ext.compare(ObjLocation.cgi[1]) == 0)
+					return (1);
+				else
+					return (-1);
+			}
+			else
+				return (-1);
+		}
+	}
+	return (0);
+}
+
+std::string server::trim_path(client &ObjClient, locationParse ObjLocation)
+{
+	std::string root;
+	std::string resourseRequested = ObjClient.URI.substr(ObjLocation.path.size());
+	if (resourseRequested[0] == '/')
+		resourseRequested = resourseRequested.substr(1);
+	int pos = resourseRequested.find('?');
+	if (pos != -1)
+		resourseRequested = resourseRequested.substr(0,pos);
+	pos = resourseRequested.find('/');
+	if (pos != -1)
+		resourseRequested = resourseRequested.substr(0,pos);
+	root = ObjClient.path + "/" + resourseRequested;
+	return (root);
+}
+
 void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 {
 	struct stat info;
 	std::string root;
 	locationParse ObjLocation = ObjServer.obj_location[loc];
-	std::string resourseRequested = ObjClient.URI.substr(ObjLocation.path.size());
-	if (resourseRequested[0] == '/')
-		resourseRequested = resourseRequested.substr(1);
-	root = ObjClient.path + "/" + resourseRequested;
+	root = trim_path(ObjClient, ObjLocation);
 	if (access(root.data(), F_OK) != 0)
 	{
 		ObjClient.respond.ready = 1;
@@ -578,11 +619,22 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 					if (access(testPath.data(), F_OK) == 0)
 					{
 						ObjClient.respond.ready = 1;
-						ObjClient.respond.flagResponse = REDIRECT;
 						std::string path = ObjLocation.path;
 						if (path[path.size() - 1] == '/')
 							path.pop_back();
 						ObjClient.redirpath = path + "/" + ObjLocation.index[i];
+						int ret = checkExtension(ObjClient.redirpath, ObjLocation);
+						if (ret == 1)
+						{
+							ObjClient.respond.flagResponse = CGI;
+							return;
+						}
+						else if (ret == -1)
+						{
+							ObjClient.respond.flagResponse = FORBIDEN;
+							return;
+						}
+						ObjClient.respond.flagResponse = REDIRECT;
 						return;
 					}
 				}
@@ -597,11 +649,22 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 						if (access(testPath.data(), F_OK) == 0)
 						{
 							ObjClient.respond.ready = 1;
-							ObjClient.respond.flagResponse = REDIRECT;
 							std::string path = ObjLocation.path;
 							if (path[path.size() - 1] == '/')
 								path.pop_back();
 							ObjClient.redirpath = path + "/" + ObjServer.index[i];
+							int ret = checkExtension(ObjClient.redirpath, ObjLocation);
+							if (ret == 1)
+							{
+								ObjClient.respond.flagResponse = CGI;
+								return;
+							}
+							else if (ret == -1)
+							{
+								ObjClient.respond.flagResponse = FORBIDEN;
+								return;
+							}
+							ObjClient.respond.flagResponse = REDIRECT;
 							return;
 						}
 					}
@@ -643,6 +706,17 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 		{
 			ObjClient.respond.ready = 1;
 			ObjClient.path = root;
+			int ret = checkExtension(ObjClient.path, ObjLocation);
+			if (ret == 1)
+			{
+				ObjClient.respond.flagResponse = CGI;
+				return;
+			}
+			else if (ret == -1)
+			{
+				ObjClient.respond.flagResponse = FORBIDEN;
+				return;
+			}
 			ObjClient.respond.flagResponse = OPFILE;
 			return ;
 		}
@@ -654,7 +728,8 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 	struct stat info;
 	locationParse ObjLocation = ObjServer.obj_location[loc];
 	std::string root;
-	ObjClient.uploadPath = "/Users/hmoubal/Desktop/webserv/upload";
+	// ObjClient.uploadPath = "/Users/hmoubal/Desktop/Webserv/upload";
+	ObjClient.uploadPath = "/home/skinnyleg/Desktop/Webserv/upload";
 	if (ObjLocation.client_body_temp_path.size() != 0)
 		ObjClient.uploadPath = ObjLocation.client_body_temp_path[1];
 	for (size_t i = 1; i < ObjLocation.allow_methods.size(); i++)
@@ -699,14 +774,20 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 					if (access(testPath.data(), F_OK) == 0)
 					{
 						ObjClient.respond.ready = 1;
-						ObjClient.respond.flagResponse = CGI;
 						ObjClient.path = testPath;
+						int ret = checkExtension(ObjClient.path, ObjLocation);
+						if (ret == 1)
+						{
+							ObjClient.respond.flagResponse = CGI;
+							return;
+						}
+						ObjClient.respond.flagResponse = FORBIDEN;
 						return;
 					}
 				}
 			}
+			ObjClient.respond.flagResponse = NOTFOUND;
 			ObjClient.respond.ready = 1;
-			ObjClient.respond.flagResponse = FORBIDEN;
 		}
 		else
 		{
@@ -719,8 +800,14 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 	else if (S_ISREG(info.st_mode))
 	{
 		ObjClient.respond.ready = 1;
-		ObjClient.respond.flagResponse = CGI;
 		ObjClient.path = root;
+		int ret = checkExtension(ObjClient.path, ObjLocation);
+		if (ret == 1)
+		{
+			ObjClient.respond.flagResponse = CGI;
+			return;
+		}
+		ObjClient.respond.flagResponse = FORBIDEN;
 		return;
 	}
 }
