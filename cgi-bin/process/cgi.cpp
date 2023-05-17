@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/17 03:03:10 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/17 04:03:09 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 cgi::cgi(/* args */)
 {
-	this->executable = "/usr/local/bin/python3";
+	this->executable = "/usr/bin/python3";
 	this->QUERY_STRING="name=moha&amigo=zenon&team=hmoubal";
 	this->CONTENT_TYPE= "text/plain";
 	this->REQUEST_METHOD  = "GET";
@@ -129,10 +129,10 @@ void	cgi::ft_cgi(std::string	fileName)
 		{
 			int	fd = open("output_cgi", O_CREAT | O_RDWR | O_TRUNC, 0777);
 
+			std::cout << "ext == " << this->executable << " filename == " << fileName << std::endl;
 			if (fd == -1)
 				return (std::cerr << "Error: fd file\n", exit(1));
 			dup2(fd, STDOUT_FILENO);
-
 			char	*argv[] = {strdup(this->executable.c_str()), (char *)fileName.c_str(), NULL};
 			if (execve(this->executable.c_str(), argv, envp) == -1)
 				return (std::cerr << "error execve\n", exit(1));

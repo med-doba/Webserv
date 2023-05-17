@@ -19,6 +19,7 @@
 #include <netinet/in.h>
 #include <poll.h>
 #include <dirent.h>
+#include "../cgi-bin/process/cgi.hpp"
 
 enum {
 	EMPTY,
@@ -42,7 +43,7 @@ enum {
 	AUTOINDEX,
 	CONFLICT,
 	INTERNALERR,
-	CGI,
+	CGIPRO,
 	BADREQUEST,
 	METHODNOTALLOWED,
 	NOTSUPPORTED,
@@ -152,6 +153,7 @@ class client
 	std::string redirpath;
 	std::string uploadPath;
 	std::string listPath;
+	cgi obj;
 
 
 	parssingOfHeader headerParss;

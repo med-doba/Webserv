@@ -21,12 +21,14 @@ SRC_DIR = ./server
 
 LIB = parsingConf/parseConf.a
 
+CGI = cgi-bin/cgi.a
+
 INC = server/*.hpp
 
 NAME = webserv
 
-$(NAME) : $(LIB) $(OBJ_DIR) $(OFILES)
-	@$(CC) $(CFLAGS) $(OFILES) $(LIB) -o $(NAME)
+$(NAME) : $(LIB) $(CGI) $(OBJ_DIR) $(OFILES)
+	@$(CC) $(CFLAGS) $(OFILES) $(LIB) $(CGI) -o $(NAME)
 	@echo "done for webserv"
 
 $(OBJ_DIR):
@@ -35,15 +37,20 @@ $(OBJ_DIR):
 $(LIB) : force
 	make -C parsingConf
 
+$(CGI) : force
+	make -C cgi-bin
+
 $(OFILES): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp $(INC)
 	@$(CC) -c $(CFLAGS) $< -o $@
 
 clean :
 	make clean -C parsingConf
+	make clean -C cgi-bin
 	@rm -rf $(OBJ_DIR)
 
 fclean : clean
 	make fclean -C parsingConf
+	make fclean -C cgi-bin
 	@rm -rf $(NAME)
 
 force:

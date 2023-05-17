@@ -582,9 +582,19 @@ std::string server::trim_path(client &ObjClient, locationParse ObjLocation)
 	int pos = resourseRequested.find('?');
 	if (pos != -1)
 		resourseRequested = resourseRequested.substr(0,pos);
-	pos = resourseRequested.find('/');
+	pos = resourseRequested.find('.');
 	if (pos != -1)
-		resourseRequested = resourseRequested.substr(0,pos);
+	{
+		std::string ext;
+		int pos2 = resourseRequested.find('/',pos);
+		if (pos2 != -1)
+			ext = resourseRequested.substr(pos, pos2 - pos);
+		else
+			ext = resourseRequested.substr(pos);
+		if (ext.compare(".php") == 0 || ext.compare(".py") == 0)
+			resourseRequested = resourseRequested.substr(0,pos2);
+	}
+	std::cout << "resourseRequested == " << resourseRequested << std::endl;
 	root = ObjClient.path + "/" + resourseRequested;
 	return (root);
 }
@@ -626,7 +636,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 						int ret = checkExtension(ObjClient.redirpath, ObjLocation);
 						if (ret == 1)
 						{
-							ObjClient.respond.flagResponse = CGI;
+							ObjClient.respond.flagResponse = CGIPRO;
 							return;
 						}
 						else if (ret == -1)
@@ -656,7 +666,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 							int ret = checkExtension(ObjClient.redirpath, ObjLocation);
 							if (ret == 1)
 							{
-								ObjClient.respond.flagResponse = CGI;
+								ObjClient.respond.flagResponse = CGIPRO;
 								return;
 							}
 							else if (ret == -1)
@@ -697,6 +707,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 			ObjClient.respond.ready = 1;
 			ObjClient.respond.flagResponse = REDIRECT;
 			ObjClient.redirpath = ObjClient.URI + "/";
+			std::cout << "here == " << root << std::endl;
 			return;
 		}
     }
@@ -709,7 +720,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 			int ret = checkExtension(ObjClient.path, ObjLocation);
 			if (ret == 1)
 			{
-				ObjClient.respond.flagResponse = CGI;
+				ObjClient.respond.flagResponse = CGIPRO;
 				return;
 			}
 			else if (ret == -1)
@@ -778,7 +789,7 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 						int ret = checkExtension(ObjClient.path, ObjLocation);
 						if (ret == 1)
 						{
-							ObjClient.respond.flagResponse = CGI;
+							ObjClient.respond.flagResponse = CGIPRO;
 							return;
 						}
 						ObjClient.respond.flagResponse = FORBIDEN;
@@ -804,7 +815,7 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 		int ret = checkExtension(ObjClient.path, ObjLocation);
 		if (ret == 1)
 		{
-			ObjClient.respond.flagResponse = CGI;
+			ObjClient.respond.flagResponse = CGIPRO;
 			return;
 		}
 		ObjClient.respond.flagResponse = FORBIDEN;

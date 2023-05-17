@@ -7,6 +7,7 @@
 #include <vector>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/uio.h>
 #include <unistd.h>
 #include <string.h>

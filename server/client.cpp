@@ -613,12 +613,15 @@ void client::initResponse(std::map<std::string, std::string> mimetypes, std::vec
 		this->respond.type = 1;
 		this->respond.flagResponse = -1;
 	}
-	else if (this->respond.flagResponse == CGI)
+	else if (this->respond.flagResponse == CGIPRO)
 	{
 		// data to fill to cgi
 		this->respond.close = ALIVE;
+		this->obj.SCRIPT_NAME = "cgi-bin/scripts_cgi/file.py";
+		this->obj.ft_cgi(this->obj.SCRIPT_NAME);
+		this->respond.contenttype = "text/html";
 		this->respond.status_code = 200;
-		this->respond.body = "CGI IN PROGRESS";
+		this->respond.body = this->obj.body;
 		this->respond.type = 1;
 		this->respond.flagResponse = -1;
 	}
