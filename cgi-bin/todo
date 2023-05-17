@@ -2,3 +2,26 @@
 -> creat a function to set envirement
 -> creat a respond header for files python and php
 -> converte vectore of string to double pointer
+
+
+
+
+
+
+
+/*
+    REQUEST_METHOD: GET, POST, PUT, DELETE, etc.
+    QUERY_STRING: A string containing the URL query parameters, such as id=123&name=John.
+    SCRIPT_NAME: The name of the script, such as index.php.
+    REQUEST_URI: The full URL used to access the script, including the query string and any fragment identifier,
+	such as /index.php?id=123#top.
+    DOCUMENT_ROOT: The root directory of the web serverParse, such as /var/www/html/.
+    HTTP_COOKIE: A string containing one or more cookies, such as user=John; session_id=abcd1234.
+    HTTP_USER_AGENT: A string containing information about the client's browser and operating system,
+	such as Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+	(KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134.
+    REMOTE_ADDR: The IP address of the client making the request, such as 192.168.0.1.
+
+Note that the values of these environment variables can vary depending on the web serverParse and configuration,
+and may also be affected by the client making the request.
+*/
