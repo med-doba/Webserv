@@ -6,7 +6,7 @@
 /*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/17 19:18:59 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/17 19:38:50 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ void cgi::ft_environment()
 void	cgi::ft_cgi(std::string	fileName)
 {
 	std::ifstream	file(fileName);
-	// char	request_body[0];
+	char	request_body[0];
 	pid_t	pid;
 
 	if (file.is_open())
@@ -92,16 +92,27 @@ void	cgi::ft_cgi(std::string	fileName)
 			ft_environment();
 		}
 
-		// else if (this->REQUEST_METHOD == "POST")
-		// {
-		// 	std::string	scontent_length = this->.CONTENT_LENGTH;
-		// 	int			content_length = std::stoi(this->.CONTENT_LENGTH);
+		else if (this->REQUEST_METHOD == "POST")
+		{
+			std::string	scontent_length = this->CONTENT_LENGTH;
+			int			content_length = std::stoi(this->CONTENT_LENGTH);
+			if (content_length > 0)
+			{
+				int	fds[2];
+				if (pipe(fds) == -1)
+					return (std::cerr << "Error: pipe failed\n", exit(1));
+				// pid_t	pid_post = fork();
+				// 	return (std::cerr << "Error: fork failed to creat a new process\n", exit(1));
+				// if (pid_post == -1)
+				write(fds[1], this->POST_DATA.data(), content_length);
+				int	std_in = dup(0);
+				dup2(fds[0], STDIN_FILENO);
+				// request_body[content_length];
+				// read(STDIN_FILENO, request_body, content_length);
+			}
+			ft_environment();
+		}
 
-		// 	request_body[content_length];
-		// 	read(STDIN_FILENO, request_body, content_length);
-
-		// 	envp = ft_environment();
-		// }
 		pid = fork();
 		if(pid == -1)
 			return (std::cerr << "Error: fork failed to creat a new process\n", exit(1));

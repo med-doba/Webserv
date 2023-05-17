@@ -14,24 +14,25 @@ path_info = os.environ.get("PATH_INFO")
 
 # Check if the request method is GET
 # print(query_string)
-if request_method != "GET":
-    print("<h1>Invalid request method!</h1>")
-    exit()
+if request_method == "GET":
+    # Parse the query string
+    query_params = {}
+    if query_string:
+        param_pairs = query_string.split("&")
+        for param_pair in param_pairs:
+            key, value = param_pair.split("=")
+            query_params[key] = value
 
-# Parse the query string
-query_params = {}
-if query_string:
-    param_pairs = query_string.split("&")
-    for param_pair in param_pairs:
-        key, value = param_pair.split("=")
-        query_params[key] = value
+    # Pass the query string parameters as command-line arguments
+    for key, value in query_params.items():
+        sys.argv.append("{}={}".format(key, value))
 
-# Pass the query string parameters as command-line arguments
-for key, value in query_params.items():
-    sys.argv.append("{}={}".format(key, value))
+    # Print a response with the query string parameters as arguments
+    print("<h1>Query String Parameters:</h1>")
+    for key, value in query_params.items():
+        print("<p>{}: {}</p>".format(key, value))
+    print("<p>PATH_INFO: {}</p>".format(path_info))
+if request_method == "POST":
+    data = sys.stdin.read()
+    print(data)
 
-# Print a response with the query string parameters as arguments
-print("<h1>Query String Parameters:</h1>")
-for key, value in query_params.items():
-    print("<p>{}: {}</p>".format(key, value))
-print("<p>PATH_INFO: {}</p>".format(path_info))
