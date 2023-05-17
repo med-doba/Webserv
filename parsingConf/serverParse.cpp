@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/10 15:12:55 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/16 23:02:15 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -583,6 +583,8 @@ void	ft_check_cgi(serverParse &classconfig, std::string &lines, locationParse &l
 	if (!location_.cgi_)
 	{
 		location_.cgi = classconfig.ft_split(lines, " \t;");
+		if (location_.cgi.size() != 3)
+			classconfig.ft_error("Error: not a valid values > cgi_pass");
 		location_.cgi_ = true;
 	}
 	else

@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/10 15:13:15 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/16 23:48:55 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,17 +22,25 @@ void	print_vector(const std::vector<std::pair<int, std::string> >& v)
 	}
 }
 
+void	rmbackslash(std::string &str)
+{
+	if (str.back() == ';')
+		if(str[str.length() - 2] == '/')
+			str.erase(str.length() - 2, 1);
+}
+
 std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 {
-	serverParse						classconfig;
-	locationParse					location_;
 	std::string					lines;
+	serverParse					classconfig;
+	locationParse				location_;
 	std::ifstream				file_conf(fileConf);
-	std::vector<serverParse>			block;
+	std::vector<serverParse>	block;
 	std::vector<std::string>	classconfig_tmp;
 
 	bool	InTheserverBlock = false;
 	bool	InTheLocationBlock = false;
+
 	if (file_conf.is_open())
 	{
 		try
@@ -44,6 +52,7 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 					continue;
 				ft_delete_comment(lines);
 				classconfig.ft_trim(lines);
+				// rmbackslash(lines);
 
 				if (!lines.empty() && lines.back() == '{')
 				{
@@ -56,6 +65,7 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 						if (classconfig.ft_split(lines, " \t").begin()->compare("location"))
 							classconfig.ft_error("Error: invalid directives");
 						location_.path = *(classconfig.ft_split(lines, " \t{").begin() + 1);
+						// rmbackslash(location_.path);
 					}
 					continue;
 				}
