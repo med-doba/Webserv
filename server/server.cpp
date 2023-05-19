@@ -213,26 +213,26 @@ void server::lunch_servers()
 	{
 		if ((servers[i].socket_server = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		{
-			perror("socket failed");
+			// perror("socket failed");
 			servers[i].fail = -1;
 			continue;
 		}
 		if (setsockopt(servers[i].socket_server, SOL_SOCKET, SO_REUSEADDR, &(servers[i].opt), sizeof(servers[i].opt)))
 		{
-			perror("setsockopt");
+			// perror("setsockopt");
 			servers[i].fail = -1;
 			continue;
 		}
 		if (bind(servers[i].socket_server, (struct sockaddr*)&(servers[i].address), servers[i].addrlen) < 0)
 		{
-			perror("bind failed");
+			// perror("bind failed");
 			servers[i].fail = -1;
 			continue;
 		}
 		fcntl(servers[i].socket_server, F_SETFL, O_NONBLOCK);
 		if (listen(servers[i].socket_server, BACKLOG) < 0)
 		{
-			perror("listen");
+			// perror("listen");
 			servers[i].fail = -1;
 			continue;
 		}
@@ -302,7 +302,7 @@ void server::monitor()
 					{
 						if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 0)
 						{
-							std::cout << "ready to recv " << clients[j].client_socket << std::endl;
+							// std::cout << "ready to recv " << clients[j].client_socket << std::endl;
 							this->receive(i, j);
 							break ;
 						}
@@ -314,7 +314,7 @@ void server::monitor()
 					{
 						if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 1)
 						{
-							std::cout << "ready to send " <<  pfds[i].fd << std::endl;
+							// std::cout << "ready to send " <<  pfds[i].fd << std::endl;
 							this->response(this->pfds[i], j);
 							break ;
 						}
@@ -326,7 +326,7 @@ void server::monitor()
 					{
 						if (pfds[i].fd == clients[j].client_socket)
 						{
-							std::cout << "from here" << std::endl;
+							// std::cout << "from here" << std::endl;
 							this->disconnect(j);
 							break ;
 						}
@@ -355,12 +355,12 @@ void server::new_connection(int indexPfds, int index)
 	c.events = POLLIN | POLLOUT;
 	pfds.push_back(c);
 	clients.push_back(obj);
-	std::cout << "new client connected " << obj.client_socket << std::endl;
+	// std::cout << "new client connected " << obj.client_socket << std::endl;
 }
 
 void server::disconnect(int index)
 {
-	std::cout << "client disconnected " << clients[index].client_socket << std::endl;
+	// std::cout << "client disconnected " << clients[index].client_socket << std::endl;
 	close(clients[index].client_socket);
 	pfds.erase(pfds.begin() + index + servers.size());
 	clients[index].clear();
@@ -557,7 +557,7 @@ int server::checkExtension(std::string pathCgi, locationParse ObjLocation)
 		else
 			ext = pathCgi.substr(pos);
 		std::cout << "extentsion gci == " << ext << std::endl;
-		if (ext.compare(".py") == 0 || ext.compare(".php") == 0)
+		if (ext.compare(".py") == 0 || ext.compare(".lua") == 0)
 		{
 			if (ObjLocation.cgi.size() != 0)
 			{
@@ -602,8 +602,10 @@ std::string server::trim_path(client &ObjClient, locationParse ObjLocation)
 void server::fillCGI(client &ObjClient, serverParse ObjServer, int loc)
 {
 	locationParse ObjLocation = ObjServer.obj_location[loc];
-	ObjClient.obj.executable = "." + ObjLocation.cgi[2];
-	std::cout << "executable == " << ObjClient.obj.executable << std::endl;
+	if (ObjLocation.cgi[1].compare(".lua") == 0)
+		ObjClient.obj.executable = ObjLocation.cgi[2];
+	else
+		ObjClient.obj.executable = "." + ObjLocation.cgi[2];
 	ObjClient.obj.CONTENT_TYPE = "text/html";
 	std::string tmp = ObjClient.URI.substr(ObjLocation.path.size());
 	int pos = tmp.find("/cgi-bin");
@@ -618,7 +620,7 @@ void server::fillCGI(client &ObjClient, serverParse ObjServer, int loc)
 	}
 	else
 	{
-		pos = ObjClient.obj.REQUEST_URI.find(".php");
+		pos = ObjClient.obj.REQUEST_URI.find(".lua");
 		if (pos != -1)
 			ObjClient.obj.SCRIPT_NAME = ObjClient.obj.REQUEST_URI.substr(0, pos + 4);
 	}

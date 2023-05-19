@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/19 02:00:19 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/19 02:31:03 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,6 @@ int	cgi::ft_environment()
 		return (-1);
 	}
 	//
-	this->CONTENT_TYPE = "text/html";
 	tmp = "CONTENT_TYPE=" + this->CONTENT_TYPE;
 	envp[++index] = strdup(tmp.data());
 	if (!envp[index])
@@ -242,10 +241,11 @@ int	cgi::ft_cgi(std::string	fileName)
 			if (fd == -1)
 				exit(1);
 			dup2(fd, STDOUT_FILENO);
-			char str[] = "/usr/bin/python3";
-			char	*argv[3] = {str, (char *)fileName.c_str(), NULL};
+			// char str[] = this->executable.c_str();
+			// char	*argv[3] = {str, (char *)fileName.c_str(), NULL};
+			char	*argv[3] = {(char *)this->executable.c_str(), (char *)fileName.c_str(), NULL};
 			// char	*argv[] = {strdup("/usr/bin/python3"), (char *)fileName.c_str(), NULL};
-			if (execve("/usr/bin/python3", argv, envp) == -1)
+			if (execve(this->executable.c_str(), argv, envp) == -1)
 				exit(1);
 		}
 		else
@@ -257,7 +257,7 @@ int	cgi::ft_cgi(std::string	fileName)
 				dup2(STDIN_FILENO, std_in);
 				close(std_in);
 			}
-			if (status == -1)
+			if (WIFEXITED(status) && WEXITSTATUS(status) == 1)
 				return (-1);
 		}
 
