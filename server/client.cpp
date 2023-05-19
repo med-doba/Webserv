@@ -8,7 +8,7 @@ int client::fillBody(std::map<std::string, std::string> mimetypes)
 	if (pos != std::string::npos)
 	{
 		std::string ext = &OpFile[pos];
-		std::cout << "extension -== " << ext<< std::endl;
+		// std::cout << "extension -== " << ext<< std::endl;
 		it = mimetypes.find(ext);
 		if (it != mimetypes.end())
 			this->respond.contenttype = it->second;
@@ -23,11 +23,11 @@ int client::fillBody(std::map<std::string, std::string> mimetypes)
 		it = mimetypes.find(".txt");
 		this->respond.contenttype = it->second;
 	}
-	std::cout << "file == " << OpFile << std::endl;
+	// std::cout << "file == " << OpFile << std::endl;
 	input.open(OpFile , std::ios::binary);
 	if (!input.is_open())
 	{
-		std::cout << "couldn't open file" << std::endl;
+		// std::cout << "couldn't open file" << std::endl;
 		this->respond.ready = 1;
 		this->respond.flagResponse = INTERNALERR;
 		return (-1);
@@ -45,7 +45,7 @@ int client::fillBody(std::map<std::string, std::string> mimetypes)
 	// // Reserve space in the buffer
 	// if (size == 0)
 	// 	return (0);
-	// std::cout << "size === " << size << std::endl;
+	// // std::cout << "size === " << size << std::endl;
 	// std::vector<char> content(size);
 
 	// // Read the file in chunks
@@ -57,8 +57,8 @@ int client::fillBody(std::map<std::string, std::string> mimetypes)
 int client::generateListing(std::map<std::string, std::string> mimetypes)
 {
 	std::string listing = this->listPath;
-	std::cout << "listing == " << listing << std::endl;
-	std::cout << "uri ==-=-=- " << this->URI << std::endl;
+	// std::cout << "listing == " << listing << std::endl;
+	// std::cout << "uri ==-=-=- " << this->URI << std::endl;
 	DIR* directory = opendir(listing.c_str());
 	std::string html;
     if (directory == nullptr) {
@@ -94,7 +94,7 @@ int client::generateListing(std::map<std::string, std::string> mimetypes)
 	it = mimetypes.find(".html");
 	if (it != mimetypes.end())
 		this->respond.contenttype = it->second;
-	std::cout << "body -- " << html << std::endl;
+	// std::cout << "body -- " << html << std::endl;
 	return (0);
 }
 
@@ -134,10 +134,10 @@ void client::findErrorPage(std::map<std::string, std::string> mimetypes,  std::v
 	std::vector<std::pair<int , std::string> >::iterator it = ErrSer.begin();
 	int status = this->respond.status_code;
 	// std::string fullPath = "/Users/hmoubal/Desktop/Webserv";
-	std::cout << ErrSer.size() << std::endl;
+	// std::cout << ErrSer.size() << std::endl;
 	for (; it != ErrSer.end(); it++)
 	{
-		std::cout << "status == " << it->first << std::endl;
+		// std::cout << "status == " << it->first << std::endl;
 		if (status == it->first)
 		{
 			this->path = it->second;
@@ -146,7 +146,7 @@ void client::findErrorPage(std::map<std::string, std::string> mimetypes,  std::v
 			return ;
 		}
 	}
-	std::cout << "manual generate " << std::endl;
+	// std::cout << "manual generate " << std::endl;
 	this->generateErrPage(mimetypes);
 }
 
@@ -181,7 +181,7 @@ void client::check(void)
 	res = headerOfRequest.find("/favicon.ico");
 	if (res != -1)
 	{
-		std::cout << "favsock == " << client_socket << std::endl;
+		// std::cout << "favsock == " << client_socket << std::endl;
 		this->respond.flagResponse = NOTFOUND;
 		this->respond.ready = 1;
 		this->ready = 1;
@@ -192,10 +192,10 @@ void client::check(void)
 
 void client::clear()
 {
-	std::cout << "clearing " << std::endl;
+	// std::cout << "clearing " << std::endl;
 	if (input.is_open())
 	{
-		std::cout << "closing " << std::endl;
+		// std::cout << "closing " << std::endl;
 		input.clear();
 		input.close();
 	}
@@ -317,6 +317,14 @@ int client::checkHeaderOfreq(std::map<std::string, std::string> Percent,std::mul
 							while (temp[_tmp] != '\r' && temp[_tmp] != '\n' && temp[_tmp + 1] != '\n')
 								_tmp++;
 							char *strtmp = ft_substr(temp,0,_tmp);
+							if (strtmp == NULL)
+							{
+								this->ready = 1;
+								this->respond.ready = 1;
+								this->respond.flagResponse = INTERNALERR;
+								this->flag = ERROR;
+								return 1;
+							}
 							boundary.append("--").append(strtmp);// free boundry and temp?
 							free(strtmp);
 							return 1;
@@ -400,7 +408,7 @@ int client::pushToBuffer()
     char data[BUFFER];
     bzero(data, BUFFER);
     this->bytes_read = recv(client_socket, &data, BUFFER, 0);
-	// std::cout << "bytes read == " << this->bytes_read << std::endl;
+	// // std::cout << "bytes read == " << this->bytes_read << std::endl;
     if(bytes_read == -1)
         return -1;
     if(bytes_read == 0)
@@ -550,7 +558,7 @@ void client::initResponse(std::map<std::string, std::string> mimetypes, std::vec
 	}
 	else if (this->respond.flagResponse == OPFILE)
 	{
-		std::cout << "filling body == " << this->client_socket << std::endl;
+		// std::cout << "filling body == " << this->client_socket << std::endl;
 		if (this->fillBody(mimetypes) == -1)
 		{
 			this->initResponse(mimetypes, ErrSer);

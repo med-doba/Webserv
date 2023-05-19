@@ -14,7 +14,6 @@ first_name = parsed_data.get('first_name', [''])[0]
 last_name = parsed_data.get('last_name', [''])[0]
 
 
-print("Content-type: text/html\r\n\r\n")
 print("<html>")
 print("<head>")
 print("<title>Hello - Second CGI Program</title>")
