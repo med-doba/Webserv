@@ -7,7 +7,7 @@
 parssingOfBody::parssingOfBody(/* args */)
 {
     file = "";
- 
+
 }
 
 char *ft_substr_(char const *s, unsigned int start, size_t len)
@@ -105,7 +105,7 @@ void parssingOfBody::putDataTofile(string  data, client & obj, std::map<std::str
 
     int pos = data.find("filename=\"");
     if(pos != -1)
-    {    
+    {
         int t = pos + 10;
         while (data[t] != '"')
             t++;
@@ -162,32 +162,32 @@ void parssingOfBody::handling_form_data(client &obj, std::map<std::string, std::
 {
     if(obj.flag_ == 5)
     {
-         
+
         int j = obj.headerOfRequest.find("boundary");
-       
+
         int tmp = j + 9;
-       
+
         char *temp = (char*)obj.headerOfRequest.data() + tmp;// because string() dont handle '\r'
         tmp = 0;
         while (temp[tmp] != '\r' && temp[tmp + 1] != '\n')
             tmp++;
         char *strtmp = ft_substr_(temp,0,tmp);
-        obj.boundary.append("--").append(strtmp);// free boundry and temp?    
+        obj.boundary.append("--").append(strtmp);// free boundry and temp?
         free(strtmp);
         obj.total_bytes_received = obj.ContentLength;
         obj.i = 0;
         obj.bodyofRequest.clear();
-         
+
     }
     if(obj.total_bytes_received >= obj.ContentLength)
-    { 
+    {
         size_t start_idx = obj.i;
         string separator = obj.boundary;
         vector<string> substrings; // clear ?
-        while (true) 
+        while (true)
         {
             size_t end_idx = obj.buffer.find(separator, start_idx);
-            if (end_idx == string::npos) 
+            if (end_idx == string::npos)
             {
                 substrings.push_back(obj.buffer.substr(start_idx));
                 break;
@@ -227,16 +227,16 @@ void  parssingOfBody::handling_chunked_data(client &obj, std::map<std::string, s
                 int k = obj.i;
                 while ((isalnum(obj.buffer[obj.i]) || isalpha(obj.buffer[obj.i])))
                     obj.i++;
-                
+
                 int dec = std::stoul(obj.buffer.substr(k,obj.i), NULL, 16);
-                
+
                 obj.i+=2;
                 if(dec == 0 )
                     break;
-                
+
                 while (dec--)
                 {
-                   
+
                     obj.bodyofRequest.push_back(obj.buffer[obj.i]);
                     obj.i++;
                 }
@@ -260,9 +260,9 @@ void  parssingOfBody::handling_chunked_data(client &obj, std::map<std::string, s
                 return;
             }
             create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.path, mimetypes_);
-            
+
             obj.flag_ = 10;
-        } 
+        }
     }
 }
 

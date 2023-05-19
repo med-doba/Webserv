@@ -133,14 +133,14 @@ void client::findErrorPage(std::map<std::string, std::string> mimetypes,  std::v
 {
 	std::vector<std::pair<int , std::string> >::iterator it = ErrSer.begin();
 	int status = this->respond.status_code;
-	std::string fullPath = "/Users/hmoubal/Desktop/Webserv";
+	// std::string fullPath = "/Users/hmoubal/Desktop/Webserv";
 	std::cout << ErrSer.size() << std::endl;
 	for (; it != ErrSer.end(); it++)
 	{
 		std::cout << "status == " << it->first << std::endl;
 		if (status == it->first)
 		{
-			this->path = fullPath + it->second;
+			this->path = it->second;
 			if (this->fillBody(mimetypes) == -1)
 				this->generateErrPage(mimetypes);
 			return ;
@@ -616,7 +616,12 @@ void client::initResponse(std::map<std::string, std::string> mimetypes, std::vec
 	else if (this->respond.flagResponse == CGIPRO)
 	{
 		this->respond.close = ALIVE;
-		this->obj.ft_cgi(this->obj.SCRIPT_NAME);
+		if (this->obj.ft_cgi(this->obj.SCRIPT_NAME) == -1)
+		{
+			this->respond.flagResponse = INTERNALERR;
+			this->initResponse(mimetypes,ErrSer);
+			return ;
+		}
 		this->respond.contenttype = "text/html";
 		this->respond.status_code = 200;
 		this->respond.body = this->obj.body;

@@ -272,7 +272,7 @@ void server::ClientHang(int index)
 			return ;
 		}
 	}
-	
+
 }
 
 void server::monitor()
@@ -604,7 +604,7 @@ void server::fillCGI(client &ObjClient, serverParse ObjServer, int loc)
 	locationParse ObjLocation = ObjServer.obj_location[loc];
 	ObjClient.obj.executable = "." + ObjLocation.cgi[2];
 	std::cout << "executable == " << ObjClient.obj.executable << std::endl;
-	ObjClient.obj.CONTENT_TYPE = "text/plain";
+	ObjClient.obj.CONTENT_TYPE = "text/html";
 	std::string tmp = ObjClient.URI.substr(ObjLocation.path.size());
 	int pos = tmp.find("/cgi-bin");
 	if (pos != -1)
@@ -639,6 +639,13 @@ void server::fillCGI(client &ObjClient, serverParse ObjServer, int loc)
 			ObjClient.obj.CONTENT_LENGTH = length;
 		}
 		ObjClient.obj.POST_DATA = ObjClient.buffer.substr(ObjClient.headerOfRequest.size() + 3);
+	}
+	pos = ObjClient.headerOfRequest.find("User-Agent: ");
+	if (pos != -1)
+	{
+		int ps = ObjClient.headerOfRequest.find('\r', pos);
+		if (ps != -1)
+			ObjClient.obj.HTTP_USER_AGENT = ObjClient.headerOfRequest.substr(pos + 12, ps - (pos + 12));
 	}
 }
 

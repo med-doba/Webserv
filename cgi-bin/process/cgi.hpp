@@ -16,25 +16,22 @@
 
 class cgi
 {
-	// private:
 	public:
-		std::string	CONTENT_TYPE;//h
-		std::string	CONTENT_LENGTH;//h
-		std::string	HTTP_COOKIE;
-		std::string	HTTP_USER_AGENT;//h
+		std::string	CONTENT_TYPE;
+		std::string	CONTENT_LENGTH;
 		std::string	PATH_INFO;
 		std::string	QUERY_STRING;
 		std::string	REQUEST_METHOD;
+		std::string	SCRIPT_NAME;
 		std::string	SCRIPT_FILENAME;
-		std::string	DOCUMENT_ROOT;
 		std::string	REQUEST_URI;
 		std::string	POST_DATA;
-		std::string	SCRIPT_NAME;
+		std::string	HTTP_USER_AGENT;
+		std::string	HTTP_COOKIE;
 		std::string body;
 
 		std::string	executable;
 		char	**envp;
-		// std::string	REMOTE_ADDR;
 
 		cgi();
 		cgi(const cgi &obj);
@@ -42,8 +39,9 @@ class cgi
 		~cgi();
 
 		//methodes
-		void	ft_cgi(std::string	fileName);
-		void ft_environment();
+		int		ft_cgi(std::string	fileName);
+		int		ft_environment();
+		void	free_2d(int from);
 
 };
 
