@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/19 20:47:25 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/19 23:23:40 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,12 +240,12 @@ int	cgi::ft_cgi(std::string	fileName)
 			int	fd = open("output_cgi", O_CREAT | O_RDWR | O_TRUNC, 0777);
 			if (fd == -1)
 				exit(1);
-			std::cout << "executable == " << this->executable << std::endl;
-			std::cout << "adjahsd == " << fileName << std::endl;
+			// std::cout << "executable == " << this->executable << std::endl;
+			// std::cout << "adjahsd == " << fileName << std::endl;
 			dup2(fd, STDOUT_FILENO);
-			// char	*argv[3] = {(char *)this->executable.c_str(), (char *)fileName.c_str(), NULL};
-			char	*argv[] = {strdup("/usr/bin/python3"), (char *)fileName.c_str(), NULL};
-			if (execve("/usr/bin/python3", argv, envp) == -1)
+			char	*argv[3] = {(char *)this->executable.c_str(), (char *)fileName.c_str(), NULL};
+			// char	*argv[] = {strdup("/usr/bin/python3"), (char *)fileName.c_str(), NULL};
+			if (execve((char *)this->executable.c_str(), argv, envp) == -1)
 				exit(1);
 		}
 		else
@@ -259,7 +259,7 @@ int	cgi::ft_cgi(std::string	fileName)
 			}
 			if (WIFEXITED(status) && WEXITSTATUS(status) == 1)
 			{
-				std::cout << "jadas " << std::endl;
+				// std::cout << "jadas " << std::endl;
 				return (-1);
 			}
 		}
