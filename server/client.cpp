@@ -137,7 +137,7 @@ void client::findErrorPage(std::map<std::string, std::string> mimetypes,  std::v
 	std::cout << ErrSer.size() << std::endl;
 	for (; it != ErrSer.end(); it++)
 	{
-		std::cout << "status == " << it->first << std::endl;
+		// std::cout << "status == " << it->first << std::endl;
 		if (status == it->first)
 		{
 			this->path = it->second;
