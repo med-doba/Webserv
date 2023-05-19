@@ -6,7 +6,7 @@
 /*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/19 22:46:18 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/19 23:25:06 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ bool	serverParse::ft_check_extention(std::string str)
 	(void)str;
 	// std::string	sub;
 	// int	i = -1;
-
+	str.size();
 	// std::string	tmp[3] = {".py", ".php", ".html"};
 	// sub = str.substr(str.find_last_of("."));
 
