@@ -3,31 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   parse_conf.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
+/*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 13:50:43 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/17 03:06:58 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/19 02:36:07 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "serverParse.hpp"
-
-
-#include <utility>
-void	print_vector(const std::vector<std::pair<int, std::string> >& v)
-{
-	for (std::vector<std::pair<int, std::string> >::const_iterator it = v.begin(); it != v.end(); ++it)
-	{
-		std::cout << "(" << it->first << ", " << it->second << ")" << std::endl;
-	}
-}
-
-void	rmbackslash(std::string &str)
-{
-	if (str.back() == ';')
-		if(str[str.length() - 2] == '/')
-			str.erase(str.length() - 2, 1);
-}
 
 std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 {
@@ -52,7 +35,6 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 					continue;
 				ft_delete_comment(lines);
 				classconfig.ft_trim(lines);
-				// rmbackslash(lines);
 
 				if (!lines.empty() && lines.back() == '{')
 				{
@@ -65,7 +47,6 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 						if (classconfig.ft_split(lines, " \t").begin()->compare("location"))
 							classconfig.ft_error("Error: invalid directives");
 						location_.path = *(classconfig.ft_split(lines, " \t{").begin() + 1);
-						// rmbackslash(location_.path);
 					}
 					continue;
 				}
@@ -168,27 +149,11 @@ std::vector<serverParse>	ft_parse_conf(std::string fileConf, MapType& bind_info)
 					classconfig.ft_error("Error: missing or mismatched brackets");
 			}
 			file_conf.close();
-			// if (!(classconfig.root_find && classconfig.error_page_find && classconfig.location_find && classconfig.listen_find))
-			// 	classconfig.ft_error("Error: Missing required directives");
 		}
 		catch(...)
 		{
 			std::cerr << "Error" << std::endl;
 		}
-		// print_vector_of_structs(bind_info);
-		// classconfig.ft_show(block);
-		// for (size_t i = 0; i <  block.size(); i++)
-		// {
-		// 	std::cout << "server block " << i << std::endl;
-		// 	print_vector(block[i].ErrorPages);
-		// 	std::cout << "location block" << std::endl;
-		// 	for (size_t j = 0; j < block[i].obj_location.size(); j++)
-		// 	{
-		// 		print_vector(block[i].obj_location[j].ErrorPages);
-		// 	}
-		// 	// std::cout << "location block" << std::endl;
-		// 	std::cout << "//\\//\\//\\//\\//\\//\\" << std::endl;
-		// }
 	}
 	else
 		throw(std::runtime_error("Config File Not Found"));

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serverParse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
+/*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/17 03:07:10 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/19 02:17:02 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,18 +77,18 @@ std::string	serverParse::get_host()
 
 bool	serverParse::ft_check_extention(std::string str)
 {
-	std::string	sub;
-	int	i = -1;
+	// std::string	sub;
+	// int	i = -1;
 
-	std::string	tmp[3] = {".py", ".php", ".html"};
-	sub = str.substr(str.find_last_of("."));
+	// std::string	tmp[3] = {".py", ".php", ".html"};
+	// sub = str.substr(str.find_last_of("."));
 
-	while(++i < 3)
-	{
-		if (sub == tmp[i])
+	// while(++i < 3)
+	// {
+	// 	if (sub == tmp[i])
 			return true;
-	}
-	return false;
+	// }
+	// return false;
 }
 
 bool	serverParse::ft_check_cmbsize(std::string &str)

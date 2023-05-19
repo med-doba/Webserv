@@ -6,7 +6,7 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:49:40 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/10 15:12:33 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/19 02:32:14 by med-doba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,22 +95,3 @@ void	locationParse::ft_clearclasslocation(locationParse &location_)
 	location_.allow_methods.clear();
 	location_.ErrorPages.clear();
 }
-
-// void	locationParse::checkErrorPageLocation(serverParse &classconfig, locationParse &location_, std::string &lines)
-// {
-// 	std::vector<std::string>	tmp_error_page;
-
-// 	if (!location_.error_page_)
-// 	{
-// 		location_.error_page =  classconfig.ft_parse_errorpage(lines);
-// 		location_.error_page_ = true;
-// 	}
-// 	else
-// 	{
-// 		tmp_error_page = classconfig.ft_parse_errorpage(lines);
-// 		location_.error_page.insert(location_.error_page.end(), (tmp_error_page.begin() + 1), tmp_error_page.end());
-// 	}
-// 	int				staticCode = std::stoi(classconfig.ft_parse_errorpage(lines)[1]);
-// 	std::string		path = classconfig.ft_parse_errorpage(lines)[2];
-// 	location_.ErrorPages.push_back(std::make_pair(staticCode, path));
-// }
