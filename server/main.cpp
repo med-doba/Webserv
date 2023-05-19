@@ -4,13 +4,15 @@ int main(int ac, char **av)
 {
 	signal(SIGPIPE, SIG_IGN);
 	MapType	bind_info;
-
+	std::string confFile;
 	try
 	{
 		if (ac != 2)
-			throw(std::runtime_error("Wrong Number Of Arguments"));
+			confFile = "confDir/configuration.conf";
+		else
+			confFile = av[1];
 		server obj;
-		obj.block = ft_parse_conf(av[1], bind_info);
+		obj.block = ft_parse_conf(confFile.c_str(), bind_info);
 		obj.fill(bind_info);
 		obj.lunch_servers();
 		obj.monitor();
