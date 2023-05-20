@@ -203,7 +203,7 @@ void parssingOfBody::handling_form_data(client &obj, std::map<std::string, std::
             substrings.push_back(obj.buffer.substr(start_idx, end_idx - start_idx));
             start_idx = end_idx + separator.length();
         }
-        int size = obj.buffer.size() - (obj.headerOfRequest.size() + 3);
+        int size = obj.buffer.size() - (obj.headerOfRequest.size() + 2);
         if (size > obj.ContentLength)
         {
             obj.respond.flagResponse = BADREQUEST;

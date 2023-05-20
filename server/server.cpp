@@ -643,7 +643,7 @@ void server::fillCGI(client &ObjClient, serverParse ObjServer, int loc)
 			std::string length = ObjClient.headerOfRequest.substr(ps + 16, ps2 - (ps + 16));
 			ObjClient.obj.CONTENT_LENGTH = length;
 		}
-		ObjClient.obj.POST_DATA = ObjClient.buffer.substr(ObjClient.headerOfRequest.size() + 3);
+		ObjClient.obj.POST_DATA = ObjClient.buffer.substr(ObjClient.headerOfRequest.size() + 2);
 	}
 	pos = ObjClient.headerOfRequest.find("User-Agent: ");
 	if (pos != -1)
@@ -1035,7 +1035,7 @@ void server::receive(int pfds_index, int index)
 	}
 	if(clients[index].flag == NONCHUNKED) // if has content lenght
 	{
-		string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 3,clients[index].buffer.size() - clients[index].headerOfRequest.size() + 3);
+		string test = clients[index].buffer.substr(clients[index].headerOfRequest.size() + 2,clients[index].buffer.size() - clients[index].headerOfRequest.size() + 2);
 		if((int)test.size() == clients[index].ContentLength)// finish recivng
 			clients[index].check();
 		else if ((int)test.size() > clients[index].ContentLength)
