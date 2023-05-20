@@ -302,7 +302,7 @@ void server::monitor()
 					{
 						if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 0)
 						{
-							// // std::cout << "ready to recv " << clients[j].client_socket << std::endl;
+							// std::cout << "ready to recv " << clients[j].client_socket << std::endl;
 							this->receive(i, j);
 							break ;
 						}
@@ -314,7 +314,7 @@ void server::monitor()
 					{
 						if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 1)
 						{
-							// // std::cout << "ready to send " <<  pfds[i].fd << std::endl;
+							// std::cout << "ready to send " <<  pfds[i].fd << std::endl;
 							this->response(this->pfds[i], j);
 							break ;
 						}
@@ -421,36 +421,39 @@ serverParse& server::findServerBlock(int index)
 	std::string line;
 	std::string host;
 	std::string port;
-	int pos = headerreq.find("Host: ");
-	line = headerreq.substr(pos + 6, headerreq.find('\r', pos + 6) - (pos + 6));
-	host = line.substr(0, line.find(':'));
-	port = line.substr(line.find(':') + 1);
-	size_t i = 0;
-	while (i < this->block.size())
+	if (!headerreq.empty())
 	{
-		if (host.compare(block[i].host) != 0)
+		int pos = headerreq.find("Host: ");
+		line = headerreq.substr(pos + 6, headerreq.find('\r', pos + 6) - (pos + 6));
+		host = line.substr(0, line.find(':'));
+		port = line.substr(line.find(':') + 1);
+		size_t i = 0;
+		while (i < this->block.size())
 		{
-			for (size_t j = 0; j < block[i].server_name.size(); j++)
+			if (host.compare(block[i].host) != 0)
 			{
-				if (host.compare(block[i].server_name[j]) == 0)
+				for (size_t j = 0; j < block[i].server_name.size(); j++)
 				{
-					for (size_t l = 1; l < block[i].listen.size(); l++)
+					if (host.compare(block[i].server_name[j]) == 0)
 					{
-						if (port.compare(block[i].listen[l]) == 0)
-							return (block[i]);
+						for (size_t l = 1; l < block[i].listen.size(); l++)
+						{
+							if (port.compare(block[i].listen[l]) == 0)
+								return (block[i]);
+						}
 					}
 				}
 			}
-		}
-		else
-		{
-			for (size_t l = 1; l < block[i].listen.size(); l++)
+			else
 			{
-				if (port.compare(block[i].listen[l]) == 0)
-					return (block[i]);
+				for (size_t l = 1; l < block[i].listen.size(); l++)
+				{
+					if (port.compare(block[i].listen[l]) == 0)
+						return (block[i]);
+				}
 			}
+			i++;
 		}
-		i++;
 	}
 	if (clients[index].respond.ready != 1)
 	{
@@ -816,7 +819,6 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 	if (resourseRequested[0] == '/')
 		resourseRequested = resourseRequested.substr(1);
 	root = root + "/" + resourseRequested;
-	// // std::cout << "root post == " << root << std::endl;
 	if (access(root.data(), F_OK) != 0)
 	{
 		ObjClient.respond.ready = 1;
@@ -1002,8 +1004,6 @@ void server::response(struct pollfd &pfds, int index)
 		int status = clients[index].respond.send_response(clients[index], pfds);
 		if (status == 1)
 			this->disconnect(index);
-		if (status == -1)
-			this->response(pfds, index);
 	}
 }
 
@@ -1014,7 +1014,14 @@ void server::receive(int pfds_index, int index)
 	clients[index].flagTimeout = 1;
 	clients[index].timeout = clock();
     rtn = clients[index].pushToBuffer();
-    if(rtn == 0 || rtn == -1)
+	if (rtn == -1)
+	{
+		clients[index].ready = 1;
+		clients[index].respond.ready = 1;
+		clients[index].respond.flagResponse = INTERNALERR;
+		return ;
+	}
+    if(rtn == 0)
 	{
 		// std::cout << "from recv " << std::endl;
 		this->disconnect(index);

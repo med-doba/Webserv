@@ -6,7 +6,7 @@ OBJ = $(SRC:%.cpp=%.o)
 
 HDR = ./process/cgi.hpp
 
-FLAGS = -Wall -Wextra -Werror #-std=c++98 -fsanitize=address
+FLAGS = -Wall -Wextra -Werror -std=c++98
 
 all: $(NAME)
 

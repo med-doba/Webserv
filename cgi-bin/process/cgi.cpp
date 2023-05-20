@@ -6,7 +6,7 @@
 /*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/19 23:23:40 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/20 02:24:40 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,7 +246,10 @@ int	cgi::ft_cgi(std::string	fileName)
 			char	*argv[3] = {(char *)this->executable.c_str(), (char *)fileName.c_str(), NULL};
 			// char	*argv[] = {strdup("/usr/bin/python3"), (char *)fileName.c_str(), NULL};
 			if (execve((char *)this->executable.c_str(), argv, envp) == -1)
+			{
+				
 				exit(1);
+			}
 		}
 		else
 		{
@@ -260,6 +263,8 @@ int	cgi::ft_cgi(std::string	fileName)
 			if (WIFEXITED(status) && WEXITSTATUS(status) == 1)
 			{
 				// std::cout << "jadas " << std::endl;
+				if (std::remove("output_cgi"))
+					return (-1);
 				return (-1);
 			}
 		}
