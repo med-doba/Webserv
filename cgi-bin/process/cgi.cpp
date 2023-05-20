@@ -6,7 +6,7 @@
 /*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/20 03:01:35 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/20 03:43:14 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ int	cgi::ft_environment()
 	int		index;
 	std::string	tmp;
 
-	envp = (char	**)malloc(sizeof(char *) * 12);
+	envp = (char	**)malloc(sizeof(char *) * 11);
 	if (!envp)
 		return (-1);
 
@@ -84,12 +84,12 @@ int	cgi::ft_environment()
 		return (-1);
 	}
 	//
-	envp[++index] = strdup("REDIRECT_STATUS=200");
-	if (!envp[index])
-	{
-		free_2d(index);
-		return (-1);
-	}
+	// envp[++index] = strdup("REDIRECT_STATUS=200");
+	// if (!envp[index])
+	// {
+	// 	free_2d(index);
+	// 	return (-1);
+	// }
 	//
 	tmp = "PATH_INFO=" + this->PATH_INFO;
 	envp[++index] = strdup(tmp.data());
@@ -188,111 +188,98 @@ int	cgi::ft_environment()
 
 int	cgi::ft_cgi(std::string	fileName)
 {
-	std::ifstream	file(fileName);
 	pid_t			pid;
 	int				fds[2];
+	int				output[2];
 	int 			std_in = 0;
 	int				status;
 
-	if (file.is_open())
+	this->body.clear();
+	if (pipe(output) == -1)
+		return (-1);
+	if (this->REQUEST_METHOD == "GET")
 	{
-		if (this->REQUEST_METHOD == "GET")
+		const char* queryParameters = strchr((const char *)this->REQUEST_URI.c_str(), '?');
+		if (queryParameters != NULL)
 		{
-			const char* queryParameters = strchr((const char *)this->REQUEST_URI.c_str(), '?');
- 			if (queryParameters != NULL)
-			{
-				queryParameters++;
-				this->QUERY_STRING = queryParameters;
-			}
-			std::string tmp_path_info = REQUEST_URI.substr(this->SCRIPT_NAME.size());
-			size_t pos = tmp_path_info.find('?');
-			if (pos != std::string::npos)
-				tmp_path_info.erase(pos);
-			this->PATH_INFO = tmp_path_info;
-			if (ft_environment() == -1)
-				return -1;
+			queryParameters++;
+			this->QUERY_STRING = queryParameters;
 		}
+		std::string tmp_path_info = REQUEST_URI.substr(this->SCRIPT_NAME.size());
+		size_t pos = tmp_path_info.find('?');
+		if (pos != std::string::npos)
+			tmp_path_info.erase(pos);
+		this->PATH_INFO = tmp_path_info;
+		if (ft_environment() == -1)
+			return -1;
+	}
 
-		if (this->REQUEST_METHOD == "POST")
+	if (this->REQUEST_METHOD == "POST")
+	{
+		std::string	scontent_length = this->CONTENT_LENGTH;
+		int			content_length = std::stoi(this->CONTENT_LENGTH);
+		if (content_length > 0)
 		{
-			std::string	scontent_length = this->CONTENT_LENGTH;
-			int			content_length = std::stoi(this->CONTENT_LENGTH);
-			if (content_length > 0)
-			{
-				if (pipe(fds) == -1)
-					return (-1);
-				std_in = dup(STDIN_FILENO);
-				write(fds[1], this->POST_DATA.data(), content_length);
-				close(fds[1]);
-				dup2(fds[0], STDIN_FILENO);
-				close(fds[0]);
-			}
-			if (ft_environment() == -1)
-				return -1;
-		}
-
-		pid = fork();
-		if(pid == -1)
-		{
-			free_2d(12);
-			return (-1);
-		}
-
-		if (!pid)
-		{
-			int	fd = open("output_cgi", O_CREAT | O_RDWR | O_TRUNC, 0777);
-			if (fd == -1)
-			{
-				free_2d(12);
-				// std::cout << "helo from fd" << std::endl;
-				exit(1);
-			}
-			// std::cout << "executable == " << this->executable << std::endl;
-			// std::cout << "adjahsd == " << fileName << std::endl;
-			dup2(fd, STDOUT_FILENO);
-			char	*argv[3] = {(char *)this->executable.c_str(), (char *)fileName.c_str(), NULL};
-			// char	*argv[] = {strdup("/usr/bin/python3"), (char *)fileName.c_str(), NULL};
-			if (execve((char *)this->executable.c_str(), argv, envp) == -1)
-			{
-				free_2d(12);
-				// std::cout << "helo from exec" << std::endl;
-				exit(1);
-			}
-		}
-		else
-		{
-			waitpid(pid, &status, 0);
-			free_2d(12);
-			if (!this->REQUEST_METHOD.compare("POST"))
-			{
-				dup2(STDIN_FILENO, std_in);
-				close(std_in);
-			}
-			if (WIFEXITED(status) && WEXITSTATUS(status) == 1)
-			{
-				// std::cout << "jadas " << std::endl;
-				std::remove("output_cgi");
+			if (pipe(fds) == -1)
 				return (-1);
-			}
+			std_in = dup(STDIN_FILENO);
+			write(fds[1], this->POST_DATA.data(), content_length);
+			close(fds[1]);
+			dup2(fds[0], STDIN_FILENO);
+			close(fds[0]);
 		}
+		if (ft_environment() == -1)
+			return -1;
+	}
 
-		std::ifstream	output("output_cgi");
+	pid = fork();
+	if(pid == -1)
+	{
+		free_2d(11);
+		return (-1);
+	}
 
-		if (output.is_open())
+	if (!pid)
+	{
+		dup2(output[1], STDOUT_FILENO);
+		close(output[1]);
+		close(output[0]);
+		char	*argv[3] = {(char *)this->executable.c_str(), (char *)fileName.c_str(), NULL};
+		if (execve((char *)this->executable.c_str(), argv, envp) == -1)
 		{
-			std::stringstream ss;
-			ss << output.rdbuf();
-			output.close();
-			std::string file = ss.str();
-			this->body = file;
-			if (std::remove("output_cgi"))
-				return (-1);
+			free_2d(11);
+			// std::cout << "helo from exec" << std::endl;
+			exit(1);
 		}
-		else
-			return (-1);
-		// Generate the HTML response using the parameters received
 	}
 	else
-		return (-1);
+	{
+		waitpid(pid, &status, 0);
+		close(output[1]);
+		free_2d(11);
+		if (!this->REQUEST_METHOD.compare("POST"))
+		{
+			dup2(STDIN_FILENO, std_in);
+			close(std_in);
+		}
+		if (WIFEXITED(status) && WEXITSTATUS(status) == 1)
+		{
+			// std::cout << "jadas " << std::endl;
+			return (-1);
+		}
+	}
+	const int BUFFER_SIZE = 4096;
+	char buffer[BUFFER_SIZE];
+	ssize_t bytesRead;
+
+	while ((bytesRead = read(output[0], buffer, BUFFER_SIZE)) > 0) 
+	{
+		// Process the data read from the pipe
+		buffer[bytesRead] = '\0';
+		this->body += buffer;
+	}
+
+	// Close the read end of the pipe
+	close(output[0]);
 	return (0);
 }
