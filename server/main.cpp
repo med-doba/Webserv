@@ -7,10 +7,12 @@ int main(int ac, char **av)
 	std::string confFile;
 	try
 	{
-		if (ac != 2)
+		if (ac == 1)
 			confFile = "confDir/configuration.conf";
-		else
+		else if (ac == 2)
 			confFile = av[1];
+		else
+			throw(std::runtime_error("Error: unexcepted arguments"));
 		server obj;
 		obj.block = ft_parse_conf(confFile.c_str(), bind_info);
 		obj.fill(bind_info);
@@ -19,6 +21,6 @@ int main(int ac, char **av)
 	}
 	catch (const std::exception &e)
 	{
-		// std::cout << e.what() << std::endl;
+		std::cout << e.what() << std::endl;
 	}
 }
