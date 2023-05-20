@@ -1,0 +1,11 @@
+infinite loop f SCRIPT
+
+location must be folder 
+
+work error_pages in location
+
+look up server block
+
+301 moved Permanently no remove caches headers
+ 
+302 with caches headers

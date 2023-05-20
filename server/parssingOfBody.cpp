@@ -43,6 +43,7 @@ void parssingOfBody::clear()
 
 void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string & headerOfRequest, int &flagResponse, std::string path, std::multimap<std::string, std::string> mimetypes_)
 {
+        std::cout << "file == " << file << std::endl;
     while (1)
     {
         if (path[path.size() - 1] == '/')
@@ -277,10 +278,10 @@ void  parssingOfBody::handling_chunked_data(client &obj, std::map<std::string, s
 
 void parssingOfBody::handle_post(client &obj, std::multimap<std::string, std::string> mimetypes_)
 {
-	string test = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
+	string test = obj.buffer.substr(obj.headerOfRequest.size() + 2,obj.ContentLength);
 	if((int)test.size() >= obj.ContentLength)// finish recivng
     {
-        obj.bodyofRequest = obj.buffer.substr(obj.headerOfRequest.size() + 3,obj.ContentLength);
+        obj.bodyofRequest = obj.buffer.substr(obj.headerOfRequest.size() + 2,obj.ContentLength);
         create_file_and_put_content(obj.bodyofRequest,obj.headerOfRequest, obj.respond.flagResponse, obj.uploadPath, mimetypes_);
     }
 }

@@ -314,7 +314,7 @@ void server::monitor()
 					{
 						if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 1)
 						{
-							// std::cout << "ready to send " <<  pfds[i].fd << std::endl;
+							std::cout << "ready to send " <<  pfds[i].fd << std::endl;
 							this->response(this->pfds[i], j);
 							break ;
 						}
@@ -408,7 +408,7 @@ int server::checkLocation(client &ObjClient, serverParse ObjServer)
 	if (ObjLocation.root.size() != 0)
 		root = ObjLocation.root[1];
 	else if (ObjServer.root.size() != 0)
-		root = ObjLocation.root[1];
+		root = ObjServer.root[1];
 	if (root[root.size() - 1] == '/')
 		root.pop_back();
 	ObjClient.path = root;
@@ -594,7 +594,7 @@ std::string server::trim_path(client &ObjClient, locationParse ObjLocation)
 			ext = resourseRequested.substr(pos, pos2 - pos);
 		else
 			ext = resourseRequested.substr(pos);
-		if (ext.compare(".php") == 0 || ext.compare(".py") == 0)
+		if (ext.compare(".lua") == 0 || ext.compare(".py") == 0)
 			resourseRequested = resourseRequested.substr(0,pos2);
 	}
 	// std::cout << "resourseRequested == " << resourseRequested << std::endl;
@@ -805,6 +805,7 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 	{
 		if (ObjLocation.allow_methods[i].compare("POST") == 0)
 		{
+			std::cout << "her \n";
 			ObjClient.postMethod(mimeTypes_, mimeTypes);
 			return;
 		}
