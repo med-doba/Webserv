@@ -6,7 +6,7 @@
 /*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/20 03:43:14 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/20 04:03:37 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,7 +211,11 @@ int	cgi::ft_cgi(std::string	fileName)
 			tmp_path_info.erase(pos);
 		this->PATH_INFO = tmp_path_info;
 		if (ft_environment() == -1)
+		{
+			close(output[0]);
+			close(output[1]);
 			return -1;
+		}
 	}
 
 	if (this->REQUEST_METHOD == "POST")
@@ -221,7 +225,11 @@ int	cgi::ft_cgi(std::string	fileName)
 		if (content_length > 0)
 		{
 			if (pipe(fds) == -1)
+			{
+				close(output[0]);
+				close(output[1]);
 				return (-1);
+			}
 			std_in = dup(STDIN_FILENO);
 			write(fds[1], this->POST_DATA.data(), content_length);
 			close(fds[1]);
@@ -229,13 +237,19 @@ int	cgi::ft_cgi(std::string	fileName)
 			close(fds[0]);
 		}
 		if (ft_environment() == -1)
+		{
+			close(output[0]);
+			close(output[1]);
 			return -1;
+		}
 	}
 
 	pid = fork();
 	if(pid == -1)
 	{
 		free_2d(11);
+		close(output[0]);
+		close(output[1]);
 		return (-1);
 	}
 
@@ -265,6 +279,8 @@ int	cgi::ft_cgi(std::string	fileName)
 		if (WIFEXITED(status) && WEXITSTATUS(status) == 1)
 		{
 			// std::cout << "jadas " << std::endl;
+			// close(output[1]);
+			close(output[0]);
 			return (-1);
 		}
 	}
@@ -280,6 +296,7 @@ int	cgi::ft_cgi(std::string	fileName)
 	}
 
 	// Close the read end of the pipe
+	// close(output[1]);
 	close(output[0]);
 	return (0);
 }

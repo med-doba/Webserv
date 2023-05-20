@@ -2,9 +2,10 @@
 
 import cgi
 import sys
-# import os
+import os
 import urllib.parse
 import select
+
 
 # Check if stdin has any input
 if select.select([sys.stdin,], [], [], 0.0)[0]:
