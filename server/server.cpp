@@ -175,11 +175,11 @@ void server::fill(MapType	bind_info)
 	miniserver obj;
 	for (size_t i = 0; i < bind_info.size(); i++)
 	{
-		std::cout << "host == " << bind_info[i].host << std::endl;
+		// std::cout << "host == " << bind_info[i].host << std::endl;
 		obj.address.sin_addr.s_addr = getAdrress(bind_info[i].host).sin_addr.s_addr;
 		for (size_t j = 0; j < bind_info[i].ports.size(); j++)
 		{
-			std::cout << "ports == " << bind_info[i].ports[j] << std::endl;
+			// std::cout << "ports == " << bind_info[i].ports[j] << std::endl;
 			obj.port = std::stoi(bind_info[i].ports[j]);
 			obj.str_port = bind_info[i].ports[j];
 			obj.address.sin_family = AF_INET;
@@ -326,7 +326,7 @@ void server::monitor()
 					{
 						if (pfds[i].fd == clients[j].client_socket)
 						{
-							// std::cout << "from here" << std::endl;
+							// // std::cout << "from here" << std::endl;
 							this->disconnect(j);
 							break ;
 						}
@@ -355,12 +355,12 @@ void server::new_connection(int indexPfds, int index)
 	c.events = POLLIN | POLLOUT;
 	pfds.push_back(c);
 	clients.push_back(obj);
-	// std::cout << "new client connected " << obj.client_socket << std::endl;
+	// // std::cout << "new client connected " << obj.client_socket << std::endl;
 }
 
 void server::disconnect(int index)
 {
-	// std::cout << "client disconnected " << clients[index].client_socket << std::endl;
+	// // std::cout << "client disconnected " << clients[index].client_socket << std::endl;
 	close(clients[index].client_socket);
 	pfds.erase(pfds.begin() + index + servers.size());
 	clients[index].clear();
@@ -421,36 +421,39 @@ serverParse& server::findServerBlock(int index)
 	std::string line;
 	std::string host;
 	std::string port;
-	int pos = headerreq.find("Host: ");
-	line = headerreq.substr(pos + 6, headerreq.find('\r', pos + 6) - (pos + 6));
-	host = line.substr(0, line.find(':'));
-	port = line.substr(line.find(':') + 1);
-	size_t i = 0;
-	while (i < this->block.size())
+	if (!headerreq.empty())
 	{
-		if (host.compare(block[i].host) != 0)
+		int pos = headerreq.find("Host: ");
+		line = headerreq.substr(pos + 6, headerreq.find('\r', pos + 6) - (pos + 6));
+		host = line.substr(0, line.find(':'));
+		port = line.substr(line.find(':') + 1);
+		size_t i = 0;
+		while (i < this->block.size())
 		{
-			for (size_t j = 0; j < block[i].server_name.size(); j++)
+			if (host.compare(block[i].host) != 0)
 			{
-				if (host.compare(block[i].server_name[j]) == 0)
+				for (size_t j = 0; j < block[i].server_name.size(); j++)
 				{
-					for (size_t l = 1; l < block[i].listen.size(); l++)
+					if (host.compare(block[i].server_name[j]) == 0)
 					{
-						if (port.compare(block[i].listen[l]) == 0)
-							return (block[i]);
+						for (size_t l = 1; l < block[i].listen.size(); l++)
+						{
+							if (port.compare(block[i].listen[l]) == 0)
+								return (block[i]);
+						}
 					}
 				}
 			}
-		}
-		else
-		{
-			for (size_t l = 1; l < block[i].listen.size(); l++)
+			else
 			{
-				if (port.compare(block[i].listen[l]) == 0)
-					return (block[i]);
+				for (size_t l = 1; l < block[i].listen.size(); l++)
+				{
+					if (port.compare(block[i].listen[l]) == 0)
+						return (block[i]);
+				}
 			}
+			i++;
 		}
-		i++;
 	}
 	if (clients[index].respond.ready != 1)
 	{
@@ -471,7 +474,7 @@ void server::checkMaxBodySize(client &ObjClient, serverParse obj, int loc)
 			allowedSize = obj.obj_location[loc].client_max_body_size;
 		else if (obj.client_max_body_size_)
 			allowedSize = obj.client_max_body_size;
-		std::cout << "allowed == " << allowedSize << std::endl;
+		// std::cout << "allowed == " << allowedSize << std::endl;
 		if (length > allowedSize)
 		{
 			ObjClient.respond.ready = 1;
@@ -556,7 +559,7 @@ int server::checkExtension(std::string pathCgi, locationParse ObjLocation)
 			ext = pathCgi.substr(pos,pos2 - pos);
 		else
 			ext = pathCgi.substr(pos);
-		std::cout << "extentsion gci == " << ext << std::endl;
+		// std::cout << "extentsion gci == " << ext << std::endl;
 		if (ext.compare(".py") == 0 || ext.compare(".lua") == 0)
 		{
 			if (ObjLocation.cgi.size() != 0)
@@ -594,7 +597,7 @@ std::string server::trim_path(client &ObjClient, locationParse ObjLocation)
 		if (ext.compare(".php") == 0 || ext.compare(".py") == 0)
 			resourseRequested = resourseRequested.substr(0,pos2);
 	}
-	std::cout << "resourseRequested == " << resourseRequested << std::endl;
+	// std::cout << "resourseRequested == " << resourseRequested << std::endl;
 	root = ObjClient.path + "/" + resourseRequested;
 	return (root);
 }
@@ -602,10 +605,10 @@ std::string server::trim_path(client &ObjClient, locationParse ObjLocation)
 void server::fillCGI(client &ObjClient, serverParse ObjServer, int loc)
 {
 	locationParse ObjLocation = ObjServer.obj_location[loc];
-	if (ObjLocation.cgi[1].compare(".lua") == 0)
+	// if (ObjLocation.cgi[1].compare(".lua") == 0)
 		ObjClient.obj.executable = ObjLocation.cgi[2];
-	else
-		ObjClient.obj.executable = "." + ObjLocation.cgi[2];
+	// else
+	// 	ObjClient.obj.executable = "." + ObjLocation.cgi[2];
 	ObjClient.obj.CONTENT_TYPE = "text/html";
 	std::string tmp = ObjClient.URI.substr(ObjLocation.path.size());
 	int pos = tmp.find("/cgi-bin");
@@ -657,7 +660,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 	std::string root;
 	locationParse ObjLocation = ObjServer.obj_location[loc];
 	root = trim_path(ObjClient, ObjLocation);
-	std::cout << "root get == " << root << std::endl;
+	// std::cout << "root get == " << root << std::endl;
 	if (access(root.data(), F_OK) != 0)
 	{
 		ObjClient.respond.ready = 1;
@@ -762,7 +765,7 @@ void server::GetBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 			ObjClient.respond.ready = 1;
 			ObjClient.respond.flagResponse = REDIRECT;
 			ObjClient.redirpath = ObjClient.URI + "/";
-			std::cout << "here == " << root << std::endl;
+			// // std::cout << "here == " << root << std::endl;
 			return;
 		}
     }
@@ -795,8 +798,7 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 	struct stat info;
 	locationParse ObjLocation = ObjServer.obj_location[loc];
 	std::string root;
-	// ObjClient.uploadPath = "/Users/hmoubal/Desktop/Webserv/upload";
-	ObjClient.uploadPath = "/home/skinnyleg/Desktop/Webserv/upload";
+	ObjClient.uploadPath = "/Users/hmoubal/Desktop/upload";
 	if (ObjLocation.client_body_temp_path.size() != 0)
 		ObjClient.uploadPath = ObjLocation.client_body_temp_path[1];
 	for (size_t i = 1; i < ObjLocation.allow_methods.size(); i++)
@@ -817,7 +819,6 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 	if (resourseRequested[0] == '/')
 		resourseRequested = resourseRequested.substr(1);
 	root = root + "/" + resourseRequested;
-	std::cout << "root post == " << root << std::endl;
 	if (access(root.data(), F_OK) != 0)
 	{
 		ObjClient.respond.ready = 1;
@@ -1003,8 +1004,6 @@ void server::response(struct pollfd &pfds, int index)
 		int status = clients[index].respond.send_response(clients[index], pfds);
 		if (status == 1)
 			this->disconnect(index);
-		if (status == -1)
-			this->response(pfds, index);
 	}
 }
 
@@ -1015,16 +1014,23 @@ void server::receive(int pfds_index, int index)
 	clients[index].flagTimeout = 1;
 	clients[index].timeout = clock();
     rtn = clients[index].pushToBuffer();
-    if(rtn == 0 || rtn == -1)
+	if (rtn == -1)
 	{
-		std::cout << "from recv " << std::endl;
+		clients[index].ready = 1;
+		clients[index].respond.ready = 1;
+		clients[index].respond.flagResponse = INTERNALERR;
+		return ;
+	}
+    if(rtn == 0)
+	{
+		// std::cout << "from recv " << std::endl;
 		this->disconnect(index);
         return ;
 	}
     rtn = clients[index].checkHeaderOfreq(PercentEncoding, mimeTypes_);
 	if(rtn == -2)
 	{
-		std::cout << "gets out from here" << std::endl;
+		// std::cout << "gets out from here" << std::endl;
 		return ;
 	}
 	if(clients[index].flag == NONCHUNKED) // if has content lenght

@@ -67,7 +67,7 @@ int parssingOfHeader::check_media(client &obj, std::multimap<std::string,std::st
         if (check.compare("multipart/form-data") == 0 || check.compare("application/x-www-form-urlencoded") == 0)
             return (0);
 		media = obj.headerOfRequest.substr(pos + 14, obj.headerOfRequest.find('\r', pos) - (pos + 14));
-		std::cout << "media == " << media << std::endl;
+		// std::cout << "media == " << media << std::endl;
         std::multimap<std::string, std::string>::iterator it = mimetypes_.find(media);
         if (it != mimetypes_.end())
             return (0);
@@ -94,23 +94,30 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy, std::multimap<
         str.push_back(copy[i]);
         i++;
     }
-
     i = 0;
     while (str[i])
     {
         while (str[i] && str[i] != ':')
             i++;
         i+=2;
+        if (i > (int)str.size())
+            break;
         int k = i;
-        while (str[i] && str[i] != '\r' && str[i] != '\n'  && str[i + 1] != '\n')  
+        while (str[i] && str[i] != '\r' && str[i] != '\n')  
             i++;
-        if(str.substr(k,i - k).size() == 0)// if has empty value
+        if(k < (int)str.size() && str.substr(k,i - k).size() == 0)// if has empty value
         {
             obj.respond.flagResponse = BADREQUEST;
             obj.respond.ready = 1;
             return -2;
         }
-        if(str[i] != '\r' && str[i] != '\n' && str[i + 1] == '\n')// if line dont end by '\r'
+        if(str[i] == '\r' && str[i + 1] != '\n')// if line dont end by '\r'
+        {
+            obj.respond.flagResponse = BADREQUEST;
+            obj.respond.ready = 1;
+            return -2;
+        }
+        else if (str[i] == '\n' && str[i - 1] != '\r')
         {
             obj.respond.flagResponse = BADREQUEST;
             obj.respond.ready = 1;
@@ -203,18 +210,6 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy, std::multimap<
     }
     else if(obj.tmp == DELETE)//delete method
     {
-        // i = str.find("If-Modified-Since: ");
-        // if(i != -1)
-        // {
-		// 	obj.respond.type = 1;
-		// 	obj.respond.status_code = 405;
-        //     obj.respond.ready = 1;
-		// 	// obj.respond.phrase = "Method Not Allowed";
-		// 	obj.respond.content = 1;
-		// 	obj.respond.body = "The request has a malformed header";
-		// 	obj.respond.close = CLOSE;
-        //     return -12;
-        // }
         i = str.find("Content-Type: ");
         if(i != -1)
         {
@@ -226,7 +221,6 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy, std::multimap<
         if(i != -1)
 		{
 			int ContentLength = ft_atoi(copy.substr(i + 16,copy.size()).c_str());
-			//std::cout << "content == "<< ContentLength<< std::endl;
 			if (ContentLength > 0)
             {
                 obj.respond.flagResponse = BADREQUEST;
@@ -300,13 +294,20 @@ int parssingOfHeader::checkHeaderLine(client &obj, std::map<std::string, std::st
     while (obj.headerOfRequest[i] && obj.headerOfRequest[i] != ' ')
         i++;
     temp = ft_substr(obj.headerOfRequest.data(),j,i);
+    if (temp == NULL)
+    {
+        obj.ready = 1;
+        obj.respond.ready = 1;
+        obj.respond.flagResponse = INTERNALERR;
+        obj.flag = ERROR;
+        return (-1);
+    }
     if(strcmp(temp,"POST") == 0)
         obj.tmp = POST;
     if(strcmp(temp,"GET") == 0)
         obj.tmp = GET;
     if(strcmp(temp,"DELETE") == 0)
         obj.tmp = DELETE;
-    // //std::cout << "method == " << tmp << std::endl;
     if( strcmp(temp,"GET") != 0 && strcmp(temp,"POST") != 0 && strcmp(temp,"DELETE") != 0)
     {
         free(temp);
@@ -321,6 +322,14 @@ int parssingOfHeader::checkHeaderLine(client &obj, std::map<std::string, std::st
     while (obj.headerOfRequest[i] && obj.headerOfRequest[i] != ' ')
         i++;
     temp = ft_substr(obj.headerOfRequest.data(),j,i);
+    if (temp == NULL)
+    {
+        obj.ready = 1;
+        obj.respond.ready = 1;
+        obj.respond.flagResponse = INTERNALERR;
+        obj.flag = ERROR;
+        return (-1);
+    }
     if(temp[0] != '/')
     {
         free(temp);
@@ -338,7 +347,14 @@ int parssingOfHeader::checkHeaderLine(client &obj, std::map<std::string, std::st
     while (obj.headerOfRequest[i] && obj.headerOfRequest[i] != '\r' && obj.headerOfRequest[i] != '\n'  && obj.headerOfRequest[i + 1] != '\n' )
         i++;
     temp = ft_substr(obj.headerOfRequest.data(),j,i + 2); 
-     
+    if (temp == NULL)
+    {
+        obj.ready = 1;
+        obj.respond.ready = 1;
+        obj.respond.flagResponse = INTERNALERR;
+        obj.flag = ERROR;
+        return (-1);
+    }
     if( strcmp(temp,"HTTP/1.1\r\n") != 0 && strcmp(temp,"HTTP/1.1\n\n") != 0)
     {
         free(temp);
@@ -358,7 +374,7 @@ int parssingOfHeader::checkHeaderOfreq_(client &obj, std::string copy, std::map<
 
 	if(rtn < 0)
 		return rtn;
-
+    
 	copy = &copy[rtn];
     rtn = checkHeaders(obj, copy, mimetypes_);
     

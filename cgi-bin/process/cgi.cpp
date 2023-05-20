@@ -6,7 +6,11 @@
 /*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2023/05/20 02:31:55 by med-doba         ###   ########.fr       */
+=======
+/*   Updated: 2023/05/20 02:24:40 by hmoubal          ###   ########.fr       */
+>>>>>>> skinnyleg
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,7 +250,10 @@ int	cgi::ft_cgi(std::string	fileName)
 			char	*argv[3] = {(char *)this->executable.c_str(), (char *)fileName.c_str(), NULL};
 			// char	*argv[] = {strdup("/usr/bin/python3"), (char *)fileName.c_str(), NULL};
 			if (execve((char *)this->executable.c_str(), argv, envp) == -1)
+			{
+
 				exit(1);
+			}
 		}
 		else
 		{

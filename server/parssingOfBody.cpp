@@ -43,39 +43,39 @@ void parssingOfBody::clear()
 
 void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string & headerOfRequest, int &flagResponse, std::string path, std::multimap<std::string, std::string> mimetypes_)
 {
-    if (path[path.size() - 1] == '/')
-        file = path;
-    else
-        file = path + "/";
-    if (access(file.c_str(), F_OK) != 0)
+    while (1)
     {
-        flagResponse = NOTFOUND;
-        file.clear();
-        bodyofRequest.clear();
-        return ;
-    }
-    exetention = std::to_string(rand() % 100000);
-    file.append(exetention);
-    std::string ext;
-    std::multimap<std::string, std::string>::iterator it;
-    int pos = headerOfRequest.find("Content-Type: ");
-    if (pos != -1)
-    {
-        ext = headerOfRequest.substr(pos + 14, headerOfRequest.find('\r', pos) - (pos + 14));
-        it = mimetypes_.find(ext);
-        if (it != mimetypes_.end())
-            file.append(it->second);
+        if (path[path.size() - 1] == '/')
+            file = path;
         else
+            file = path + "/";
+        if (access(file.c_str(), F_OK) != 0)
         {
-            it = mimetypes_.find("text/plain");
-            file.append(it->second);
+            flagResponse = NOTFOUND;
+            file.clear();
+            bodyofRequest.clear();
+            return ;
         }
-    }
-    fd = open((char*)(file.data()),O_CREAT | O_RDWR | O_EXCL, 0777);
-    if (fd < 0)
-    {
-        flagResponse = CONFLICT;
-        return ;
+        exetention = std::to_string(rand() % 100000);
+        file.append(exetention);
+        std::string ext;
+        std::multimap<std::string, std::string>::iterator it;
+        int pos = headerOfRequest.find("Content-Type: ");
+        if (pos != -1)
+        {
+            ext = headerOfRequest.substr(pos + 14, headerOfRequest.find('\r', pos) - (pos + 14));
+            it = mimetypes_.find(ext);
+            if (it != mimetypes_.end())
+                file.append(it->second);
+            else
+            {
+                it = mimetypes_.find("text/plain");
+                file.append(it->second);
+            }
+        }
+        fd = open((char*)(file.data()),O_CREAT | O_RDWR | O_EXCL, 0777);
+        if (fd > 0)
+            break ;
     }
     int i = write(fd,(void*)(bodyofRequest.data()),bodyofRequest.size());
 	if (i == (int)bodyofRequest.size())
@@ -89,7 +89,7 @@ int parssingOfBody::checkMedia(std::string file, std::map<std::string, std::stri
     int pos = file.find('.');
     if (pos != -1)
     {
-        std::cout << &file[pos] << std::endl;
+        // std::cout << &file[pos] << std::endl;
         std::string ext = &file[pos];
         it = mimetypes.find(ext);
         if (it != mimetypes.end())
@@ -120,8 +120,8 @@ void parssingOfBody::putDataTofile(string  data, client & obj, std::map<std::str
             return ;
         }
         file +=  data.substr(pos + 10,t - (pos + 10));
-        // std::cout << "file == " << file << std::endl;
-        // std::cout << "data == " << data << std::endl;
+        // // std::cout << "file == " << file << std::endl;
+        // // std::cout << "data == " << data << std::endl;
         if (checkMedia(file, mimetypes) == -1)
         {
             obj.respond.flagResponse = MEDIANOTSUPPORTED;
@@ -172,6 +172,14 @@ void parssingOfBody::handling_form_data(client &obj, std::map<std::string, std::
         while (temp[tmp] != '\r' && temp[tmp + 1] != '\n')
             tmp++;
         char *strtmp = ft_substr_(temp,0,tmp);
+        if (strtmp == NULL)
+        {
+            obj.ready = 1;
+            obj.respond.ready = 1;
+            obj.respond.flagResponse = INTERNALERR;
+            obj.flag = ERROR;
+            return ;
+        }
         obj.boundary.append("--").append(strtmp);// free boundry and temp?
         free(strtmp);
         obj.total_bytes_received = obj.ContentLength;

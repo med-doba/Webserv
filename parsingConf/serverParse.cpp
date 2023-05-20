@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serverParse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: med-doba <med-doba@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/05 11:48:14 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/19 15:48:40 by med-doba         ###   ########.fr       */
+/*   Updated: 2023/05/19 23:25:06 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,7 @@ std::string	serverParse::get_host()
 
 bool	serverParse::ft_check_extention(std::string str)
 {
+	(void)str;
 	// std::string	sub;
 	// int	i = -1;
 	str.size();
@@ -211,10 +212,10 @@ bool	serverParse::ft_check_rangeofports(std::string &str)
 
 //--------**-------**----------**-----------**---------//
 
-void	serverParse::ft_ft(std::string str)
-{
-	std::cout << str << std::endl;
-}
+// void	serverParse::ft_ft(std::string str)
+// {
+// 	// std::cout << str << std::endl;
+// }
 
 void	serverParse::ft_error(std::string msg)
 {
@@ -303,65 +304,65 @@ bool	serverParse::ft_isDigit(std::string &str)
 	return true;
 }
 
-void	serverParse::ft_show(std::vector<serverParse> &block)
-{
-	for (size_t i = 0; i <  block.size(); i++)
-	{
-		std::cout << "-----------serverParse block-----------------\n";
-		std::vector<std::string>::iterator it6;
-		for (it6 = block[i].listen.begin(); it6 != block[i].listen.end(); it6++)
-			std::cout << *it6 << " ";
-		std::cout << "\n";
-		std::cout << block[i].get_host() << std::endl;
-		std::vector<std::string>::iterator it4;
-		for (it4 = block[i].server_name.begin(); it4 != block[i].server_name.end(); it4++)
-			std::cout << *it4 << " ";
-		std::cout << "\n";
-		std::vector<std::string>::iterator it3;
-		for (it3 = block[i].root.begin(); it3 != block[i].root.end(); it3++)
-			std::cout << *it3 << " ";
-		std::cout << "\n";
-		std::vector<std::string>::iterator it1;
-		for (it1 = block[i].error_page.begin(); it1 != block[i].error_page.end(); it1++)
-			std::cout << *it1 << " ";
-		std::cout << "\n";
-		std::vector<std::string>::iterator it2;
-		for (it2 = block[i].index.begin(); it2 != block[i].index.end(); it2++)
-			std::cout << *it2 << " ";
-		std::cout << "\n";
-		std::cout << "cmdsize_ = " << block[i].client_max_body_size_ << std::endl;
-		std::cout << "\n";
-		for (size_t j = 0; j < block[i].obj_location.size(); j++)
-		{
-			std::cout << "-----------location block-----------------\n";
-			std::cout << "-----------path-----------------\n";
-			std::cout << "path = " << block[i].obj_location[j].path << " >>> ";
-			std::vector<std::string>::iterator it7;
-			for (it7 = block[i].obj_location[j].error_page.begin(); it7 != block[i].obj_location[j].error_page.end(); it7++)
-				std::cout << *it7 << " ";
-			std::vector<std::string>::iterator it00;
-			for (it00 = block[i].obj_location[j].root.begin(); it00 != block[i].obj_location[j].root.end(); it00++)
-				std::cout << *it00 << " ";
-			std::vector<std::string>::iterator it11;
-			for (it11 = block[i].obj_location[j].index.begin(); it11 != block[i].obj_location[j].index.end(); it11++)
-				std::cout << *it11 << " ";
-			std::vector<std::string>::iterator it9;
-			for (it9 = block[i].obj_location[j].allow_methods.begin(); it9 != block[i].obj_location[j].allow_methods.end(); it9++)
-				std::cout << *it9 << " ";
-			std::vector<std::string>::iterator it10;
-			for (it10 = block[i].obj_location[j].autoindex.begin(); it10 != block[i].obj_location[j].autoindex.end(); it10++)
-				std::cout << *it10 << " ";
-			std::vector<std::string>::iterator it111;
-			for (it111 = block[i].obj_location[j].cgi.begin(); it111 != block[i].obj_location[j].cgi.end(); it111++)
-				std::cout << *it111 << " ";
-			std::vector<std::string>::iterator it12;
-			for (it12 = block[i].obj_location[j].rtn.begin(); it12 != block[i].obj_location[j].rtn.end(); it12++)
-				std::cout << *it12 << " ";
-			std::cout << "\n";
-		}
-		std::cout << "\n-----------next serverParse-----------------\n\n";
-	}
-}
+// void	serverParse::ft_show(std::vector<serverParse> &block)
+// {
+// 	for (size_t i = 0; i <  block.size(); i++)
+// 	{
+// 		// std::cout << "-----------serverParse block-----------------\n";
+// 		std::vector<std::string>::iterator it6;
+// 		for (it6 = block[i].listen.begin(); it6 != block[i].listen.end(); it6++)
+// 			// std::cout << *it6 << " ";
+// 		// std::cout << "\n";
+// 		// std::cout << block[i].get_host() << std::endl;
+// 		std::vector<std::string>::iterator it4;
+// 		for (it4 = block[i].server_name.begin(); it4 != block[i].server_name.end(); it4++)
+// 			// std::cout << *it4 << " ";
+// 		// std::cout << "\n";
+// 		std::vector<std::string>::iterator it3;
+// 		for (it3 = block[i].root.begin(); it3 != block[i].root.end(); it3++)
+// 			// std::cout << *it3 << " ";
+// 		// std::cout << "\n";
+// 		std::vector<std::string>::iterator it1;
+// 		for (it1 = block[i].error_page.begin(); it1 != block[i].error_page.end(); it1++)
+// 			// std::cout << *it1 << " ";
+// 		// std::cout << "\n";
+// 		std::vector<std::string>::iterator it2;
+// 		for (it2 = block[i].index.begin(); it2 != block[i].index.end(); it2++)
+// 			// std::cout << *it2 << " ";
+// 		// std::cout << "\n";
+// 		// std::cout << "cmdsize_ = " << block[i].client_max_body_size_ << std::endl;
+// 		// std::cout << "\n";
+// 		for (size_t j = 0; j < block[i].obj_location.size(); j++)
+// 		{
+// 			// std::cout << "-----------location block-----------------\n";
+// 			// std::cout << "-----------path-----------------\n";
+// 			// std::cout << "path = " << block[i].obj_location[j].path << " >>> ";
+// 			std::vector<std::string>::iterator it7;
+// 			for (it7 = block[i].obj_location[j].error_page.begin(); it7 != block[i].obj_location[j].error_page.end(); it7++)
+// 				// std::cout << *it7 << " ";
+// 			std::vector<std::string>::iterator it00;
+// 			for (it00 = block[i].obj_location[j].root.begin(); it00 != block[i].obj_location[j].root.end(); it00++)
+// 				// std::cout << *it00 << " ";
+// 			std::vector<std::string>::iterator it11;
+// 			for (it11 = block[i].obj_location[j].index.begin(); it11 != block[i].obj_location[j].index.end(); it11++)
+// 				// std::cout << *it11 << " ";
+// 			std::vector<std::string>::iterator it9;
+// 			for (it9 = block[i].obj_location[j].allow_methods.begin(); it9 != block[i].obj_location[j].allow_methods.end(); it9++)
+// 				// std::cout << *it9 << " ";
+// 			std::vector<std::string>::iterator it10;
+// 			for (it10 = block[i].obj_location[j].autoindex.begin(); it10 != block[i].obj_location[j].autoindex.end(); it10++)
+// 				// std::cout << *it10 << " ";
+// 			std::vector<std::string>::iterator it111;
+// 			for (it111 = block[i].obj_location[j].cgi.begin(); it111 != block[i].obj_location[j].cgi.end(); it111++)
+// 				// std::cout << *it111 << " ";
+// 			std::vector<std::string>::iterator it12;
+// 			for (it12 = block[i].obj_location[j].rtn.begin(); it12 != block[i].obj_location[j].rtn.end(); it12++)
+// 				// std::cout << *it12 << " ";
+// 			// std::cout << "\n";
+// 		}
+// 		// std::cout << "\n-----------next serverParse-----------------\n\n";
+// 	}
+// }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -593,21 +594,21 @@ void	ft_check_cgi(serverParse &classconfig, std::string &lines, locationParse &l
 
 //parse config
 
-void print_vector_of_structs(MapType& v)
-{
-	for (MapType::iterator it = v.begin(); it != v.end(); ++it)
-	{
-		bind_info& s = *it;
-		std::cout << "host: " << s.host << std::endl;
-		std::cout << "ports: ";
-		for (std::vector<std::string>::iterator str_it = s.ports.begin(); str_it != s.ports.end(); ++str_it)
-		{
-			const std::string& str = *str_it;
-			std::cout << str << " | ";
-		}
-		std::cout << std::endl;
-	}
-}
+// void print_vector_of_structs(MapType& v)
+// {
+// 	for (MapType::iterator it = v.begin(); it != v.end(); ++it)
+// 	{
+// 		bind_info& s = *it;
+// 		// std::cout << "host: " << s.host << std::endl;
+// 		// std::cout << "ports: ";
+// 		for (std::vector<std::string>::iterator str_it = s.ports.begin(); str_it != s.ports.end(); ++str_it)
+// 		{
+// 			const std::string& str = *str_it;
+// 			// std::cout << str << " | ";
+// 		}
+// 		// std::cout << std::endl;
+// 	}
+// }
 
 void	ft_rm_double_ports(std::vector<std::string>	&ports)
 {

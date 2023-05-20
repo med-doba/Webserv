@@ -37,7 +37,7 @@ void response::generate_response(std::map<int, std::string> statusPhrase)
 			response_req += "Content-Type: text/plain" + del;
 		response_req += contentlength + std::to_string(body.size()) + del;
 		response_req += del;
-		std::cout << response_req << std::endl;
+		// std::cout << response_req << std::endl;
 		if (!body.empty())
 			response_req += body;
 		type = 0;
@@ -62,6 +62,7 @@ int response::send_response(client &obj, struct pollfd &pfds)
 {
 	int i = -1;
 	int close = 0;
+	(void)pfds;
 
 	i = send(obj.client_socket, response_req.c_str(), response_req.size(), 0);
 	if (i < 0)
@@ -73,7 +74,7 @@ int response::send_response(client &obj, struct pollfd &pfds)
 	}
 	else if (i == (int)response_req.size())
 	{
-		std::cout << "sent complete == " << pfds.fd << std::endl;
+		// std::cout << "sent complete == " << pfds.fd << std::endl;
 		close = obj.respond.close;
 		obj.clear();
 		if (close == CLOSE)
@@ -84,7 +85,7 @@ int response::send_response(client &obj, struct pollfd &pfds)
 	else if (i < (int)response_req.size())
 	{
 		response_req.erase(0, i);
-		std::cout << "chunks == " << pfds.fd << std::endl;
+		// std::cout << "chunks == " << pfds.fd << std::endl;
 	}
 	return (0);
 }
