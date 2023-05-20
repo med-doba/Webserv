@@ -284,7 +284,7 @@ int client::checkHeaderOfreq(std::map<std::string, std::string> Percent,std::mul
 						{
 							flag = FORM;
 							ContentLength = ft_atoi(copyheader.substr(pos + 16,copyheader.size()).c_str());
-							i = headerOfRequest.size() + 3;// after herder
+							i = headerOfRequest.size() + 2;// after herder
 							bytes_read -= i;
 							_tmp = j + 9;
 							char *temp = (char*)copyheader.data() + _tmp;// because string() dont handle '\r'

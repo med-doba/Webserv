@@ -6,7 +6,7 @@
 /*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/20 02:24:40 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/20 03:01:35 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,13 +233,20 @@ int	cgi::ft_cgi(std::string	fileName)
 
 		pid = fork();
 		if(pid == -1)
+		{
+			free_2d(12);
 			return (-1);
+		}
 
 		if (!pid)
 		{
 			int	fd = open("output_cgi", O_CREAT | O_RDWR | O_TRUNC, 0777);
 			if (fd == -1)
+			{
+				free_2d(12);
+				// std::cout << "helo from fd" << std::endl;
 				exit(1);
+			}
 			// std::cout << "executable == " << this->executable << std::endl;
 			// std::cout << "adjahsd == " << fileName << std::endl;
 			dup2(fd, STDOUT_FILENO);
@@ -247,7 +254,8 @@ int	cgi::ft_cgi(std::string	fileName)
 			// char	*argv[] = {strdup("/usr/bin/python3"), (char *)fileName.c_str(), NULL};
 			if (execve((char *)this->executable.c_str(), argv, envp) == -1)
 			{
-				
+				free_2d(12);
+				// std::cout << "helo from exec" << std::endl;
 				exit(1);
 			}
 		}
@@ -263,8 +271,7 @@ int	cgi::ft_cgi(std::string	fileName)
 			if (WIFEXITED(status) && WEXITSTATUS(status) == 1)
 			{
 				// std::cout << "jadas " << std::endl;
-				if (std::remove("output_cgi"))
-					return (-1);
+				std::remove("output_cgi");
 				return (-1);
 			}
 		}
