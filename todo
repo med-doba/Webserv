@@ -1,8 +1,8 @@
 infinite loop f SCRIPT
 
-location must be folder 
+location must be folder (don't know if i should do it)
 
-work error_pages in location
+work error_pages in location (doba will do it)
 
 look up server block (done)
 
