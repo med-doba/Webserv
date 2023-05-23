@@ -43,7 +43,7 @@ void parssingOfBody::clear()
 
 void parssingOfBody::create_file_and_put_content(string & bodyofRequest,string & headerOfRequest, int &flagResponse, std::string path, std::multimap<std::string, std::string> mimetypes_)
 {
-        std::cout << "file == " << file << std::endl;
+        // std::cout << "file == " << file << std::endl;
     while (1)
     {
         if (path[path.size() - 1] == '/')

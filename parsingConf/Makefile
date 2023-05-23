@@ -6,7 +6,7 @@ OBJ = $(SRC:%.cpp=%.o)
 
 HDR = locationParse.hpp serverParse.hpp
 
-FLAGS = -Wall -Wextra -Werror -std=c++98
+FLAGS = -Wall -Wextra -Werror #-std=c++98
 
 all: $(NAME)
 

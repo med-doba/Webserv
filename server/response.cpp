@@ -67,6 +67,7 @@ int response::send_response(client &obj, struct pollfd &pfds)
 	i = send(obj.client_socket, response_req.c_str(), response_req.size(), 0);
 	if (i < 0)
 	{
+		// std::cout << "here eroor send" << std::endl;
 		this->flagResponse = INTERNALERR;
 		this->ready = 1;
 		this->contenttype.clear();

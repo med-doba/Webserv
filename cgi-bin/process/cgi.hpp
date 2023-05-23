@@ -42,6 +42,7 @@ class cgi
 		int		ft_cgi(std::string	fileName);
 		int		ft_environment();
 		void	free_2d(int from);
+		void	clear();
 
 };
 

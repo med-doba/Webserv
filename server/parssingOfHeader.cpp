@@ -174,6 +174,7 @@ int parssingOfHeader::checkHeaders(client &obj, std::string copy, std::multimap<
             std::string type = str.substr(i + 19, str.find('\r', i) - (i + 19));
             if (type.compare("chunked") != 0)
             {
+				std::cout << "here not chunked == " << type << std::endl;
                 obj.respond.flagResponse = NOTIMPLEMENTED;
                 obj.respond.ready = 1;
                 return (-1);

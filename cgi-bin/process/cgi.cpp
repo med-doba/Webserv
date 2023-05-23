@@ -6,7 +6,7 @@
 /*   By: hmoubal <hmoubal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/15 16:54:52 by med-doba          #+#    #+#             */
-/*   Updated: 2023/05/20 15:13:11 by hmoubal          ###   ########.fr       */
+/*   Updated: 2023/05/23 01:01:09 by hmoubal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,7 +194,6 @@ int	cgi::ft_cgi(std::string	fileName)
 	int 			std_in = 0;
 	int				status;
 
-	this->body.clear();
 	if (pipe(output) == -1)
 		return (-1);
 	if (this->REQUEST_METHOD == "GET")
@@ -274,7 +273,7 @@ int	cgi::ft_cgi(std::string	fileName)
 		if (!this->REQUEST_METHOD.compare("POST"))
 		{
 			dup2(STDIN_FILENO, std_in);
-			close(std_in);
+			// close(std_in);
 		}
 		if (WIFEXITED(status) && WEXITSTATUS(status) == 1)
 		{
@@ -300,3 +299,21 @@ int	cgi::ft_cgi(std::string	fileName)
 	close(output[0]);
 	return (0);
 }
+
+void	cgi::clear()
+{
+	CONTENT_TYPE.clear();
+	CONTENT_LENGTH.clear();
+	PATH_INFO.clear();
+	QUERY_STRING.clear();
+	REQUEST_METHOD.clear();
+	SCRIPT_NAME.clear();
+	SCRIPT_FILENAME.clear();
+	REQUEST_URI.clear();
+	POST_DATA.clear();
+	HTTP_USER_AGENT.clear();
+	HTTP_COOKIE.clear();
+	body.clear();
+	executable.clear();
+}
+

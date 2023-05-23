@@ -314,7 +314,7 @@ void server::monitor()
 					{
 						if (pfds[i].fd == clients[j].client_socket && clients[j].ready == 1)
 						{
-							std::cout << "ready to send " <<  pfds[i].fd << std::endl;
+							// std::cout << "ready to send " <<  pfds[i].fd << std::endl;
 							this->response(this->pfds[i], j);
 							break ;
 						}
@@ -432,6 +432,14 @@ serverParse& server::findServerBlock(int index)
 		{
 			if (host.compare(block[i].host) != 0)
 			{
+				for (size_t l = 1; l < block[i].listen.size(); l++)
+				{
+					if (port.compare(block[i].listen[l]) == 0)
+						return (block[i]);
+				}
+			}
+			else
+			{
 				for (size_t j = 0; j < block[i].server_name.size(); j++)
 				{
 					if (host.compare(block[i].server_name[j]) == 0)
@@ -442,14 +450,6 @@ serverParse& server::findServerBlock(int index)
 								return (block[i]);
 						}
 					}
-				}
-			}
-			else
-			{
-				for (size_t l = 1; l < block[i].listen.size(); l++)
-				{
-					if (port.compare(block[i].listen[l]) == 0)
-						return (block[i]);
 				}
 			}
 			i++;
@@ -805,7 +805,7 @@ void server::PostBehaviour(client &ObjClient, serverParse ObjServer, int loc)
 	{
 		if (ObjLocation.allow_methods[i].compare("POST") == 0)
 		{
-			std::cout << "her \n";
+			// std::cout << "her \n";
 			ObjClient.postMethod(mimeTypes_, mimeTypes);
 			return;
 		}
@@ -1070,6 +1070,9 @@ void server::receive(int pfds_index, int index)
 			clients[index].check();
 	}
 	else if (clients[index].flag == ERROR)
+	{
+		std::cout << "erroor chunked == " << std::endl;
 		clients[index].check();
+	}
 }
 

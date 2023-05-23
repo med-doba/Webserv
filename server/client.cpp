@@ -182,6 +182,7 @@ void client::clear()
 	ready = 0;
 	total_bytes_received = 0;
 	respond.clear();
+	obj.clear();
 	flag = 0;
 	tmp = 0;
 	flag_ = 0;
@@ -486,7 +487,7 @@ void client::initResponse(std::map<std::string, std::string> mimetypes, std::vec
 	{
 		this->respond.status_code = 501;
 		this->findErrorPage(mimetypes, ErrSer);
-		this->respond.close = CLOSE;
+		this->respond.close = ALIVE;
 		this->respond.flagResponse = -1;
 		this->respond.type = 1;
 	}
@@ -553,9 +554,12 @@ void client::initResponse(std::map<std::string, std::string> mimetypes, std::vec
 		if (this->respond.status_code == 0)
 			this->respond.status_code = 301;
 		this->respond.close = ALIVE;
-		this->respond.headers.push_back("Cache-Control: no-cache, no-store");
-		this->respond.headers.push_back("Pragma: no-cache");
-		this->respond.headers.push_back("Expires: 0");
+		if (this->respond.status_code != 301)
+		{
+			this->respond.headers.push_back("Cache-Control: no-cache, no-store");
+			this->respond.headers.push_back("Pragma: no-cache");
+			this->respond.headers.push_back("Expires: 0");
+		}
 		this->respond.headers.push_back("Location: " + this->respond.redirectUrl);
 		this->respond.flagResponse = -1;
 		this->respond.type = 1;
